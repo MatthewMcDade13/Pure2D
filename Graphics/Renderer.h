@@ -32,7 +32,7 @@ namespace pure
         PURE2D_API explicit Renderer(const Window& window);
         PURE2D_API ~Renderer();
 
-        PURE2D_API const Rectf& viewport() const;
+
 
         PURE2D_API void drawRect(const Rectf& r, const Vec4<float>& color, float rotation = 0) const;
         PURE2D_API void drawRect(const Rectf& r, const Vec4<float>& color, Shader shader, float rotation = 0) const;
@@ -49,21 +49,22 @@ namespace pure
         PURE2D_API void drawSpritesInstanced(Sprite* sprites, size_t count);
         PURE2D_API void drawSpritesInstanced(Sprite* sprites, size_t count, Shader shader);
 
+        PURE2D_API const Rectf& viewport() const;
         PURE2D_API void setViewport(const Rectf& vp);
         PURE2D_API void zoom(float offset);
 
     private:
         VertexArray m_vao;
         VertexBuffer m_vertBuffer;
-        VertexBuffer m_instancedSpriteVBO;
-        VertexBuffer m_instancedSpriteOffsets;
+        VertexBuffer m_instancedMatBuffer;
+        VertexBuffer m_instancedOffsetsBuffer;
 
-        VertexArray m_userVAO;
-        VertexBuffer m_userBuffer;
+        VertexArray m_primitiveVAO;
+        VertexBuffer m_primitiveBuffer;
 
         Shader m_spriteShader;
         Shader m_colorShader;
-        Shader m_instancedSpriteShader;
+        Shader m_instancedShader;
         Shader m_basicShader;
         Mat4 m_projection;
         Rectf m_viewport;

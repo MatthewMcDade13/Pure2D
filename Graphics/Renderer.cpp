@@ -56,7 +56,7 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 
         m_spriteShader = Shader::createSrc(shader::vert, shader::spriteFrag);
         m_colorShader = Shader::createSrc(shader::vert, shader::colorFrag);
-        m_instancedSpriteShader = Shader::createSrc(shader::instancedSpriteVert, shader::spriteFrag);
+        m_instancedShader = Shader::createSrc(shader::instancedSpriteVert, shader::spriteFrag);
         m_basicShader = Shader::createSrc(shader::vert, shader::frag);
 
         m_spriteShader.bind();
@@ -84,13 +84,13 @@ pure::Renderer::Renderer(const Window& window) : cam({})
         m_vao.setLayout(m_vertBuffer, 2, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, texCoord));
         m_vao.setLayout(m_vertBuffer, 4, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, color));
 
-//        m_instancedSpriteVBO = VertexBuffer::createZeroed(sizeof(Mat4), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-//        m_instancedSpriteOffsets = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+//        m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+//        m_instancedOffsetsBuffer = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
 //
-//        m_vao.setLayout(m_instancedSpriteOffsets, 4, false, sizeof(Vec4f), 0);
+//        m_vao.setLayout(m_instancedOffsetsBuffer, 4, false, sizeof(Vec4f), 0);
 //
 //        for (int i = 0; i < 4; i++)
-//            m_vao.setLayout(m_instancedSpriteVBO, 4, false, sizeof(Mat4), (void*)(i * sizeof(Vec4f)));
+//            m_vao.setLayout(m_instancedMatBuffer, 4, false, sizeof(Mat4), (void*)(i * sizeof(Vec4f)));
 //
 //        glVertexAttribDivisor(3, 1);
 //        glVertexAttribDivisor(4, 1);
@@ -100,13 +100,13 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 
         constexpr int NUM_MAT4 = 2;
 
-        m_instancedSpriteVBO = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-        m_instancedSpriteOffsets = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+        m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+        m_instancedOffsetsBuffer = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
 
-        m_vao.setLayout(m_instancedSpriteOffsets, 4, false, sizeof(Vec4f), 0);
+        m_vao.setLayout(m_instancedOffsetsBuffer, 4, false, sizeof(Vec4f), 0);
 
         for (int i = 0; i < 4 * NUM_MAT4; i++)
-            m_vao.setLayout(m_instancedSpriteVBO, 4, false, sizeof(Mat4) * NUM_MAT4, (void*)(i * sizeof(Vec4f)));
+            m_vao.setLayout(m_instancedMatBuffer, 4, false, sizeof(Mat4) * NUM_MAT4, (void*)(i * sizeof(Vec4f)));
 
         for (int i = 3; i <= 11; i++)
             glVertexAttribDivisor(i, 1);
@@ -115,14 +115,14 @@ pure::Renderer::Renderer(const Window& window) : cam({})
     }
 
     {
-        m_userVAO = VertexArray::create();
-        m_userVAO.bind();
+        m_primitiveVAO = VertexArray::create();
+        m_primitiveVAO.bind();
 
-        m_userBuffer = VertexBuffer::createZeroed(sizeof(Vertex2D), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+        m_primitiveBuffer = VertexBuffer::createZeroed(sizeof(Vertex2D), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
 
-        m_userVAO.setLayout(m_userBuffer, 3, false, sizeof(Vertex2D), 0);
-        m_userVAO.setLayout(m_userBuffer, 2, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, texCoord));
-        m_userVAO.setLayout(m_userBuffer, 4, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, color));
+        m_primitiveVAO.setLayout(m_primitiveBuffer, 3, false, sizeof(Vertex2D), 0);
+        m_primitiveVAO.setLayout(m_primitiveBuffer, 2, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, texCoord));
+        m_primitiveVAO.setLayout(m_primitiveBuffer, 4, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, color));
 
         unbindVAO();
     }
@@ -133,8 +133,8 @@ pure::Renderer::~Renderer()
 {
     m_vao.free();
     m_vertBuffer.free();
-    m_instancedSpriteVBO.free();
-    m_instancedSpriteShader.free();
+    m_instancedMatBuffer.free();
+    m_instancedShader.free();
     m_colorShader.free();
     m_spriteShader.free();
 }
@@ -216,7 +216,7 @@ void Renderer::drawSprite(Sprite &sprite, Shader shader) const
 // TODO: Test to make sure this is actually faster lol
 void pure::Renderer::drawSpritesInstanced(Sprite * sprites, size_t count)
 {
-    drawSpritesInstanced(sprites,count, m_instancedSpriteShader);
+    drawSpritesInstanced(sprites,count, m_instancedShader);
 }
 
 void Renderer::drawSpritesInstanced(Sprite *sprites, size_t count, Shader shader)
@@ -242,15 +242,15 @@ void Renderer::drawSpritesInstanced(Sprite *sprites, size_t count, Shader shader
         }
     }
 
-    if (transforms.size() >= m_instancedSpriteVBO.capacity)
-        m_instancedSpriteVBO.alloc(&transforms[0], transforms.size(), DrawUsage::DYNAMIC_DRAW);
+    if (transforms.size() >= m_instancedMatBuffer.capacity)
+        m_instancedMatBuffer.alloc(&transforms[0], transforms.size(), DrawUsage::DYNAMIC_DRAW);
     else
-        m_instancedSpriteVBO.writeBuffer(&transforms[0], transforms.size(), 0);
+        m_instancedMatBuffer.writeBuffer(&transforms[0], transforms.size(), 0);
 
-    if (texOffsets.size() >= m_instancedSpriteOffsets.capacity)
-        m_instancedSpriteOffsets.alloc(&texOffsets[0], texOffsets.size(), DrawUsage::DYNAMIC_DRAW);
+    if (texOffsets.size() >= m_instancedOffsetsBuffer.capacity)
+        m_instancedOffsetsBuffer.alloc(&texOffsets[0], texOffsets.size(), DrawUsage::DYNAMIC_DRAW);
     else
-        m_instancedSpriteOffsets.writeBuffer(&texOffsets[0], texOffsets.size(), 0);
+        m_instancedOffsetsBuffer.writeBuffer(&texOffsets[0], texOffsets.size(), 0);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertBuffer.count, count);
 }
@@ -261,6 +261,7 @@ void pure::Renderer::setViewport(const Rectf& vp)
     m_viewport = vp;
 }
 
+// TODO: This doesn't kind of zooms from the top left corner, make this zoom from center.
 void pure::Renderer::zoom(float offset)
 {
     m_viewport.w += offset;
@@ -279,18 +280,18 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
 
 void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, Shader shader)
 {
-    m_userVAO.bind();
+    m_primitiveVAO.bind();
     shader.bind();
 
-    if (vertCount >= m_userBuffer.capacity)
-        m_userBuffer.alloc(verts, vertCount, DrawUsage::DYNAMIC_DRAW);
+    if (vertCount >= m_primitiveBuffer.capacity)
+        m_primitiveBuffer.alloc(verts, vertCount, DrawUsage::DYNAMIC_DRAW);
     else
-        m_userBuffer.writeBuffer(verts, vertCount, 0);
+        m_primitiveBuffer.writeBuffer(verts, vertCount, 0);
 
     m_basicShader.setUniform("u_matrixMVP", m_projection * cam.view());
     m_basicShader.setUniform("u_modelMatrix", makeMat4());
 
-    drawArrays(primtype, 0, m_userBuffer.count);
+    drawArrays(primtype, 0, m_primitiveBuffer.count);
 }
 
 
