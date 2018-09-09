@@ -16,6 +16,7 @@ namespace pure
 
 		static Shader create(const char* vertShaderPath, const char* fragShaderPath);
 		static Shader createSrc(const char* vertSrc, const char* fragSrc);
+		static Shader createTemplated(const char *effectSrc, bool isInstanced);
 		void bind() const;
 
 		uint32_t getLocation(const char* uniform) const;

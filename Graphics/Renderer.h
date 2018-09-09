@@ -52,9 +52,6 @@ namespace pure
         PURE2D_API void setViewport(const Rectf& vp);
         PURE2D_API void zoom(float offset);
 
-        PURE2D_API Shader createShader(const char* effectSrc, bool isInstanced);
-
-
     private:
         VertexArray m_vao;
         VertexBuffer m_vertBuffer;

@@ -2,6 +2,7 @@
 //#include <gl/GL.h>
 #include "glad.h"
 #include "Private/FileIO.h"
+#include "Private/Shaders.h"
 #include "Math/Vec4.h"
 #include "Math/Mat4.h"
 #include "Private/Convert.h"
@@ -186,3 +187,33 @@ void pure::Shader::free()
 	glDeleteProgram(id_);
 	id_ = 0;
 }
+
+constexpr const char* FRAG_TEMPLATE_VARS = "#version 330\n"
+       "out vec4 FragColor;\n"
+
+       "in vec2 TexCoord;\n"
+       "in vec4 Color;\n"
+       "in vec3 FragPos;\n"
+
+       "uniform sampler2D u_texture;\n";
+
+constexpr const char* FRAG_TEMPLATE_MAIN = "\n"
+       "void main()\n"
+       "{\n"
+       "	FragColor = effect(Color, u_texture, TexCoord, FragPos);\n"
+       "}";
+
+// TODO: Consider having this be the main way we create shaders?
+// Having this as main way of creating shaders should suffice this engine is only doing 2D
+Shader Shader::createTemplated(const char *effectSrc, bool isInstanced)
+{
+    const char* vert = isInstanced ? shader::instancedSpriteVert : shader::vert;
+
+    std::string frag = FRAG_TEMPLATE_VARS;
+    frag += effectSrc;
+    frag += FRAG_TEMPLATE_MAIN;
+
+    return Shader::createSrc(vert, frag.c_str());
+
+}
+

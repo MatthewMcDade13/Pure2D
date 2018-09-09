@@ -84,19 +84,32 @@ pure::Renderer::Renderer(const Window& window) : cam({})
         m_vao.setLayout(m_vertBuffer, 2, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, texCoord));
         m_vao.setLayout(m_vertBuffer, 4, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, color));
 
-        m_instancedSpriteVBO = VertexBuffer::createZeroed(sizeof(Mat4), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+//        m_instancedSpriteVBO = VertexBuffer::createZeroed(sizeof(Mat4), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+//        m_instancedSpriteOffsets = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+//
+//        m_vao.setLayout(m_instancedSpriteOffsets, 4, false, sizeof(Vec4f), 0);
+//
+//        for (int i = 0; i < 4; i++)
+//            m_vao.setLayout(m_instancedSpriteVBO, 4, false, sizeof(Mat4), (void*)(i * sizeof(Vec4f)));
+//
+//        glVertexAttribDivisor(3, 1);
+//        glVertexAttribDivisor(4, 1);
+//        glVertexAttribDivisor(5, 1);
+//        glVertexAttribDivisor(6, 1);
+//        glVertexAttribDivisor(7, 1);
+
+        constexpr int NUM_MAT4 = 2;
+
+        m_instancedSpriteVBO = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
         m_instancedSpriteOffsets = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
 
         m_vao.setLayout(m_instancedSpriteOffsets, 4, false, sizeof(Vec4f), 0);
 
-        for (int i = 0; i < 4; i++)
-            m_vao.setLayout(m_instancedSpriteVBO, 4, false, sizeof(Mat4), (void*)(i * sizeof(Vec4f)));
+        for (int i = 0; i < 4 * NUM_MAT4; i++)
+            m_vao.setLayout(m_instancedSpriteVBO, 4, false, sizeof(Mat4) * NUM_MAT4, (void*)(i * sizeof(Vec4f)));
 
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-        glVertexAttribDivisor(7, 1);
+        for (int i = 3; i <= 11; i++)
+            glVertexAttribDivisor(i, 1);
 
         unbindVAO();
     }
@@ -144,8 +157,10 @@ void Renderer::drawRect(const Rectf &r, const Vec4<float> &color, Shader shader,
     model = scale(model, Vec3f(r.w, r.h, 1.f));
 
 
-    m_colorShader.setUniform("u_color", color);
-    m_colorShader.setUniform("u_matrix", m_projection * cam.view() * model);
+    shader.setUniform("u_color", color);
+
+    shader.setUniform("u_modelMatrix", model);
+    shader.setUniform("u_matrixMVP", m_projection * cam.view() * model);
     drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
 }
 
@@ -166,7 +181,8 @@ void Renderer::drawTexture(const Texture &tex, Vec3f pos, Vec2f size, Shader sha
     model = translate(model, Vec3f(size.x * -.5f, size.y * -.5f, 0.f));
     model = scale(model, Vec3f(size.x, size.y, 1.f));
 
-    m_spriteShader.setUniform("u_matrix", m_projection * cam.view() *  model);
+    shader.setUniform("u_modelMatrix", model);
+    shader.setUniform("u_matrixMVP", m_projection * cam.view() *  model);
 
     drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
 }
@@ -179,15 +195,17 @@ void pure::Renderer::drawSprite(Sprite & sprite) const
 void Renderer::drawSprite(Sprite &sprite, Shader shader) const
 {
     m_vao.bind();
-    m_spriteShader.bind();
+    shader.bind();
     sprite.texture()->bind();
 
-    m_spriteShader.setUniform("u_matrix", m_projection * cam.view() * sprite.modelMatrix());
+    shader.setUniform("u_matrixMVP", m_projection * cam.view() * sprite.modelMatrix());
+    shader.setUniform("u_modelMatrix", sprite.modelMatrix());
+
 
     {
         const Rectui& texRect = sprite.textureRect;
 
-        m_spriteShader.setUniform("u_textureOffsets", Vec4f(
+        shader.setUniform("u_textureOffsets", Vec4f(
                 float(texRect.x), float(texRect.y), float(texRect.w), float(texRect.h)
         ));
     }
@@ -204,7 +222,7 @@ void pure::Renderer::drawSpritesInstanced(Sprite * sprites, size_t count)
 void Renderer::drawSpritesInstanced(Sprite *sprites, size_t count, Shader shader)
 {
     m_vao.bind();
-    m_instancedSpriteShader.bind();
+    shader.bind();
     sprites[0].texture()->bind();
 
     std::vector<Mat4> transforms;
@@ -216,6 +234,7 @@ void Renderer::drawSpritesInstanced(Sprite *sprites, size_t count, Shader shader
     {
         Sprite& sprite = sprites[i];
         transforms.push_back(m_projection *  cam.view() * sprite.modelMatrix());
+        transforms.push_back(sprite.modelMatrix());
 
         {
             const Rectui& texRect = sprite.textureRect;
@@ -268,36 +287,10 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
     else
         m_userBuffer.writeBuffer(verts, vertCount, 0);
 
-    m_basicShader.setUniform("u_matrix", m_projection * cam.view());
+    m_basicShader.setUniform("u_matrixMVP", m_projection * cam.view());
+    m_basicShader.setUniform("u_modelMatrix", makeMat4());
 
     drawArrays(primtype, 0, m_userBuffer.count);
-}
-
-constexpr const char* FRAG_TEMPLATE_VARS = "#version 330\n"
-        "out vec4 FragColor;\n"
-
-        "in vec2 TexCoord;\n"
-        "in vec4 Color;\n"
-        "in vec3 FragPos;\n"
-
-        "uniform sampler2D u_texture;\n";
-
-constexpr const char* FRAG_TEMPLATE_MAIN = "\n"
-        "void main()\n"
-        "{\n"
-        "	FragColor = effect(Color, u_texture, TexCoords, FragPos);\n"
-        "}";
-
-Shader Renderer::createShader(const char *effectSrc, bool isInstanced)
-{
-    const char* vert = isInstanced ? shader::instancedSpriteVert : shader::vert;
-
-    std::string frag = FRAG_TEMPLATE_VARS;
-    frag += effectSrc;
-    frag += FRAG_TEMPLATE_MAIN;
-
-    return Shader::createSrc(vert, frag.c_str());
-
 }
 
 

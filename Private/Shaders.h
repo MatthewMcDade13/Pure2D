@@ -10,9 +10,11 @@ namespace shader
 
 		"out vec2 TexCoord;\n"
 		"out vec4 Color;\n"
+        "out vec3 FragPos;\n"
 
 		"uniform sampler2D u_texture;\n"
-		"uniform mat4 u_matrix;\n"
+		"uniform mat4 u_matrixMVP;\n"
+        "uniform mat4 u_modelMatrix;\n"
 		"uniform vec4 u_textureOffsets;\n" // position = xy, size = zw
 
 		"void main()\n"
@@ -23,9 +25,10 @@ namespace shader
 		"   vec2 normalizedCoords = vec2(texCoord.x / texSize.x, 1.0 - (texCoord.y / texSize.y));\n"
 
 		"	TexCoord = normalizedCoords;\n"
-		"   Color = l_color;"
+		"   Color = l_color;\n"
+        "   FragPos = vec3(u_modelMatrix * vec4(l_pos, 1.0));\n"
 
-		"	gl_Position = u_matrix * vec4(l_pos, 1.0);\n"
+		"	gl_Position = u_matrixMVP * vec4(l_pos, 1.0);\n"
 		"}";
 
 	constexpr const char* frag = "#version 330\n"
@@ -43,10 +46,12 @@ namespace shader
 		"layout(location = 1) in vec2 l_texCoords;\n"
 		"layout(location = 2) in vec4 l_color;\n"
 		"layout(location = 3) in vec4 l_textureOffsets;\n"
-		"layout(location = 4) in mat4 l_matrix;\n"
+		"layout(location = 4) in mat4 l_matrixMVP;\n"
+        "layout(location = 8) in mat4 u_modelMatrix;\n"
 
 		"out vec2 TexCoord;\n"
         "out vec4 Color;\n"
+        "out vec3 FragPos;\n"
 		"uniform sampler2D u_texture;\n"
 
 		"void main()\n"
@@ -59,7 +64,9 @@ namespace shader
 		"	TexCoord = normalizedCoords;\n"
         "	Color = l_color;\n"
 
-		"	gl_Position = l_matrix * vec4(l_pos, 1.0);\n"
+        "   FragPos = vec3(u_modelMatrix * vec4(l_pos, 1.0));\n"
+
+		"	gl_Position = l_matrixMVP * vec4(l_pos, 1.0);\n"
 		"}";
 
 
