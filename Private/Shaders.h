@@ -87,7 +87,6 @@ namespace shader
 		"out vec4 FragColor;\n"
 
 		"in vec4 Color;\n"
-		// TODO: Not sure how i feel about this uniform for color, maybe look into diff way.
 		"uniform vec4 u_color;\n"
 
 		"void main()\n"

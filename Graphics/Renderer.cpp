@@ -137,6 +137,10 @@ pure::Renderer::~Renderer()
     m_instancedShader.free();
     m_colorShader.free();
     m_spriteShader.free();
+    m_basicShader.free();
+
+    m_primitiveVAO.free();
+    m_primitiveBuffer.free();
 }
 
 const Rectf & pure::Renderer::viewport() const { return m_viewport; }
@@ -150,7 +154,7 @@ void Renderer::drawRect(const Rectf &r, const Vec4<float> &color, Shader shader,
 {
     m_vao.bind();
     shader.bind();
-    Mat4 model = translate(makeMat4(), Vec3f(r.x, r.y, 0.f));
+    Mat4 model = translate(makeMat4(), Vec3f(r.x, r.y, 20.f));
     model = translate(model, Vec3f(r.w * .5f, r.h * .5f, 0.f));
     model = rotate(model, radians(rotation), Vec3f(0.f, 0.f, 1.f));
     model = translate(model, Vec3f(r.w * -.5f, r.h * -.5f, 0.f));
@@ -164,27 +168,20 @@ void Renderer::drawRect(const Rectf &r, const Vec4<float> &color, Shader shader,
     drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
 }
 
-void pure::Renderer::drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation) const
+void pure::Renderer::drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation, const Rectui* texRect) const
 {
-    drawTexture(tex, pos, size, m_colorShader, rotation);
+    drawTexture(tex, pos, size, m_spriteShader, rotation, texRect);
 }
 
-void Renderer::drawTexture(const Texture &tex, Vec3f pos, Vec2f size, Shader shader, float rotation) const
+void Renderer::drawTexture(const Texture &tex, Vec3f pos, Vec2f size, Shader shader, float rotation, const Rectui* texRect) const
 {
-    m_vao.bind();
-    shader.bind();
-    tex.bind();
-
     Mat4 model = translate(makeMat4(), pos);
     model = translate(model, Vec3f(size.x * .5f, size.y * .5f, 0.f));
     model = rotate(model, radians(rotation), Vec3f(0.f, 0.f, 1.f));
     model = translate(model, Vec3f(size.x * -.5f, size.y * -.5f, 0.f));
     model = scale(model, Vec3f(size.x, size.y, 1.f));
 
-    shader.setUniform("u_modelMatrix", model);
-    shader.setUniform("u_matrixMVP", m_projection * cam.view() *  model);
-
-    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
+    drawTexture(tex, model, shader, texRect);
 }
 
 void pure::Renderer::drawSprite(Sprite & sprite) const
@@ -192,25 +189,37 @@ void pure::Renderer::drawSprite(Sprite & sprite) const
     drawSprite(sprite, m_spriteShader);
 }
 
-void Renderer::drawSprite(Sprite &sprite, Shader shader) const
+void Renderer::drawTexture(const Texture &tex, const Mat4 &transform, const Rectui *texRect) const
+{
+    drawTexture(tex, transform, m_spriteShader, texRect);
+}
+
+void Renderer::drawTexture(const Texture &tex, const Mat4 &transform, Shader shader, const Rectui *texRect) const
 {
     m_vao.bind();
     shader.bind();
-    sprite.texture()->bind();
+    tex.bind();
 
-    shader.setUniform("u_matrixMVP", m_projection * cam.view() * sprite.modelMatrix());
-    shader.setUniform("u_modelMatrix", sprite.modelMatrix());
+    shader.setUniform("u_modelMatrix", transform);
+    shader.setUniform("u_matrixMVP", m_projection * cam.view() *  transform);
 
+    Rectui textureRect;
+    if (!texRect)
+        textureRect = { 0, 0, uint32_t(tex.size.x), uint32_t(tex.size.y) };
+    else
+        textureRect = *texRect;
 
-    {
-        const Rectui& texRect = sprite.textureRect;
-
-        shader.setUniform("u_textureOffsets", Vec4f(
-                float(texRect.x), float(texRect.y), float(texRect.w), float(texRect.h)
-        ));
-    }
+    shader.setUniform("u_textureOffsets", Vec4f(
+            float(textureRect.x), float(textureRect.y), float(textureRect.w), float(textureRect.h)
+    ));
 
     drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
+}
+
+
+void Renderer::drawSprite(Sprite &sprite, Shader shader) const
+{
+    drawTexture(*sprite.texture(), sprite.modelMatrix(), shader, &sprite.textureRect);
 }
 
 // TODO: Test to make sure this is actually faster lol
@@ -221,6 +230,7 @@ void pure::Renderer::drawSpritesInstanced(Sprite * sprites, size_t count)
 
 void Renderer::drawSpritesInstanced(Sprite *sprites, size_t count, Shader shader)
 {
+
     m_vao.bind();
     shader.bind();
     sprites[0].texture()->bind();
@@ -294,4 +304,45 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
     drawArrays(primtype, 0, m_primitiveBuffer.count);
 }
 
+// TODO: I don't like how we handle paramters for instanced drawing, it would cause user to allocate memory and/or separate existing
+// memory to conform to the api. Maybe use some kind of polymorphism instead.
+void Renderer::drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count)
+{
+    drawTextureInstanced(tex, transforms, texRects, count, m_instancedShader);
+}
 
+void Renderer::drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count, Shader shader)
+{
+    m_vao.bind();
+    shader.bind();
+    tex.bind();
+
+    std::vector<Mat4> transformData;
+    transformData.reserve(count);
+    std::vector<Vec4f> texOffsets;
+    texOffsets.reserve(count);
+
+    for (size_t i = 0; i < count; i++)
+    {
+        const Mat4& model = transforms[i];
+        transformData.push_back(m_projection *  cam.view() * model);
+        transformData.push_back(model);
+
+        {
+            const Rectui& texRect = texRects[i];
+            texOffsets.emplace_back(float(texRect.x), float(texRect.y), float(texRect.w), float(texRect.h));
+        }
+    }
+
+    if (transformData.size() >= m_instancedMatBuffer.capacity)
+        m_instancedMatBuffer.alloc(&transformData[0], transformData.size(), DrawUsage::DYNAMIC_DRAW);
+    else
+        m_instancedMatBuffer.writeBuffer(&transformData[0], transformData.size(), 0);
+
+    if (texOffsets.size() >= m_instancedOffsetsBuffer.capacity)
+        m_instancedOffsetsBuffer.alloc(&texOffsets[0], texOffsets.size(), DrawUsage::DYNAMIC_DRAW);
+    else
+        m_instancedOffsetsBuffer.writeBuffer(&texOffsets[0], texOffsets.size(), 0);
+
+    glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertBuffer.count, count);
+}

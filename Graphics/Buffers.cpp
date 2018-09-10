@@ -148,6 +148,7 @@ VertexBuffer pure::VertexBuffer::create(const T * verts, size_t count, DrawUsage
 }
 
 
+// TODO: float overload is broken and doesn't properly set offsets and count/capacity of buffers
 template VertexBuffer VertexBuffer::create<Vertex>(const Vertex* verts, size_t count, DrawUsage usage, BufferType type);
 template VertexBuffer VertexBuffer::create<Vertex2D>(const Vertex2D* verts, size_t count, DrawUsage usage, BufferType type);
 template VertexBuffer VertexBuffer::create<float>(const float* verts, size_t count, DrawUsage usage, BufferType type);

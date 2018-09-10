@@ -83,6 +83,8 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
 
     glViewport(0, 0, m_impl->width, m_impl->height);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return true;
 }

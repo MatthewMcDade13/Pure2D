@@ -40,8 +40,14 @@ namespace pure
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount);
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, Shader shader);
 
-        PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0) const;
-        PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, Shader shader, float rotation = 0) const;
+        PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0, const Rectui* texRect = nullptr) const;
+        PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, Shader shader, float rotation = 0, const Rectui* texRect = nullptr) const;
+
+        PURE2D_API void drawTexture(const Texture& tex, const Mat4& transform, const Rectui* texRect = nullptr) const;
+        PURE2D_API void drawTexture(const Texture& tex, const Mat4& transform, Shader shader, const Rectui* texRect = nullptr) const;
+
+        PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count);
+        PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count, Shader shader);
 
         PURE2D_API void drawSprite(Sprite& sprite) const;
         PURE2D_API void drawSprite(Sprite& sprite, Shader shader) const;

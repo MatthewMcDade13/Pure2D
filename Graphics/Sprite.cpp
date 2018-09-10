@@ -13,6 +13,7 @@ float pure::Sprite::rotation() const { return m_rotation; }
 
 const Texture* pure::Sprite::texture() const { return m_texture; }
 
+// TODO: Create Transform struct that will encapsulate this exact functionality
 const Mat4 & pure::Sprite::modelMatrix()
 {
 	if (m_needsUpdate)
