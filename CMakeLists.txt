@@ -34,7 +34,7 @@ add_library(Pure2D SHARED
         System/AssetManager.cpp System/AssetManager.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
-        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h)
+        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -54,6 +54,7 @@ message(STATUS "${PROJECT_BINARY_DIR}/pure2d-config.cmake")
 
 install(TARGETS Pure2D DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+# ROOT
 install(
         FILES
         "Define.h"
@@ -61,6 +62,7 @@ install(
         DESTINATION "include/${PROJECT_NAME}"
 )
 
+# WINDOW
 install(
         FILES
         "Window/Window.h"
@@ -69,6 +71,7 @@ install(
         DESTINATION "include/${PROJECT_NAME}/Window"
 )
 
+# MATH
 install(
         FILES
         "Math/Vec2.h" "Math/Vec3.h" "Math/Vec4.h"
@@ -78,15 +81,18 @@ install(
         DESTINATION "include/${PROJECT_NAME}/Math"
 )
 
+# GRAPHICS
 install(
         FILES
         "Graphics/Buffers.h" "Graphics/Camera.h"
         "Graphics/Shader.h" "Graphics/Sprite.h"
         "Graphics/Texture.h" "Graphics/Vertex.h"
         "Graphics/Renderer.h"
+        "Graphics/Transform.h"
         DESTINATION "include/${PROJECT_NAME}/Graphics"
 )
 
+# SYSTEM
 install(
         FILES
         "System/AssetManager.h"

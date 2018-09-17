@@ -1,9 +1,7 @@
 #ifndef PURE3D_SPRITE_H
 #define PURE3D_SPRITE_H
 
-#include "Math/Mat4.h"
-#include "Math/Vec2.h"
-#include "Math/Vec3.h"
+#include "Transform.h"
 #include "Math/Rect.h"
 #include "Define.h"
 
@@ -22,24 +20,19 @@ namespace pure
 
 		PURE2D_API const Mat4& modelMatrix();
 
-		PURE2D_API void setPosition(Vec3f pos);
+		PURE2D_API void setPosition(const Vec3f& pos);
 		PURE2D_API void setSize(Vec2f size);
 		PURE2D_API void setRotation(float angle);
 		PURE2D_API void setTexture(Texture* tex);
 
-		PURE2D_API void move(Vec3f offset);
-		PURE2D_API void rotate(float angle);
-
+        PURE2D_API void move(const Vec3f& offset);
+        PURE2D_API void scale(Vec2f offset);
+        PURE2D_API void rotate(float angle);
 
 	private:
 		Texture* m_texture;
+		Transform m_transform;
 
-		Vec3f m_position;
-		Vec2f m_size;
-		float m_rotation;
-		Mat4 m_model;
-
-		bool m_needsUpdate;
 	};
 }
 

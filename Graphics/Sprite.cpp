@@ -6,45 +6,32 @@
 
 using namespace pure;
 
-Vec3f pure::Sprite::position() const { return m_position; }
-Vec2f pure::Sprite::size() const { return m_size; }
+Vec3f pure::Sprite::position() const { return m_transform.position(); }
+Vec2f pure::Sprite::size() const { return m_transform.size(); }
 
-float pure::Sprite::rotation() const { return m_rotation; }
+float pure::Sprite::rotation() const { return m_transform.rotation(); }
 
 const Texture* pure::Sprite::texture() const { return m_texture; }
 
 // TODO: Create Transform struct that will encapsulate this exact functionality
 const Mat4 & pure::Sprite::modelMatrix()
 {
-	if (m_needsUpdate)
-	{
-		m_model = translate(makeMat4(), m_position);
-		m_model = translate(m_model, Vec3f(m_size.x * .5f, m_size.y * .5f, 0.f));
-		m_model = pure::rotate(m_model, radians(m_rotation), Vec3f(0.f, 0.f, 1.f));
-		m_model = translate(m_model, Vec3f(m_size.x * -.5f, m_size.y * -.5f, 0.f));
-		m_model = scale(m_model, Vec3f(m_size.x, m_size.y, 1.f));
-		m_needsUpdate = false;
-	}
-
-	return m_model;
+	return m_transform.modelMatrix();
 }
 
-void pure::Sprite::setPosition(Vec3f pos)
+void pure::Sprite::setPosition(const Vec3f& pos)
 {
-	m_position = pos;
-	m_needsUpdate = true;
+	m_transform.setPosition(pos);
 }
 
 void pure::Sprite::setSize(Vec2f size)
 {
-	m_size = size;
-	m_needsUpdate = true;
+	m_transform.setSize(size);
 }
 
 void pure::Sprite::setRotation(float angle)
 {
-	m_rotation = angle;
-	m_needsUpdate = true;
+	m_transform.setRotation(angle);
 }
 
 void pure::Sprite::setTexture(Texture* tex)
@@ -56,14 +43,17 @@ void pure::Sprite::setTexture(Texture* tex)
 	};
 }
 
-void pure::Sprite::move(Vec3f offset)
+void pure::Sprite::move(const Vec3f &offset)
 {
-	m_position += offset;
-	m_needsUpdate = true;
+	m_transform.move(offset);
+}
+
+void pure::Sprite::scale(Vec2f offset)
+{
+	m_transform.scale(offset);
 }
 
 void pure::Sprite::rotate(float angle)
 {
-	m_rotation += angle;
-	m_needsUpdate = true;
+	m_transform.rotate(angle);
 }
