@@ -98,6 +98,7 @@ install(
         "System/AssetManager.h"
         "System/NonCopyable.h"
         "System/Time.h"
+        "System/Util.h"
         DESTINATION "include/${PROJECT_NAME}/System"
 )
 

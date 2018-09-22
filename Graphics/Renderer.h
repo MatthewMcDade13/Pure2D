@@ -13,6 +13,7 @@
 #include "Graphics/Vertex.h"
 #include "Graphics/Buffers.h"
 #include "Graphics/Camera.h"
+#include "Graphics/Transform.h"
 #include "System/NonCopyable.h"
 #include "Define.h"
 
@@ -24,6 +25,20 @@ namespace pure
     template <typename T> struct Vec2;
     template <typename T> struct Vec4;
     template <typename T> struct Rect;
+
+    struct RenderCtx
+    {
+        Transform transform = Transform::create();
+        Shader shader = { 0 };
+        Texture* texture = nullptr;
+        Rectui texRect = {};
+    };
+
+    struct Drawable
+    {
+        virtual ~Drawable() = default;
+        virtual void draw(RenderCtx& ctx) = 0;
+    };
 
     struct Renderer : private NonCopyable
     {
@@ -39,6 +54,8 @@ namespace pure
 
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount);
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, Shader shader);
+        PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex);
+        PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex, Shader shader);
 
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0, const Rectui* texRect = nullptr) const;
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, Shader shader, float rotation = 0, const Rectui* texRect = nullptr) const;
@@ -54,6 +71,8 @@ namespace pure
 
         PURE2D_API void drawSpritesInstanced(Sprite* sprites, size_t count);
         PURE2D_API void drawSpritesInstanced(Sprite* sprites, size_t count, Shader shader);
+
+//        PURE2D_API void draw(Drawable& drawable);
 
         PURE2D_API const Rectf& viewport() const;
         PURE2D_API void setViewport(const Rectf& vp);

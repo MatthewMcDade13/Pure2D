@@ -304,6 +304,36 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
     drawArrays(primtype, 0, m_primitiveBuffer.count);
 }
 
+void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex)
+{
+    drawPrimitive(primtype, verts, vertCount, tex, m_spriteShader);
+}
+
+void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex,
+                             Shader shader)
+{
+    m_vao.bind();
+    shader.bind();
+    tex.bind();
+
+    if (vertCount >= m_primitiveBuffer.capacity)
+        m_primitiveBuffer.alloc(verts, vertCount, DrawUsage::DYNAMIC_DRAW);
+    else
+        m_primitiveBuffer.writeBuffer(verts, vertCount, 0);
+
+    m_basicShader.setUniform("u_matrixMVP", m_projection * cam.view());
+    m_basicShader.setUniform("u_modelMatrix", makeMat4());
+
+    Rectui textureRect = { 0, 0, uint32_t(tex.size.x), uint32_t(tex.size.y) };;
+
+    shader.setUniform("u_textureOffsets", Vec4f(
+            float(textureRect.x), float(textureRect.y), float(textureRect.w), float(textureRect.h)
+    ));
+
+    drawArrays(primtype, 0, m_primitiveBuffer.count);
+}
+
+
 // TODO: I don't like how we handle paramters for instanced drawing, it would cause user to allocate memory and/or separate existing
 // memory to conform to the api. Maybe use some kind of polymorphism instead.
 void Renderer::drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count)
@@ -346,3 +376,30 @@ void Renderer::drawTextureInstanced(const Texture& tex, const Mat4* transforms, 
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertBuffer.count, count);
 }
+
+//void Renderer::draw(Drawable &drawable)
+//{
+//
+//    RenderCtx ctx = {};
+//    drawable.draw(ctx);
+//
+//    m_vao.bind();
+//    ctx.shader.bind();
+//
+//    ctx.shader.setUniform("u_modelMatrix", ctx.transform.modelMatrix());
+//    ctx.shader.setUniform("u_matrixMVP", m_projection * cam.view() *  ctx.transform.modelMatrix());
+//
+//    if (ctx.texture)
+//    {
+//        ctx.texture->bind();
+//        if (ctx.texRect.x == 0 && ctx.texRect.y == 0 && ctx.texRect.w == 0 && ctx.texRect.h == 0)
+//            ctx.texRect = { 0, 0, uint32_t(ctx.texture->size.x), uint32_t(ctx.texture->size.y) };
+//    }
+//
+//    ctx.shader.setUniform("u_textureOffsets", Vec4f(
+//            float(ctx.texRect.x), float(ctx.texRect.y), float(ctx.texRect.w), float(ctx.texRect.h)
+//    ));
+//
+//
+//    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
+//}
