@@ -66,6 +66,8 @@ namespace pure
         PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count);
         PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count, Shader shader);
 
+		//TODO: Add 2D Mesh function. Might be able to reduce amount of rendering functions or at least
+		// replace sprite.
         PURE2D_API void drawSprite(Sprite& sprite) const;
         PURE2D_API void drawSprite(Sprite& sprite, Shader shader) const;
 

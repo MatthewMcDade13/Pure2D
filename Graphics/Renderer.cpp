@@ -312,7 +312,7 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
 void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex,
                              Shader shader)
 {
-    m_vao.bind();
+    m_primitiveVAO.bind();
     shader.bind();
     tex.bind();
 
@@ -321,8 +321,8 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
     else
         m_primitiveBuffer.writeBuffer(verts, vertCount, 0);
 
-    m_basicShader.setUniform("u_matrixMVP", m_projection * cam.view());
-    m_basicShader.setUniform("u_modelMatrix", makeMat4());
+	shader.setUniform("u_matrixMVP", m_projection * cam.view());
+	shader.setUniform("u_modelMatrix", makeMat4());
 
     Rectui textureRect = { 0, 0, uint32_t(tex.size.x), uint32_t(tex.size.y) };;
 
