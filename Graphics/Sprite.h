@@ -1,5 +1,5 @@
-#ifndef PURE3D_SPRITE_H
-#define PURE3D_SPRITE_H
+#ifndef PURE2D_SPRITE_H
+#define PURE2D_SPRITE_H
 
 #include "Transform.h"
 #include "Math/Rect.h"
@@ -36,4 +36,4 @@ namespace pure
 	};
 }
 
-#endif // PURE3D_SPRITE_H
+#endif // PURE2D_SPRITE_H

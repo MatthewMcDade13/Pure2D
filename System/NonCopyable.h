@@ -1,5 +1,5 @@
-#ifndef PURE3D_NONCOPYABLE_H
-#define PURE3D_NONCOPYABLE_H
+#ifndef PURE2D_NONCOPYABLE_H
+#define PURE2D_NONCOPYABLE_H
 
 #include "Define.h"
 
@@ -17,4 +17,4 @@ namespace pure
 }
 
 
-#endif // PURE3D_NONCOPYABLE_H
+#endif // PURE2D_NONCOPYABLE_H

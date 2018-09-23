@@ -1,5 +1,5 @@
-#ifndef PURE3D_MATH_RECT_H
-#define PURE3D_MATH_RECT_H
+#ifndef PURE2D_MATH_RECT_H
+#define PURE2D_MATH_RECT_H
 
 #include <cinttypes>
 #include <type_traits>
@@ -23,4 +23,4 @@ namespace pure
 	using Rectui = Rect<uint32_t>;
 }
 
-#endif // PURE3D_MATH_RECT_H
+#endif // PURE2D_MATH_RECT_H

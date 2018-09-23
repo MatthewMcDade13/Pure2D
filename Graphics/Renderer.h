@@ -22,6 +22,7 @@ namespace pure
     struct Texture;
     struct Window;
     struct Sprite;
+	struct Mesh;
     template <typename T> struct Vec2;
     template <typename T> struct Vec4;
     template <typename T> struct Rect;
@@ -56,6 +57,8 @@ namespace pure
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, Shader shader);
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex);
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex, Shader shader);
+
+		PURE2D_API void drawMesh(DrawPrimitive primtype, const Mesh& mesh, const Mat4& transform);
 
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0, const Rectui* texRect = nullptr) const;
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, Shader shader, float rotation = 0, const Rectui* texRect = nullptr) const;

@@ -1,5 +1,5 @@
-#ifndef PURE3D_CAMERA_H
-#define PURE3D_CAMERA_H
+#ifndef PURE2D_CAMERA_H
+#define PURE2D_CAMERA_H
 
 #include "Define.h"
 #include "Math/Vec3.h"
@@ -31,4 +31,4 @@ namespace pure
 }
 
 
-#endif // PURE3D_CAMERA_H
+#endif // PURE2D_CAMERA_H

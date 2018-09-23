@@ -1,5 +1,5 @@
-#ifndef PURE3D_GRAPHICS_BUFFERS_H
-#define PURE3D_GRAPHICS_BUFFERS_H
+#ifndef PURE2D_GRAPHICS_BUFFERS_H
+#define PURE2D_GRAPHICS_BUFFERS_H
 
 #include <cinttypes>
 #include <cstdio>
@@ -100,4 +100,4 @@ namespace pure
 	PURE2D_API void drawElements(DrawPrimitive prim, uint32_t count);
 }
 
-#endif // PURE3D_GRAPHICS_BUFFERS_H
+#endif // PURE2D_GRAPHICS_BUFFERS_H

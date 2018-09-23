@@ -6,6 +6,7 @@
 #include "Math/Convert.h"
 #include "Graphics/Sprite.h"
 #include "Graphics/Texture.h"
+#include "Graphics/Mesh.h"
 #include "Window/Window.h"
 #include "Private/Shaders.h"
 #include "Private/Util.h"
@@ -331,6 +332,23 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
     ));
 
     drawArrays(primtype, 0, m_primitiveBuffer.count);
+}
+
+void pure::Renderer::drawMesh(DrawPrimitive primtype, const Mesh & mesh, const Mat4 & transform)
+{
+	m_primitiveVAO.bind();
+	mesh.shader.bind();
+	if (mesh.texture) mesh.texture->bind();
+
+	if (mesh.numVerts >= m_primitiveBuffer.capacity)
+		m_primitiveBuffer.alloc(mesh.verts, mesh.numVerts, DrawUsage::DYNAMIC_DRAW);
+	else
+		m_primitiveBuffer.writeBuffer(mesh.verts, mesh.numVerts, 0);
+
+	mesh.shader.setUniform("u_matrixMVP", m_projection * cam.view() * transform);
+	mesh.shader.setUniform("u_modelMatrix", transform);
+
+	drawArrays(primtype, 0, m_primitiveBuffer.count);
 }
 
 

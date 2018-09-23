@@ -1,5 +1,5 @@
-#ifndef PURE3D_PRIVATE_CONVERT_H
-#define PURE3D_PRIVATE_CONVERT_H
+#ifndef PURE2D_PRIVATE_CONVERT_H
+#define PURE2D_PRIVATE_CONVERT_H
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -67,4 +67,4 @@ constexpr pure::Vec2f toVec2(const glm::vec2& vec)
 
 inline pure::Mat4 toMat4(const glm::mat4& mat) { return { *TO_ALIGNED_STORAGE(mat) }; }
 
-#endif // PURE3D_PRIVATE_CONVERT_H
+#endif // PURE2D_PRIVATE_CONVERT_H

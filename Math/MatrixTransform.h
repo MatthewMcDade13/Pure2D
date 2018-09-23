@@ -1,5 +1,5 @@
-#ifndef PURE3D_MATRIX_TRANSFORM_H
-#define PURE3D_MATRIX_TRANSFORM_H
+#ifndef PURE2D_MATRIX_TRANSFORM_H
+#define PURE2D_MATRIX_TRANSFORM_H
 
 #include "Define.h"
 
@@ -16,7 +16,7 @@ namespace pure
 	PURE2D_API Mat4 lookAt(const Vec3<float>& position, const Vec3<float>& target, const Vec3<float>& up);
 }
 
-#endif // PURE3D_MATRIX_TRANSFORM_H
+#endif // PURE2D_MATRIX_TRANSFORM_H
 
 
 

@@ -1,5 +1,5 @@
-#ifndef PURE3D_PRIVATE_SHADERS_H
-#define PURE3D_PRIVATE_SHADERS_H
+#ifndef PURE2D_PRIVATE_SHADERS_H
+#define PURE2D_PRIVATE_SHADERS_H
 
 namespace shader
 {
@@ -96,4 +96,4 @@ namespace shader
 
 }
 
-#endif // PURE3D_PRIVATE_SHADERS_H
+#endif // PURE2D_PRIVATE_SHADERS_H

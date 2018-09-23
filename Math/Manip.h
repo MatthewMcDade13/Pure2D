@@ -1,5 +1,5 @@
-#ifndef PURE3D_MATH_MANIP_H
-#define PURE3D_MATH_MANIP_H
+#ifndef PURE2D_MATH_MANIP_H
+#define PURE2D_MATH_MANIP_H
 
 #include "Define.h"
 

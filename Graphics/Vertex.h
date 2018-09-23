@@ -1,5 +1,5 @@
-#ifndef PURE3D_VERTEX_H
-#define PURE3D_VERTEX_H
+#ifndef PURE2D_VERTEX_H
+#define PURE2D_VERTEX_H
 
 #include <cinttypes>
 #include "Define.h"
@@ -49,4 +49,4 @@ namespace pure
 
 }
 
-#endif // PURE3D_VERTEX_H
+#endif // PURE2D_VERTEX_H

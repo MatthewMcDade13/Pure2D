@@ -1,5 +1,5 @@
-#ifndef PURE3D_PRIVATE_UTIL_H	
-#define PURE3D_PRIVATE_UTIL_H
+#ifndef PURE2D_PRIVATE_UTIL_H	
+#define PURE2D_PRIVATE_UTIL_H
 
 #include <unordered_map>
 #include <string>
@@ -20,4 +20,4 @@ V* mapGet(std::unordered_map<K, V>& map, const K& key)
 
 
 
-#endif // PURE3D_PRIVATE_UTIL_H
+#endif // PURE2D_PRIVATE_UTIL_H

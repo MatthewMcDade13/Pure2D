@@ -1,5 +1,5 @@
-#ifndef PURE3D_TIME_H
-#define PURE3D_TIME_H
+#ifndef PURE2D_TIME_H
+#define PURE2D_TIME_H
 
 #include "Define.h"
 
@@ -20,4 +20,4 @@ namespace pure
 	}
 }
 
-#endif // PURE3D_TIME_H
+#endif // PURE2D_TIME_H

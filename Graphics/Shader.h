@@ -1,5 +1,5 @@
-#ifndef PURE3D_SHADER_H
-#define PURE3D_SHADER_H
+#ifndef PURE2D_SHADER_H
+#define PURE2D_SHADER_H
 
 #include <cinttypes>
 #include "Define.h"
@@ -37,4 +37,4 @@ namespace pure
 	};
 }
 
-#endif // PURE3D_SHADER_H
+#endif // PURE2D_SHADER_H

@@ -1,5 +1,5 @@
-#ifndef PURE3D_MATH_CONVERT_H
-#define PURE3D_MATH_CONVERT_H
+#ifndef PURE2D_MATH_CONVERT_H
+#define PURE2D_MATH_CONVERT_H
 
 #include "Define.h"
 #include "Constants.h"
@@ -17,4 +17,4 @@ namespace pure
 	}
 }
 
-#endif // PURE3D_MATH_CONVERT_H
+#endif // PURE2D_MATH_CONVERT_H
