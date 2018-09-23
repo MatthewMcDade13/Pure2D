@@ -3,7 +3,7 @@
 #include "Math/Manip.h"
 #include "Math/Convert.h"
 #include "Math/MatrixTransform.h"
-#include <ctgmath>
+#include <cmath>
 
 using namespace pure;
 
