@@ -67,7 +67,7 @@ void Transform::rotate(float angle)
 
 Transform Transform::create(Mat4 mat)
 {
-    Transform t;
+	Transform t = {};
     t.m_model = mat;
     t.m_needsUpdate = true;
 	return t;

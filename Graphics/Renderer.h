@@ -59,6 +59,7 @@ namespace pure
         PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex, Shader shader);
 
 		PURE2D_API void drawMesh(DrawPrimitive primtype, const Mesh& mesh, const Mat4& transform);
+		PURE2D_API void drawMeshInstanced(DrawPrimitive primtype, const Mesh& mesh, const Mat4* transforms, size_t numDraws);
 
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0, const Rectui* texRect = nullptr) const;
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, Shader shader, float rotation = 0, const Rectui* texRect = nullptr) const;
@@ -68,6 +69,7 @@ namespace pure
 
         PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count);
         PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count, Shader shader);
+
 
 		//TODO: Add 2D Mesh function. Might be able to reduce amount of rendering functions or at least
 		// replace sprite.
@@ -95,7 +97,8 @@ namespace pure
         Shader m_spriteShader;
         Shader m_colorShader;
         Shader m_instancedShader;
-        Shader m_basicShader;
+        Shader m_primShader;
+		Shader m_primTexShader;
         Mat4 m_projection;
         Rectf m_viewport;
     };

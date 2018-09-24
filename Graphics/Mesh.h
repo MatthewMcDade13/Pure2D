@@ -11,9 +11,9 @@ namespace pure
 
 	struct Mesh
 	{
-		Vertex2D* verts;
+		const Vertex2D* verts;
 		size_t numVerts;
-		Texture* texture;
+		const Texture* texture;
 		Shader shader;
 	};
 }

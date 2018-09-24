@@ -31,6 +31,27 @@ namespace shader
 		"	gl_Position = u_matrixMVP * vec4(l_pos, 1.0);\n"
 		"}";
 
+	constexpr const char* primVert = "#version 330\n"
+		"layout(location = 0) in vec3 l_pos;\n"
+		"layout(location = 1) in vec2 l_texCoords;\n"
+		"layout(location = 2) in vec4 l_color;\n"
+
+		"out vec2 TexCoord;\n"
+		"out vec4 Color;\n"
+		"out vec3 FragPos;\n"
+
+		"uniform mat4 u_matrixMVP;\n"
+		"uniform mat4 u_modelMatrix;\n"
+
+		"void main()\n"
+		"{\n"
+		"	TexCoord = l_texCoords;\n"
+		"   Color = l_color;\n"
+		"   FragPos = vec3(u_modelMatrix * vec4(l_pos, 1.0));\n"
+
+		"	gl_Position = u_matrixMVP * vec4(l_pos, 1.0);\n"
+		"}";
+
 	constexpr const char* frag = "#version 330\n"
          "out vec4 FragColor;\n"
 

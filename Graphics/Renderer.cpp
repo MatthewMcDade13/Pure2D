@@ -58,7 +58,8 @@ pure::Renderer::Renderer(const Window& window) : cam({})
         m_spriteShader = Shader::createSrc(shader::vert, shader::spriteFrag);
         m_colorShader = Shader::createSrc(shader::vert, shader::colorFrag);
         m_instancedShader = Shader::createSrc(shader::instancedSpriteVert, shader::spriteFrag);
-        m_basicShader = Shader::createSrc(shader::vert, shader::frag);
+        m_primShader = Shader::createSrc(shader::primVert, shader::frag);
+		m_primTexShader = Shader::createSrc(shader::primVert, shader::spriteFrag);
 
         m_spriteShader.bind();
         m_spriteShader.setUniform("u_texture", 0);
@@ -138,7 +139,8 @@ pure::Renderer::~Renderer()
     m_instancedShader.free();
     m_colorShader.free();
     m_spriteShader.free();
-    m_basicShader.free();
+    m_primShader.free();
+	m_primTexShader.free();
 
     m_primitiveVAO.free();
     m_primitiveBuffer.free();
@@ -286,7 +288,7 @@ void pure::Renderer::zoom(float offset)
 
 void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount)
 {
-    drawPrimitive(primtype, verts, vertCount, m_basicShader);
+    drawPrimitive(primtype, verts, vertCount, m_primShader);
 }
 
 void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, Shader shader)
@@ -299,15 +301,15 @@ void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size
     else
         m_primitiveBuffer.writeBuffer(verts, vertCount, 0);
 
-    m_basicShader.setUniform("u_matrixMVP", m_projection * cam.view());
-    m_basicShader.setUniform("u_modelMatrix", makeMat4());
+    m_primShader.setUniform("u_matrixMVP", m_projection * cam.view());
+    m_primShader.setUniform("u_modelMatrix", makeMat4());
 
     drawArrays(primtype, 0, m_primitiveBuffer.count);
 }
 
 void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex)
 {
-    drawPrimitive(primtype, verts, vertCount, tex, m_spriteShader);
+    drawPrimitive(primtype, verts, vertCount, tex, m_primTexShader);
 }
 
 void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex,
@@ -349,6 +351,30 @@ void pure::Renderer::drawMesh(DrawPrimitive primtype, const Mesh & mesh, const M
 	mesh.shader.setUniform("u_modelMatrix", transform);
 
 	drawArrays(primtype, 0, m_primitiveBuffer.count);
+}
+
+void pure::Renderer::drawMeshInstanced(DrawPrimitive primtype, const Mesh & mesh, const Mat4 * transforms, size_t numDraws)
+{
+	m_vao.bind();
+	mesh.shader.bind();
+	if (mesh.texture) mesh.texture->bind();
+
+	std::vector<Mat4> transformData;
+	transformData.reserve(numDraws);
+
+	for (size_t i = 0; i < numDraws; i++)
+	{
+		const Mat4& model = transforms[i];
+		transformData.push_back(m_projection *  cam.view() * model);
+		transformData.push_back(model);
+	}
+
+	if (transformData.size() >= m_instancedMatBuffer.capacity)
+		m_instancedMatBuffer.alloc(&transformData[0], transformData.size(), DrawUsage::DYNAMIC_DRAW);
+	else
+		m_instancedMatBuffer.writeBuffer(&transformData[0], transformData.size(), 0);
+
+	glDrawArraysInstanced(static_cast<GLenum>(primtype), 0, m_vertBuffer.count, numDraws);
 }
 
 

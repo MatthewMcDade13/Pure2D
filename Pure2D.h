@@ -7,7 +7,7 @@
 
 
 #include "Init.h"
-#include "Math.h"
+#include "PureMath.h"
 #include "Graphics.h"
 #include "System.h"
 #include "Window.h"
