@@ -16,10 +16,10 @@
 #include "Graphics/Transform.h"
 #include "System/NonCopyable.h"
 #include "Define.h"
+#include "Texture.h"
 
 namespace pure
 {
-    struct Texture;
     struct Window;
     struct Sprite;
 	struct Mesh;
@@ -48,38 +48,14 @@ namespace pure
         PURE2D_API explicit Renderer(const Window& window);
         PURE2D_API ~Renderer();
 
-
-
-        PURE2D_API void drawRect(const Rectf& r, const Vec4<float>& color, float rotation = 0) const;
-        PURE2D_API void drawRect(const Rectf& r, const Vec4<float>& color, Shader shader, float rotation = 0) const;
-
-        PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount);
-        PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, Shader shader);
-        PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex);
-        PURE2D_API void drawPrimitive(DrawPrimitive primtype, const Vertex2D* verts, size_t vertCount, const Texture& tex, Shader shader);
-
 		PURE2D_API void drawMesh(DrawPrimitive primtype, const Mesh& mesh, const Mat4& transform);
-		PURE2D_API void drawMeshInstanced(DrawPrimitive primtype, const Mesh& mesh, const Mat4* transforms, size_t numDraws);
+		PURE2D_API void drawMeshInstanced(DrawPrimitive primtype, const Mesh& mesh, const Mat4* transforms, uint32_t numDraws);
 
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0, const Rectui* texRect = nullptr) const;
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, Shader shader, float rotation = 0, const Rectui* texRect = nullptr) const;
 
         PURE2D_API void drawTexture(const Texture& tex, const Mat4& transform, const Rectui* texRect = nullptr) const;
         PURE2D_API void drawTexture(const Texture& tex, const Mat4& transform, Shader shader, const Rectui* texRect = nullptr) const;
-
-        PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count);
-        PURE2D_API void drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count, Shader shader);
-
-
-		//TODO: Add 2D Mesh function. Might be able to reduce amount of rendering functions or at least
-		// replace sprite.
-        PURE2D_API void drawSprite(Sprite& sprite) const;
-        PURE2D_API void drawSprite(Sprite& sprite, Shader shader) const;
-
-        PURE2D_API void drawSpritesInstanced(Sprite* sprites, size_t count);
-        PURE2D_API void drawSpritesInstanced(Sprite* sprites, size_t count, Shader shader);
-
-//        PURE2D_API void draw(Drawable& drawable);
 
         PURE2D_API const Rectf& viewport() const;
         PURE2D_API void setViewport(const Rectf& vp);
@@ -89,16 +65,12 @@ namespace pure
         VertexArray m_vao;
         VertexBuffer m_vertBuffer;
         VertexBuffer m_instancedMatBuffer;
-        VertexBuffer m_instancedOffsetsBuffer;
+        VertexArray m_drawVAO;
+        VertexBuffer m_drawBuff;
 
-        VertexArray m_primitiveVAO;
-        VertexBuffer m_primitiveBuffer;
-
-        Shader m_spriteShader;
-        Shader m_colorShader;
+        Shader m_shader;
         Shader m_instancedShader;
-        Shader m_primShader;
-		Shader m_primTexShader;
+        Texture m_defaultTexture;
         Mat4 m_projection;
         Rectf m_viewport;
     };

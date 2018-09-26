@@ -46,6 +46,30 @@ namespace pure
 		POLYGON = 0x0009
 	};
 
+	struct PURE2D_API VertexAttribute
+    {
+        uint8_t bufferIndex;
+        uint8_t elemCount;
+        bool isInstanced;
+        BufferType type : 16;
+        size_t offset;
+        size_t stride;
+
+        static inline VertexAttribute create(uint8_t bufferIndex, uint8_t elemCount,
+                BufferType type, size_t stride, size_t offset, bool isInstanced)
+        {
+            VertexAttribute va = {};
+            va.bufferIndex = bufferIndex;
+            va.elemCount = elemCount;
+            va.type = type;
+            va.offset = offset;
+            va.stride = stride;
+            va.isInstanced = isInstanced;
+            return va;
+        }
+    };
+
+
 	struct ElementBuffer
 	{
 		uint32_t id_;
@@ -55,10 +79,11 @@ namespace pure
 	struct PURE2D_API VertexBuffer
 	{
 		uint32_t id_;
-		uint32_t vertexSize;
+//		uint32_t vertexSize;
 		BufferType type;
-		size_t count;
-		size_t capacity;
+		size_t vertCount;
+		size_t size;
+//		size_t capacity;
 
 		static VertexBuffer createZeroed(uint32_t typeSize, uint32_t count, DrawUsage usage, BufferType type);
 
@@ -79,13 +104,12 @@ namespace pure
 	struct PURE2D_API VertexArray
 	{
 		uint32_t id_;
-		uint32_t numLayout;
 
 		static VertexArray create();
 
 		void bind() const;
 		void free();
-		void setLayout(const VertexBuffer& buffer, int elemCount, bool normalized, size_t stride, void* ptr);
+		void setLayout(const VertexBuffer& buffer, uint32_t index, int elemCount, bool normalized, size_t stride, void* ptr);
 	};
 
 	PURE2D_API ElementBuffer createEBO(const uint32_t* indicies, size_t count, DrawUsage usage = DrawUsage::STATIC_DRAW);
@@ -98,6 +122,8 @@ namespace pure
 	// TODO: Move this to renderer. We can store start, vertCount, and DrawPrimitive on VertexArray most likely...
 	PURE2D_API void drawArrays(DrawPrimitive prim, uint32_t start, uint32_t vertCount);
 	PURE2D_API void drawElements(DrawPrimitive prim, uint32_t count);
+
+	PURE2D_API void setVertexLayout(const VertexBuffer& buffer, VertexAttribute* attribs, size_t numAttribs);
 }
 
 #endif // PURE2D_GRAPHICS_BUFFERS_H

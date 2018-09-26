@@ -29,7 +29,8 @@ namespace pure
 		PURE2D_API void bind() const;
 
 		PURE2D_API static Texture create(const char* fileName, bool shouldFlip = true);
-		PURE2D_API static void free(Texture& tex);
+		PURE2D_API static Texture createBlank();
+		PURE2D_API void free();
 	private:
 		uint32_t m_unit;
 	};

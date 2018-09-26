@@ -68,8 +68,21 @@ Texture pure::Texture::create(const char * fileName, bool shouldFlip)
 	return t;
 }
 
-void pure::Texture::free(Texture & tex)
+void pure::Texture::free()
 {
-	glDeleteTextures(1, &tex.id_);
-	tex = { };
+	glDeleteTextures(1, &id_);
+	*this = { };
+}
+
+Texture Texture::createBlank()
+{
+	uint32_t texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	GLubyte texdata[] = { 255, 255, 255, 255 };
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1,
+				 0, GL_RGBA, GL_UNSIGNED_BYTE, texdata);
+	glGenerateMipmap(GL_TEXTURE_2D);
 }

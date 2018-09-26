@@ -23,7 +23,7 @@ pure::AssetManager::~AssetManager()
 	for (auto& kv : m_impl->shaders)
 		kv.second.free();
 	for (auto& kv : m_impl->textures)
-		Texture::free(kv.second);
+		kv.second.free();
 
 	delete m_impl;
 }
@@ -82,5 +82,5 @@ void pure::AssetManager::freeTexture(const char* filePath)
 	auto node = m_impl->textures.extract(filePath);
 	if (node.empty()) return;
 
-	Texture::free(node.mapped());
+	node.mapped().free();
 }

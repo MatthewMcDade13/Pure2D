@@ -8,7 +8,7 @@ find_package(PkgConfig REQUIRED 3.3)
 
 add_library(Pure2D SHARED
         Define.h
-        Graphics.h Math.h System.h Window.h Init.h Init.cpp
+        Graphics.h PureMath.h System.h Window.h Init.h Init.cpp
         Window/Window.cpp Window/Window.h
         External/glad.c External/glad.h
         External/khrplatform.h
@@ -30,11 +30,12 @@ add_library(Pure2D SHARED
         Graphics/Shader.cpp Graphics/Shader.h
         Graphics/Sprite.cpp Graphics/Sprite.h
         Graphics/Texture.cpp Graphics/Texture.h
+        Graphics/Mesh.h
         Graphics/Vertex.h
         System/AssetManager.cpp System/AssetManager.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
-        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h)
+        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -58,7 +59,7 @@ install(TARGETS Pure2D DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(
         FILES
         "Define.h"
-        Graphics.h Math.h System.h Window.h Init.h Pure2D.h
+        Graphics.h PureMath.h System.h Window.h Init.h Pure2D.h
         DESTINATION "include/${PROJECT_NAME}"
 )
 
@@ -89,6 +90,7 @@ install(
         "Graphics/Texture.h" "Graphics/Vertex.h"
         "Graphics/Renderer.h"
         "Graphics/Transform.h"
+        "Graphics/Mesh.h"
         DESTINATION "include/${PROJECT_NAME}/Graphics"
 )
 

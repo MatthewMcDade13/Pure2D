@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include "glad.h"
+#include <iostream>
 
 using namespace pure;
 
@@ -21,29 +22,29 @@ using namespace pure;
 static constexpr float CLIP_NEAR = -50.f;
 static constexpr float CLIP_FAR = 50.f;
 
-struct InstancedVertex2D
+static struct
 {
-    static constexpr size_t COUNT = 12;
-
-    union
-    {
-        struct
-        {
-            struct { float x, y, z, w; } xTransform;
-            struct { float x, y, z, w; } yTransform;
-            struct { float x, y, z, w;} zTransform;
-        };
-
-        float buffer[COUNT];
-    };
-};
+    VertexAttribute vertex2dAttribs[3] = {};
+    VertexAttribute instancedMatAttribs [8] = {};
+} attribs = {};
 
 pure::Renderer::Renderer(const Window& window) : cam({})
 {
 
+    constexpr int NUM_MAT4 = 2;
     {
         cam.position.z = -5.f;
         cam.lookDir.z = -1.f;
+    }
+
+    {
+
+        attribs.vertex2dAttribs[0] = VertexAttribute::create(0, 3, BufferType::FLOAT, sizeof(Vertex2D), 0, false);
+        attribs.vertex2dAttribs[1] = VertexAttribute::create(1, 2, BufferType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, texCoord)), false);
+        attribs.vertex2dAttribs[2] = VertexAttribute::create(2, 4, BufferType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, color)), false);
+
+        for (int i = 0; i < 4 * NUM_MAT4; i++)
+            attribs.instancedMatAttribs[i] = VertexAttribute::create(i + 3, 4, BufferType::FLOAT, sizeof(Mat4) * NUM_MAT4, size_t(i * sizeof(Vec4f)), true);
     }
 
     {
@@ -55,26 +56,21 @@ pure::Renderer::Renderer(const Window& window) : cam({})
             setViewport({ 0.f, 0.f, w, h });
         }
 
-        m_spriteShader = Shader::createSrc(shader::vert, shader::spriteFrag);
-        m_colorShader = Shader::createSrc(shader::vert, shader::colorFrag);
-        m_instancedShader = Shader::createSrc(shader::instancedSpriteVert, shader::spriteFrag);
-        m_primShader = Shader::createSrc(shader::primVert, shader::frag);
-		m_primTexShader = Shader::createSrc(shader::primVert, shader::spriteFrag);
-
-        m_spriteShader.bind();
-        m_spriteShader.setUniform("u_texture", 0);
+        m_shader = Shader::createSrc(shader::vert, shader::frag);
+        m_instancedShader = Shader::createSrc(shader::instancedVert, shader::frag);
+        m_defaultTexture = Texture::createBlank();
     }
 
     {
 
         constexpr Vertex2D verts[] = {
-                { 0.0f, 1.0f, 0.0f,   0.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
-                { 1.0f, 0.0f, 0.0f,   1.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
-                { 0.0f, 0.0f, 0.0f,   0.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
+                { 0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
+                { 1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
+                { 0.0f, 0.0f, 0.0f,   0.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
 
-                { 0.0f, 1.0f, 0.0f,   0.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
-                { 1.0f, 1.0f, 0.0f,   1.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
-                { 1.0f, 0.0f, 0.0f,   1.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
+                { 0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
+                { 1.0f, 1.0f, 0.0f,   1.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
+                { 1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
         };
 
         m_vao = VertexArray::create();
@@ -82,49 +78,16 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 
         m_vertBuffer = VertexBuffer::create(verts, ARRAY_COUNT(verts), DrawUsage::STATIC_DRAW);
 
-        m_vao.setLayout(m_vertBuffer, 3, false, sizeof(Vertex2D), 0);
-        m_vao.setLayout(m_vertBuffer, 2, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, texCoord));
-        m_vao.setLayout(m_vertBuffer, 4, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, color));
-
-//        m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-//        m_instancedOffsetsBuffer = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-//
-//        m_vao.setLayout(m_instancedOffsetsBuffer, 4, false, sizeof(Vec4f), 0);
-//
-//        for (int i = 0; i < 4; i++)
-//            m_vao.setLayout(m_instancedMatBuffer, 4, false, sizeof(Mat4), (void*)(i * sizeof(Vec4f)));
-//
-//        glVertexAttribDivisor(3, 1);
-//        glVertexAttribDivisor(4, 1);
-//        glVertexAttribDivisor(5, 1);
-//        glVertexAttribDivisor(6, 1);
-//        glVertexAttribDivisor(7, 1);
-
-        constexpr int NUM_MAT4 = 2;
-
-        m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-        m_instancedOffsetsBuffer = VertexBuffer::createZeroed(sizeof(Vec4f), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-
-        m_vao.setLayout(m_instancedOffsetsBuffer, 4, false, sizeof(Vec4f), 0);
-
-        for (int i = 0; i < 4 * NUM_MAT4; i++)
-            m_vao.setLayout(m_instancedMatBuffer, 4, false, sizeof(Mat4) * NUM_MAT4, (void*)(i * sizeof(Vec4f)));
-
-        for (int i = 3; i <= 11; i++)
-            glVertexAttribDivisor(i, 1);
+        setVertexLayout(m_vertBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
         unbindVAO();
     }
 
     {
-        m_primitiveVAO = VertexArray::create();
-        m_primitiveVAO.bind();
+        m_drawVAO = VertexArray::create();
+        m_drawVAO.bind();
 
-        m_primitiveBuffer = VertexBuffer::createZeroed(sizeof(Vertex2D), 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-
-        m_primitiveVAO.setLayout(m_primitiveBuffer, 3, false, sizeof(Vertex2D), 0);
-        m_primitiveVAO.setLayout(m_primitiveBuffer, 2, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, texCoord));
-        m_primitiveVAO.setLayout(m_primitiveBuffer, 4, false, sizeof(Vertex2D), (void*)GET_MEM_OFFSET(Vertex2D, color));
+        m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
 
         unbindVAO();
     }
@@ -136,65 +99,37 @@ pure::Renderer::~Renderer()
     m_vao.free();
     m_vertBuffer.free();
     m_instancedMatBuffer.free();
-    m_instancedShader.free();
-    m_colorShader.free();
-    m_spriteShader.free();
-    m_primShader.free();
-	m_primTexShader.free();
 
-    m_primitiveVAO.free();
-    m_primitiveBuffer.free();
+    m_instancedShader.free();
+    m_shader.free();
+    m_defaultTexture.free();
+
+    m_drawVAO.free();
+    m_drawBuff.free();
 }
 
 const Rectf & pure::Renderer::viewport() const { return m_viewport; }
 
-void pure::Renderer::drawRect(const Rectf& r, const Vec4<float>& color, float rotation) const
-{
-    drawRect(r, color, m_colorShader, rotation);
-}
-
-void Renderer::drawRect(const Rectf &r, const Vec4<float> &color, Shader shader, float rotation) const
-{
-    m_vao.bind();
-    shader.bind();
-    Mat4 model = translate(makeMat4(), Vec3f(r.x, r.y, 20.f));
-    model = translate(model, Vec3f(r.w * .5f, r.h * .5f, 0.f));
-    model = rotate(model, radians(rotation), Vec3f(0.f, 0.f, 1.f));
-    model = translate(model, Vec3f(r.w * -.5f, r.h * -.5f, 0.f));
-    model = scale(model, Vec3f(r.w, r.h, 1.f));
-
-
-    shader.setUniform("u_color", color);
-
-    shader.setUniform("u_modelMatrix", model);
-    shader.setUniform("u_matrixMVP", m_projection * cam.view() * model);
-    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
-}
 
 void pure::Renderer::drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation, const Rectui* texRect) const
 {
-    drawTexture(tex, pos, size, m_spriteShader, rotation, texRect);
+    drawTexture(tex, pos, size, m_shader, rotation, texRect);
 }
 
 void Renderer::drawTexture(const Texture &tex, Vec3f pos, Vec2f size, Shader shader, float rotation, const Rectui* texRect) const
 {
-    Mat4 model = translate(makeMat4(), pos);
-    model = translate(model, Vec3f(size.x * .5f, size.y * .5f, 0.f));
-    model = rotate(model, radians(rotation), Vec3f(0.f, 0.f, 1.f));
-    model = translate(model, Vec3f(size.x * -.5f, size.y * -.5f, 0.f));
-    model = scale(model, Vec3f(size.x, size.y, 1.f));
+    Transform t = Transform::create();
+    t.setPosition(pos);
+    t.setSize(size);
+    t.setRotation(rotation);
 
-    drawTexture(tex, model, shader, texRect);
+    drawTexture(tex, t.modelMatrix(), shader, texRect);
 }
 
-void pure::Renderer::drawSprite(Sprite & sprite) const
-{
-    drawSprite(sprite, m_spriteShader);
-}
 
 void Renderer::drawTexture(const Texture &tex, const Mat4 &transform, const Rectui *texRect) const
 {
-    drawTexture(tex, transform, m_spriteShader, texRect);
+    drawTexture(tex, transform, m_shader, texRect);
 }
 
 void Renderer::drawTexture(const Texture &tex, const Mat4 &transform, Shader shader, const Rectui *texRect) const
@@ -216,56 +151,7 @@ void Renderer::drawTexture(const Texture &tex, const Mat4 &transform, Shader sha
             float(textureRect.x), float(textureRect.y), float(textureRect.w), float(textureRect.h)
     ));
 
-    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
-}
-
-
-void Renderer::drawSprite(Sprite &sprite, Shader shader) const
-{
-    drawTexture(*sprite.texture(), sprite.modelMatrix(), shader, &sprite.textureRect);
-}
-
-// TODO: Test to make sure this is actually faster lol
-void pure::Renderer::drawSpritesInstanced(Sprite * sprites, size_t count)
-{
-    drawSpritesInstanced(sprites,count, m_instancedShader);
-}
-
-void Renderer::drawSpritesInstanced(Sprite *sprites, size_t count, Shader shader)
-{
-
-    m_vao.bind();
-    shader.bind();
-    sprites[0].texture()->bind();
-
-    std::vector<Mat4> transforms;
-    transforms.reserve(count);
-    std::vector<Vec4f> texOffsets;
-    texOffsets.reserve(count);
-
-    for (size_t i = 0; i < count; i++)
-    {
-        Sprite& sprite = sprites[i];
-        transforms.push_back(m_projection *  cam.view() * sprite.modelMatrix());
-        transforms.push_back(sprite.modelMatrix());
-
-        {
-            const Rectui& texRect = sprite.textureRect;
-            texOffsets.emplace_back(float(texRect.x), float(texRect.y), float(texRect.w), float(texRect.h));
-        }
-    }
-
-    if (transforms.size() >= m_instancedMatBuffer.capacity)
-        m_instancedMatBuffer.alloc(&transforms[0], transforms.size(), DrawUsage::DYNAMIC_DRAW);
-    else
-        m_instancedMatBuffer.writeBuffer(&transforms[0], transforms.size(), 0);
-
-    if (texOffsets.size() >= m_instancedOffsetsBuffer.capacity)
-        m_instancedOffsetsBuffer.alloc(&texOffsets[0], texOffsets.size(), DrawUsage::DYNAMIC_DRAW);
-    else
-        m_instancedOffsetsBuffer.writeBuffer(&texOffsets[0], texOffsets.size(), 0);
-
-    glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertBuffer.count, count);
+    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.vertCount);
 }
 
 void pure::Renderer::setViewport(const Rectf& vp)
@@ -286,164 +172,55 @@ void pure::Renderer::zoom(float offset)
 
 }
 
-void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount)
-{
-    drawPrimitive(primtype, verts, vertCount, m_primShader);
-}
-
-void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, Shader shader)
-{
-    m_primitiveVAO.bind();
-    shader.bind();
-
-    if (vertCount >= m_primitiveBuffer.capacity)
-        m_primitiveBuffer.alloc(verts, vertCount, DrawUsage::DYNAMIC_DRAW);
-    else
-        m_primitiveBuffer.writeBuffer(verts, vertCount, 0);
-
-    m_primShader.setUniform("u_matrixMVP", m_projection * cam.view());
-    m_primShader.setUniform("u_modelMatrix", makeMat4());
-
-    drawArrays(primtype, 0, m_primitiveBuffer.count);
-}
-
-void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex)
-{
-    drawPrimitive(primtype, verts, vertCount, tex, m_primTexShader);
-}
-
-void Renderer::drawPrimitive(DrawPrimitive primtype, const Vertex2D *verts, size_t vertCount, const Texture &tex,
-                             Shader shader)
-{
-    m_primitiveVAO.bind();
-    shader.bind();
-    tex.bind();
-
-    if (vertCount >= m_primitiveBuffer.capacity)
-        m_primitiveBuffer.alloc(verts, vertCount, DrawUsage::DYNAMIC_DRAW);
-    else
-        m_primitiveBuffer.writeBuffer(verts, vertCount, 0);
-
-	shader.setUniform("u_matrixMVP", m_projection * cam.view());
-	shader.setUniform("u_modelMatrix", makeMat4());
-
-    Rectui textureRect = { 0, 0, uint32_t(tex.size.x), uint32_t(tex.size.y) };;
-
-    shader.setUniform("u_textureOffsets", Vec4f(
-            float(textureRect.x), float(textureRect.y), float(textureRect.w), float(textureRect.h)
-    ));
-
-    drawArrays(primtype, 0, m_primitiveBuffer.count);
-}
-
 void pure::Renderer::drawMesh(DrawPrimitive primtype, const Mesh & mesh, const Mat4 & transform)
 {
-	m_primitiveVAO.bind();
-	mesh.shader.bind();
-	if (mesh.texture) mesh.texture->bind();
+    m_drawVAO.bind();
 
-	if (mesh.numVerts >= m_primitiveBuffer.capacity)
-		m_primitiveBuffer.alloc(mesh.verts, mesh.numVerts, DrawUsage::DYNAMIC_DRAW);
-	else
-		m_primitiveBuffer.writeBuffer(mesh.verts, mesh.numVerts, 0);
-
-	mesh.shader.setUniform("u_matrixMVP", m_projection * cam.view() * transform);
-	mesh.shader.setUniform("u_modelMatrix", transform);
-
-	drawArrays(primtype, 0, m_primitiveBuffer.count);
-}
-
-void pure::Renderer::drawMeshInstanced(DrawPrimitive primtype, const Mesh & mesh, const Mat4 * transforms, size_t numDraws)
-{
-	m_vao.bind();
-	mesh.shader.bind();
-	if (mesh.texture) mesh.texture->bind();
-
-	std::vector<Mat4> transformData;
-	transformData.reserve(numDraws);
-
-	for (size_t i = 0; i < numDraws; i++)
-	{
-		const Mat4& model = transforms[i];
-		transformData.push_back(m_projection *  cam.view() * model);
-		transformData.push_back(model);
-	}
-
-	if (transformData.size() >= m_instancedMatBuffer.capacity)
-		m_instancedMatBuffer.alloc(&transformData[0], transformData.size(), DrawUsage::DYNAMIC_DRAW);
-	else
-		m_instancedMatBuffer.writeBuffer(&transformData[0], transformData.size(), 0);
-
-	glDrawArraysInstanced(static_cast<GLenum>(primtype), 0, m_vertBuffer.count, numDraws);
-}
-
-
-// TODO: I don't like how we handle paramters for instanced drawing, it would cause user to allocate memory and/or separate existing
-// memory to conform to the api. Maybe use some kind of polymorphism instead.
-void Renderer::drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count)
-{
-    drawTextureInstanced(tex, transforms, texRects, count, m_instancedShader);
-}
-
-void Renderer::drawTextureInstanced(const Texture& tex, const Mat4* transforms, const Rectui* texRects, size_t count, Shader shader)
-{
-    m_vao.bind();
+    const Shader& shader = mesh.shader.id_ == 0 ? m_shader : mesh.shader;
     shader.bind();
-    tex.bind();
+
+    if (mesh.texture) mesh.texture->bind();
+    else m_defaultTexture.bind();
+
+    mesh.vbo.bind();
+
+    setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+
+    shader.setUniform("u_matrixMVP", m_projection * cam.view() * transform);
+    shader.setUniform("u_modelMatrix", transform);
+
+    drawArrays(DrawPrimitive::TRIANGLES, 0, uint32_t(mesh.vbo.vertCount));
+    unbindVBO();
+}
+
+void pure::Renderer::drawMeshInstanced(DrawPrimitive primtype, const Mesh & mesh, const Mat4 * transforms, uint32_t numDraws)
+{
+    m_drawVAO.bind();
+    if (mesh.shader.id_ == 0) m_instancedShader.bind();
+    else mesh.shader.bind();
+
+    if (mesh.texture) mesh.texture->bind();
+    else m_defaultTexture.bind();
+
+    setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
     std::vector<Mat4> transformData;
-    transformData.reserve(count);
-    std::vector<Vec4f> texOffsets;
-    texOffsets.reserve(count);
+    transformData.reserve(numDraws);
 
-    for (size_t i = 0; i < count; i++)
+    for (size_t i = 0; i < numDraws; i++)
     {
-        const Mat4& model = transforms[i];
-        transformData.push_back(m_projection *  cam.view() * model);
+        const Mat4 &model = transforms[i];
+        transformData.push_back(m_projection * cam.view() * model);
         transformData.push_back(model);
-
-        {
-            const Rectui& texRect = texRects[i];
-            texOffsets.emplace_back(float(texRect.x), float(texRect.y), float(texRect.w), float(texRect.h));
-        }
     }
 
-    if (transformData.size() >= m_instancedMatBuffer.capacity)
+    setVertexLayout(m_instancedMatBuffer, attribs.instancedMatAttribs, ARRAY_COUNT(attribs.instancedMatAttribs));
+
+    if (transformData.size() * sizeof(Mat4) >= m_instancedMatBuffer.size)
         m_instancedMatBuffer.alloc(&transformData[0], transformData.size(), DrawUsage::DYNAMIC_DRAW);
     else
         m_instancedMatBuffer.writeBuffer(&transformData[0], transformData.size(), 0);
 
-    if (texOffsets.size() >= m_instancedOffsetsBuffer.capacity)
-        m_instancedOffsetsBuffer.alloc(&texOffsets[0], texOffsets.size(), DrawUsage::DYNAMIC_DRAW);
-    else
-        m_instancedOffsetsBuffer.writeBuffer(&texOffsets[0], texOffsets.size(), 0);
-
-    glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertBuffer.count, count);
+    glDrawArraysInstanced(static_cast<GLenum>(primtype), 0, uint32_t(mesh.vbo.vertCount), numDraws);
+    unbindVBO();
 }
-
-//void Renderer::draw(Drawable &drawable)
-//{
-//
-//    RenderCtx ctx = {};
-//    drawable.draw(ctx);
-//
-//    m_vao.bind();
-//    ctx.shader.bind();
-//
-//    ctx.shader.setUniform("u_modelMatrix", ctx.transform.modelMatrix());
-//    ctx.shader.setUniform("u_matrixMVP", m_projection * cam.view() *  ctx.transform.modelMatrix());
-//
-//    if (ctx.texture)
-//    {
-//        ctx.texture->bind();
-//        if (ctx.texRect.x == 0 && ctx.texRect.y == 0 && ctx.texRect.w == 0 && ctx.texRect.h == 0)
-//            ctx.texRect = { 0, 0, uint32_t(ctx.texture->size.x), uint32_t(ctx.texture->size.y) };
-//    }
-//
-//    ctx.shader.setUniform("u_textureOffsets", Vec4f(
-//            float(ctx.texRect.x), float(ctx.texRect.y), float(ctx.texRect.w), float(ctx.texRect.h)
-//    ));
-//
-//
-//    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.count);
-//}

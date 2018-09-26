@@ -3,6 +3,7 @@
 
 #include <cinttypes>
 #include "Graphics/Shader.h"
+#include "Graphics/Buffers.h"
 
 namespace pure
 {
@@ -11,10 +12,12 @@ namespace pure
 
 	struct Mesh
 	{
-		const Vertex2D* verts;
-		size_t numVerts;
+		VertexBuffer vbo;
 		const Texture* texture;
 		Shader shader;
+
+		static Mesh create(const Vertex2D* verts, size_t vertCount, DrawUsage usage = DrawUsage::STATIC_DRAW);
+		static Mesh quad(DrawUsage usage = DrawUsage::STATIC_DRAW);
 	};
 }
 

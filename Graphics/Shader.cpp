@@ -207,7 +207,7 @@ constexpr const char* FRAG_TEMPLATE_MAIN = "\n"
 // Having this as main way of creating shaders should suffice this engine is only doing 2D
 Shader Shader::createTemplated(const char *effectSrc, bool isInstanced)
 {
-    const char* vert = isInstanced ? shader::instancedSpriteVert : shader::vert;
+    const char* vert = isInstanced ? shader::instancedVert : shader::vert;
 
     std::string frag = FRAG_TEMPLATE_VARS;
     frag += effectSrc;
