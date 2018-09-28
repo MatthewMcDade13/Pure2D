@@ -25,10 +25,12 @@ pure::Mesh pure::Mesh::quad(DrawUsage usage)
 
 }
 
-pure::Mesh pure::Mesh::create(const pure::Vertex2D *verts, size_t vertCount, pure::DrawUsage usage)
+pure::Mesh pure::Mesh::create(const pure::Vertex2D *verts, size_t vertCount,
+        pure::DrawPrimitive primtype, pure::DrawUsage usage)
 {
     Mesh m = {};
 
+    m.primtype = primtype;
     m.vbo = VertexBuffer::create(verts, vertCount, usage);
     return m;
 }
