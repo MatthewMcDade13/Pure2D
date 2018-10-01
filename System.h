@@ -3,6 +3,6 @@
 
 #include "System/Time.h"
 #include "System/NonCopyable.h"
-#include "System/AssetManager.h"
+#include "System/Util.h"
 
 #endif // PURE2D_MSYSTEM_H

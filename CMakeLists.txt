@@ -32,10 +32,9 @@ add_library(Pure2D SHARED
         Graphics/Texture.cpp Graphics/Texture.h
         Graphics/Mesh.h
         Graphics/Vertex.h
-        System/AssetManager.cpp System/AssetManager.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
-        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp)
+        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -90,6 +89,7 @@ install(
         "Graphics/Texture.h" "Graphics/Vertex.h"
         "Graphics/Renderer.h"
         "Graphics/Transform.h"
+        "Graphics/Renderable.h"
         "Graphics/Mesh.h"
         DESTINATION "include/${PROJECT_NAME}/Graphics"
 )
@@ -97,7 +97,6 @@ install(
 # SYSTEM
 install(
         FILES
-        "System/AssetManager.h"
         "System/NonCopyable.h"
         "System/Time.h"
         "System/Util.h"

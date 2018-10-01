@@ -133,7 +133,7 @@ void pure::VertexArray::setLayout(const VertexBuffer & buffer, uint32_t index, i
 	glEnableVertexAttribArray(index);
 }
 
-// TODO/NOTE: Maybe consider taking verts as void* and having extra parameter as type size? Might be a little more flexible
+// TODO/NOTE: Maybe consider taking quadVerts as void* and having extra parameter as type size? Might be a little more flexible
 // and avoid having to maintain all these specializations. OR We could wrap all OpenGL calls in our own funcs and just use those
 // funcs directly in template
 
@@ -167,7 +167,20 @@ VertexBuffer pure::VertexBuffer::create(const T * verts, size_t count, DrawUsage
 	vb.alloc(verts, count, usage, type);
 
 	return vb;
-}\
+}
+
+void *VertexBuffer::map(BufferAccess access)
+{
+	bind();
+    return glMapBuffer(GL_ARRAY_BUFFER, static_cast<GLenum>(access));
+}
+
+void VertexBuffer::unmap()
+{
+	bind();
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
 
 // TODO: float overload is broken and doesn't properly set offsets and count/capacity of buffers
 template VertexBuffer VertexBuffer::create<Vertex>(const Vertex* verts, size_t count, DrawUsage usage, BufferType type);

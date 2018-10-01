@@ -23,16 +23,10 @@ namespace pure
     struct Window;
     struct Sprite;
 	struct Mesh;
+	struct Renderable;
     template <typename T> struct Vec2;
     template <typename T> struct Vec4;
     template <typename T> struct Rect;
-
-    struct Renderable
-    {
-        virtual ~Renderable() = default;
-        virtual void draw(struct Renderer& renderer) = 0;
-    };
-
 
     struct Renderer : private NonCopyable
     {
@@ -45,9 +39,9 @@ namespace pure
 		PURE2D_API void drawMeshInstanced(const Mesh& mesh, const Mat4* transforms, uint32_t numDraws);
 
 		// TODO: Change to drawQuads when we implement Element Buffers... or some ish lol
-        PURE2D_API void drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, Texture *texture,
+        PURE2D_API void drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture,
                                       Shader shader);
-		PURE2D_API void drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, Texture* texture);
+		PURE2D_API void drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture* texture);
 
 		// TODO: Verify these drawTexture funcs actually work still after we refactored Renderer.
         PURE2D_API void drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation = 0, const Rectui* texRect = nullptr) const;

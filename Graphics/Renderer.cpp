@@ -6,6 +6,7 @@
 #include "Math/Convert.h"
 #include "Graphics/Sprite.h"
 #include "Graphics/Texture.h"
+#include "Graphics/Renderable.h"
 #include "Graphics/Mesh.h"
 #include "Window/Window.h"
 #include "Private/Shaders.h"
@@ -216,12 +217,12 @@ void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transform
     unbindVBO();
 }
 
-void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, Texture *texture)
+void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture)
 {
     drawTriangles(start, count, buffer, texture, m_shader);
 }
 
-void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, Texture *texture, Shader shader)
+void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader)
 {
     m_vao.bind();
     shader.bind();

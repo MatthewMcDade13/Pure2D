@@ -1,6 +1,7 @@
 #ifndef PURE2D_SPRITE_H
 #define PURE2D_SPRITE_H
 
+#include "Graphics/Renderer.h"
 #include "Transform.h"
 #include "Math/Rect.h"
 #include "Define.h"
@@ -8,10 +9,12 @@
 namespace pure
 {
 	struct Texture;
+	struct Mesh;
 
 	struct Sprite
 	{
-		Rectui textureRect;
+		Mesh* mesh;
+        Rectui textureRect;
 
 		PURE2D_API Vec3f position() const;
 		PURE2D_API Vec2f size() const;
@@ -30,9 +33,9 @@ namespace pure
         PURE2D_API void rotate(float angle);
 
 	private:
-		Texture* m_texture;
-		Transform m_transform;
 
+		Transform m_transform;
+        Texture* m_texture;
 	};
 }
 

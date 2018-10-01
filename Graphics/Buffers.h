@@ -46,6 +46,13 @@ namespace pure
 		POLYGON = 0x0009
 	};
 
+	enum class BufferAccess
+	{
+		READ_ONLY  = 0x88B8,
+		WRITE_ONLY = 0x88B9,
+		READ_WRITE = 0x88BA
+	};
+
 	struct PURE2D_API VertexAttribute
     {
         uint8_t bufferIndex;
@@ -95,6 +102,9 @@ namespace pure
 
 		template<typename T>
 		void writeBuffer(const T* verts, size_t count, intptr_t bufferOffset);
+
+		void* map(BufferAccess access = BufferAccess::READ_WRITE);
+		void unmap();
 
 		void bind() const;
 		void free();
