@@ -92,7 +92,7 @@ namespace pure
 		size_t size;
 //		size_t capacity;
 
-		static VertexBuffer createZeroed(uint32_t typeSize, uint32_t count, DrawUsage usage, BufferType type);
+		static VertexBuffer createZeroed(size_t typeSize, size_t count, DrawUsage usage, BufferType type);
 
 		template<typename T>
 		static VertexBuffer create(const T* verts, size_t count, DrawUsage usage, BufferType type = BufferType::FLOAT);
@@ -102,6 +102,8 @@ namespace pure
 
 		template<typename T>
 		void writeBuffer(const T* verts, size_t count, intptr_t bufferOffset);
+
+		void copy(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size);
 
 		void* map(BufferAccess access = BufferAccess::READ_WRITE);
 		void unmap();

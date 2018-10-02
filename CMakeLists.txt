@@ -34,7 +34,7 @@ add_library(Pure2D SHARED
         Graphics/Vertex.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
-        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h)
+        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h Graphics/SpriteBatch.cpp Graphics/SpriteBatch.h)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 

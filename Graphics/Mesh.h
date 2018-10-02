@@ -13,6 +13,8 @@ namespace pure
 
 	struct Mesh
 	{
+	    static constexpr int QUAD_VERT_COUNT = 6;
+
 		VertexBuffer vbo;
 		const Texture* texture;
 		Shader shader;

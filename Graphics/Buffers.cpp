@@ -85,7 +85,7 @@ void pure::setVertexLayout(const VertexBuffer &buffer, VertexAttribute *attribs,
     }
 }
 
-VertexBuffer pure::VertexBuffer::createZeroed(uint32_t typeSize, uint32_t count, DrawUsage usage, BufferType type)
+VertexBuffer pure::VertexBuffer::createZeroed(size_t typeSize, size_t count, DrawUsage usage, BufferType type)
 {
 	uint32_t id;
 	glGenBuffers(1, &id);
@@ -148,9 +148,8 @@ void pure::VertexBuffer::alloc(const T* verts, size_t count, DrawUsage usage, Bu
 template<typename T>
 void pure::VertexBuffer::writeBuffer(const T * verts, size_t count, intptr_t bufferOffset)
 {
-    assert(count * sizeof(T) <= size - bufferOffset);
-
 	bind();
+
 	glBufferSubData(GL_ARRAY_BUFFER, bufferOffset, sizeof(T) * count, verts);
 }
 
@@ -179,6 +178,14 @@ void VertexBuffer::unmap()
 {
 	bind();
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+void VertexBuffer::copy(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size)
+{
+    glBindBuffer(GL_COPY_READ_BUFFER, other.id_);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, id_);
+
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, readOffset, writeOffset, size);
 }
 
 
