@@ -17,9 +17,9 @@ namespace pure
 
     struct SpriteBatch : public Renderable, private NonCopyable
     {
-        Texture& texture;
+        const Texture* texture;
 
-        explicit SpriteBatch(Texture& texture, size_t maxNumSprites);
+        explicit SpriteBatch(const Texture& texture, size_t maxNumSprites);
         ~SpriteBatch();
 
         void reset(size_t maxNumSprites);

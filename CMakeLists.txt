@@ -34,7 +34,7 @@ add_library(Pure2D SHARED
         Graphics/Vertex.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
-        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h Graphics/SpriteBatch.cpp Graphics/SpriteBatch.h)
+        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h Graphics/SpriteBatch.cpp Graphics/SpriteBatch.h Graphics/Vertex.cpp Graphics/Quad.cpp Graphics/Quad.h)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -91,6 +91,8 @@ install(
         "Graphics/Transform.h"
         "Graphics/Renderable.h"
         "Graphics/Mesh.h"
+        "Graphics/SpriteBatch.h"
+        "Graphics/Quad.h"
         DESTINATION "include/${PROJECT_NAME}/Graphics"
 )
 

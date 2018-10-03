@@ -180,7 +180,7 @@ void VertexBuffer::unmap()
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
-void VertexBuffer::copy(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size)
+void VertexBuffer::copyData(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size)
 {
     glBindBuffer(GL_COPY_READ_BUFFER, other.id_);
     glBindBuffer(GL_COPY_WRITE_BUFFER, id_);
@@ -190,7 +190,6 @@ void VertexBuffer::copy(VertexBuffer other, intptr_t readOffset, intptr_t writeO
 
 
 // TODO: float overload is broken and doesn't properly set offsets and count/capacity of buffers
-template VertexBuffer VertexBuffer::create<Vertex>(const Vertex* verts, size_t count, DrawUsage usage, BufferType type);
 template VertexBuffer VertexBuffer::create<Vertex2D>(const Vertex2D* verts, size_t count, DrawUsage usage, BufferType type);
 template VertexBuffer VertexBuffer::create<float>(const float* verts, size_t count, DrawUsage usage, BufferType type);
 template VertexBuffer VertexBuffer::create<Vec2f>(const Vec2f* verts, size_t count, DrawUsage usage, BufferType type);
@@ -198,7 +197,6 @@ template VertexBuffer VertexBuffer::create<Vec3f>(const Vec3f* verts, size_t cou
 template VertexBuffer VertexBuffer::create<Vec4f>(const Vec4f* verts, size_t count, DrawUsage usage, BufferType type);
 template VertexBuffer VertexBuffer::create<Mat4>(const Mat4* verts, size_t count, DrawUsage usage, BufferType type);
 
-template void VertexBuffer::alloc<Vertex>(const Vertex* verts, size_t count, DrawUsage usage, BufferType type);
 template void VertexBuffer::alloc<Vertex2D>(const Vertex2D* verts, size_t count, DrawUsage usage, BufferType type);
 template void VertexBuffer::alloc<float>(const float* verts, size_t count, DrawUsage usage, BufferType type);
 template void VertexBuffer::alloc<Vec2f>(const Vec2f* verts, size_t count, DrawUsage usage, BufferType type);
@@ -206,7 +204,6 @@ template void VertexBuffer::alloc<Vec3f>(const Vec3f* verts, size_t count, DrawU
 template void VertexBuffer::alloc<Vec4f>(const Vec4f* verts, size_t count, DrawUsage usage, BufferType type);
 template void VertexBuffer::alloc<Mat4>(const Mat4* verts, size_t count, DrawUsage usage, BufferType type);
 
-template void VertexBuffer::writeBuffer<Vertex>(const Vertex* verts, size_t count, intptr_t bufferOffset);
 template void VertexBuffer::writeBuffer<Vertex2D>(const Vertex2D* verts, size_t count, intptr_t bufferOffset);
 template void VertexBuffer::writeBuffer<float>(const float* verts, size_t count, intptr_t bufferOffset);
 template void VertexBuffer::writeBuffer<Vec2f>(const Vec2f* verts, size_t count, intptr_t bufferOffset);

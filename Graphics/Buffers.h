@@ -11,8 +11,6 @@
 
 namespace pure
 {
-	struct Vertex;
-	struct Vertex2D;
 
 	enum class DrawUsage
 	{
@@ -103,7 +101,7 @@ namespace pure
 		template<typename T>
 		void writeBuffer(const T* verts, size_t count, intptr_t bufferOffset);
 
-		void copy(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size);
+		void copyData(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size);
 
 		void* map(BufferAccess access = BufferAccess::READ_WRITE);
 		void unmap();

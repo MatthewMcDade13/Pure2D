@@ -8,6 +8,8 @@
 
 #include "Define.h"
 #include <type_traits>
+#include <Graphics/Vertex.h>
+
 
 namespace pure
 {
@@ -17,7 +19,7 @@ namespace pure
 
     struct PURE2D_API Mat4
     {
-        // TODO: Might need copy ctor/copy assignment operator?
+        // TODO: Might need copy ctor/copyData assignment operator?
         std::aligned_storage_t<sizeof(float[4][4])> val_;
 
         void raw(float out[16]) const;
@@ -43,6 +45,7 @@ namespace pure
         Mat4& operator--(int);
 
     };
+
 
     PURE2D_API Mat4 makeMat4();
 

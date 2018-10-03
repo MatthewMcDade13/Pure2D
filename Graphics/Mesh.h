@@ -9,11 +9,11 @@ namespace pure
 {
 	struct Vertex2D;
 	struct Texture;
+	struct Mat4;
 	template<typename T> struct Rect;
 
 	struct Mesh
 	{
-	    static constexpr int QUAD_VERT_COUNT = 6;
 
 		VertexBuffer vbo;
 		const Texture* texture;
@@ -25,6 +25,7 @@ namespace pure
 
 		static Mesh quad(DrawUsage usage = DrawUsage::STATIC_DRAW);
 		static Mesh quad(const Rect<uint32_t>& textureRect, Texture& texture, DrawUsage usage = DrawUsage::STATIC_DRAW);
+
 	};
 }
 

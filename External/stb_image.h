@@ -4334,7 +4334,7 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, stbi__uint32 r
    stbi__uint32 i,j,stride = x*out_n*bytes;
    stbi__uint32 img_len, img_width_bytes;
    int k;
-   int img_n = s->img_n; // copy it into a local for later
+   int img_n = s->img_n; // copyData it into a local for later
 
    int output_bytes = out_n*bytes;
    int filter_bytes = img_n*bytes;
@@ -4810,7 +4810,7 @@ static int stbi__parse_png_file(stbi__png *z, int scan, int req_comp)
                if (c.length != (stbi__uint32) s->img_n*2) return stbi__err("bad tRNS len","Corrupt PNG");
                has_trans = 1;
                if (z->depth == 16) {
-                  for (k = 0; k < s->img_n; ++k) tc16[k] = (stbi__uint16)stbi__get16be(s); // copy the values as-is
+                  for (k = 0; k < s->img_n; ++k) tc16[k] = (stbi__uint16)stbi__get16be(s); // copyData the values as-is
                } else {
                   for (k = 0; k < s->img_n; ++k) tc[k] = (stbi_uc)(stbi__get16be(s) & 255) * stbi__depth_scale_table[z->depth]; // non 8-bit images will be larger
                }
@@ -5590,7 +5590,7 @@ static void *stbi__tga_load(stbi__context *s, int *x, int *y, int *comp, int req
             read_next_pixel = 0;
          } // end of reading a pixel
 
-         // copy data
+         // copyData data
          for (j = 0; j < tga_comp; ++j)
            tga_data[i*tga_comp+j] = raw_data[j];
 
@@ -5784,8 +5784,8 @@ static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, int req
       // RLE as used by .PSD and .TIFF
       // Loop until you get the number of unpacked bytes you are expecting:
       //     Read the next source byte into n.
-      //     If n is between 0 and 127 inclusive, copy the next n+1 bytes literally.
-      //     Else if n is between -127 and -1 inclusive, copy the next byte -n+1 times.
+      //     If n is between 0 and 127 inclusive, copyData the next n+1 bytes literally.
+      //     Else if n is between -127 and -1 inclusive, copyData the next byte -n+1 times.
       //     Else if n is 128, noop.
       // Endloop
 
@@ -7443,7 +7443,7 @@ SOFTWARE.
 ------------------------------------------------------------------------------
 ALTERNATIVE B - Public Domain (www.unlicense.org)
 This is free and unencumbered software released into the public domain.
-Anyone is free to copy, modify, publish, use, compile, sell, or distribute this
+Anyone is free to copyData, modify, publish, use, compile, sell, or distribute this
 software, either in source code form or as a compiled binary, for any purpose,
 commercial or non-commercial, and by any means.
 In jurisdictions that recognize copyright laws, the author or authors of this

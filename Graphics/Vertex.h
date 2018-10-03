@@ -2,51 +2,36 @@
 #define PURE2D_VERTEX_H
 
 #include <cinttypes>
+#include <cstddef>
 #include "Define.h"
 #include "Math/Vec2.h"
 #include "Math/Vec3.h"
 #include "Math/Vec4.h"
 
-
-// TODO: Spread this out to renderer.
-
 namespace pure
 {
+    struct Mat4;
+    template<typename T> struct Rect;
 
-	struct Vertex
-	{
-		static constexpr uint32_t COUNT = 8;
+    struct Vertex2D
+    {
+        static constexpr uint32_t COUNT = 9;
 
-		union
-		{
-			struct 
-			{
-				struct { float x, y, z; } position;
-				struct { float x, y, z; } normal;
-				struct { float x, y; } textureCoord;
-			};
+        union
+        {
+            struct
+            {
+                struct { float x, y, z; } position;
+                struct { float u, v; } texCoord;
+                struct { float r, g, b, a; } color;
+            };
 
-			float buffer[COUNT];
-		};
-	};
+            float buffer[COUNT];
+        };
+    };
 
-	struct Vertex2D
-	{
-		static constexpr uint32_t COUNT = 9;
-
-		union
-		{
-			struct
-			{
-				struct { float x, y, z; } position;
-				struct { float u, v; } texCoord;
-				struct { float r, g, b, a; } color;
-			};
-
-			float buffer[COUNT];
-		};
-	};
-
+    void translateVerts(Vertex2D* verts, size_t vertCount, const Mat4& modelMat);
+    void calcTexCoords(Vertex2D* verts, size_t vertCount, const Rect<uint32_t>& textureRect, Vec2i textureSize);
 }
 
 #endif // PURE2D_VERTEX_H
