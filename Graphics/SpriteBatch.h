@@ -5,7 +5,7 @@
 #ifndef PURE2D_SPRITEBATCH_H
 #define PURE2D_SPRITEBATCH_H
 
-#include "Graphics/Buffers.h"
+#include <cstddef>
 #include "Graphics/Renderable.h"
 #include "System/NonCopyable.h"
 
@@ -13,24 +13,25 @@ namespace pure
 {
     struct Renderer;
     struct Texture;
-    struct Mesh;
+    struct Quad;
+    struct Mat4;
 
-    struct SpriteBatch : public Renderable, private NonCopyable
+    // TODO: To make this Renderable or not to make this Renderable...
+    struct SpriteBatch : private NonCopyable
     {
         const Texture* texture;
 
-        explicit SpriteBatch(const Texture& texture, size_t maxNumSprites);
+        explicit SpriteBatch(Renderer& renderer, const Texture& texture, size_t maxNumSprites);
         ~SpriteBatch();
 
         void reset(size_t maxNumSprites);
-        void submit(Mesh& mesh);
+        void submit(const Quad& quad, const Mat4& transform);
         void flush();
 
-        void draw(Renderer& renderer) final;
+        void draw() const;
 
     private:
-        VertexBuffer m_vbo;
-        intptr_t m_writeOffset;
+        struct SpriteBatch_Impl* m_impl;
     };
 }
 

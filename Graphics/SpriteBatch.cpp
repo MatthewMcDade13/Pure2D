@@ -3,51 +3,72 @@
 //
 
 #include <cassert>
+#include <vector>
+
 #include "SpriteBatch.h"
 #include "Graphics/Texture.h"
-#include "Graphics/Mesh.h"
+#include "Graphics/Quad.h"
+#include "Graphics/Buffers.h"
 #include "Graphics/Renderer.h"
 #include "Quad.h"
 
+namespace pure
+{
+    struct SpriteBatch_Impl
+    {
+        std::vector<Quad> quads;
+        VertexBuffer vbo = {};
+        Renderer* renderer;
+        intptr_t writeOffset = 0;
+    };
+}
+
+
 using namespace pure;
 
-pure::SpriteBatch::SpriteBatch(const pure::Texture &texture, size_t maxNumSprites):
-    texture(&texture), m_writeOffset(0),  m_vbo({ })
+pure::SpriteBatch::SpriteBatch(Renderer& renderer, const pure::Texture &texture, size_t maxNumSprites):
+    texture(&texture), m_impl(new SpriteBatch_Impl())
 {
+    m_impl->quads.reserve(maxNumSprites);
+    m_impl-> renderer = &renderer;
     reset(maxNumSprites);
 }
 
 pure::SpriteBatch::~SpriteBatch()
 {
-    m_vbo.free();
+    m_impl->vbo.free();
+    delete m_impl;
+    m_impl = nullptr;
 }
 
-void SpriteBatch::submit(pure::Mesh &mesh)
+void SpriteBatch::submit(const Quad& quad, const Mat4& transform)
 {
-
-    const size_t dataSize = mesh.vbo.vertCount * sizeof(Vertex2D);
-
-    assert(dataSize + m_writeOffset <= m_vbo.size);
-
-    m_vbo.copyData(mesh.vbo, 0, m_writeOffset, dataSize);
-    m_writeOffset += dataSize;
-    m_vbo.vertCount += Quad::VERT_COUNT;
+    Quad q = quad;
+    translateVerts(q.verts, Quad::VERT_COUNT, m_impl->renderer->MVMatrix() * transform);
+    m_impl->quads.push_back(q);
 }
 
 void pure::SpriteBatch::flush()
 {
-    m_writeOffset = 0;
-    m_vbo.vertCount = 0;
-}
-
-void pure::SpriteBatch::draw(pure::Renderer &renderer)
-{
-    renderer.drawTriangles(0, m_vbo.vertCount, m_vbo, texture);
+    m_impl->quads.clear();
+    m_impl->writeOffset = 0;
+    m_impl->vbo.vertCount = 0;
 }
 
 void pure::SpriteBatch::reset(size_t maxNumSprites)
 {
-    if (m_vbo.id_ != 0) m_vbo.free();
-    m_vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), maxNumSprites * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+    if (m_impl->vbo.id_ != 0) m_impl->vbo.free();
+    m_impl->vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), maxNumSprites * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+}
+
+void SpriteBatch::draw() const
+{
+    auto* verts = reinterpret_cast<Vertex2D*>(&m_impl->quads[0]);
+    const size_t numVerts = m_impl->quads.size() * Quad::VERT_COUNT;
+
+    m_impl->vbo.writeBuffer(verts, numVerts, 0);
+    m_impl->vbo.vertCount = numVerts;
+    m_impl->renderer->drawBuffer(0, m_impl->vbo.vertCount, m_impl->vbo, texture);
+
 }
 

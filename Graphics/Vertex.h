@@ -31,6 +31,8 @@ namespace pure
     };
 
     void translateVerts(Vertex2D* verts, size_t vertCount, const Mat4& modelMat);
+    // TODO: Probably don't need vertCount, might be safe to assume this is Quad::VERT_COUNT (since we are uing a textureRect
+    // to find coordinates)
     void calcTexCoords(Vertex2D* verts, size_t vertCount, const Rect<uint32_t>& textureRect, Vec2i textureSize);
 }
 

@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include "glad.h"
+#include "Quad.h"
 #include <iostream>
 
 using namespace pure;
@@ -28,6 +29,8 @@ static struct
     VertexAttribute vertex2dAttribs[3] = {};
     VertexAttribute instancedMatAttribs [8] = {};
 } attribs = {};
+
+static const Quad defaultQuad = Quad::create();
 
 pure::Renderer::Renderer(const Window& window) : cam({})
 {
@@ -64,22 +67,14 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 
     {
 
-        constexpr Vertex2D verts[] = {
-                { 0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
-                { 1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
-                { 0.0f, 0.0f, 0.0f,   0.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
-
-                { 0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
-                { 1.0f, 1.0f, 0.0f,   1.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },
-                { 1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },
-        };
+        Quad q = Quad::create();
 
         m_vao = VertexArray::create();
         m_vao.bind();
 
-        m_vertBuffer = VertexBuffer::create(verts, ARRAY_COUNT(verts), DrawUsage::STATIC_DRAW);
+        m_quadBuffer = VertexBuffer::create(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
 
-        setVertexLayout(m_vertBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+        setVertexLayout(m_quadBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
         unbindVAO();
     }
@@ -98,7 +93,7 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 pure::Renderer::~Renderer()
 {
     m_vao.free();
-    m_vertBuffer.free();
+    m_quadBuffer.free();
     m_instancedMatBuffer.free();
 
     m_instancedShader.free();
@@ -106,45 +101,44 @@ pure::Renderer::~Renderer()
     m_defaultTexture.free();
 
     m_drawVAO.free();
-    m_drawBuff.free();
 }
 
 const Rectf & pure::Renderer::viewport() const { return m_viewport; }
 const Mat4 &Renderer::projection() const { return m_projection; }
 
+const Mat4 Renderer::MVMatrix() const { return m_projection * cam.view(); }
 
-void pure::Renderer::drawTexture(const Texture& tex, Vec3f pos, Vec2f size, float rotation, const Rectui* texRect) const
+void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Texture *texture)
 {
-    drawTexture(tex, pos, size, m_shader, rotation, texRect);
-}
-
-void Renderer::drawTexture(const Texture &tex, Vec3f pos, Vec2f size, Shader shader, float rotation, const Rectui* texRect) const
-{
-    Transform t = Transform::create();
-    t.setPosition(pos);
-    t.setSize(size);
-    t.setRotation(rotation);
-
-    drawTexture(tex, t.modelMatrix(), shader);
+    drawQuad(quad, transform, m_shader, texture);
 }
 
 
-void Renderer::drawTexture(const Texture &tex, const Mat4 &transform) const
-{
-    drawTexture(tex, transform, m_shader);
-}
-
-void Renderer::drawTexture(const Texture &tex, const Mat4 &transform, Shader shader) const
+void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, const Texture *texture)
 {
     m_vao.bind();
     shader.bind();
-    tex.bind();
+    if (texture) texture->bind();
+    else m_defaultTexture.bind();
 
-    shader.setUniform("u_modelMatrix", transform);
-    shader.setUniform("u_matrixMVP", m_projection * cam.view() *  transform);
+    if (transform)
+    {
+        shader.setUniform("u_modelMatrix", *transform);
+        shader.setUniform("u_matrixMVP", m_projection * cam.view() * (*transform));
+    }
+    else
+    {
+        const Mat4 mat = makeMat4();
+        shader.setUniform("u_modelMatrix", mat);
+        shader.setUniform("u_matrixMVP", mat);
+    }
 
-    drawArrays(DrawPrimitive::TRIANGLES, 0, m_vertBuffer.vertCount);
+    m_quadBuffer.writeBuffer(quad.verts, Quad::VERT_COUNT, 0);
+
+
+    drawArrays(DrawPrimitive::TRIANGLE_STRIP, 0, m_quadBuffer.vertCount);
 }
+
 
 void pure::Renderer::setViewport(const Rectf& vp)
 {
@@ -217,16 +211,17 @@ void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transform
     unbindVBO();
 }
 
-void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture)
+void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, DrawPrimitive primtype)
 {
-    drawTriangles(start, count, buffer, texture, m_shader);
+    drawBuffer(start, count, buffer, texture, m_shader, primtype);
 }
 
-void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader)
+void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader, DrawPrimitive primtype)
 {
     m_vao.bind();
     shader.bind();
     if (texture) texture->bind();
+    else m_defaultTexture.bind();
 
     // TODO: Maybe we can use a different simple shader to avoid sending useless data to gpu?
     shader.setUniform("u_modelMatrix", makeMat4());
@@ -235,11 +230,12 @@ void Renderer::drawTriangles(uint32_t start, uint32_t count, VertexBuffer buffer
     setVertexLayout(buffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
 
-    drawArrays(DrawPrimitive::TRIANGLES, start, count);
+    drawArrays(primtype, start, count);
 }
 
 void Renderer::draw(Renderable &renderable)
 {
     renderable.draw(*this);
 }
+
 

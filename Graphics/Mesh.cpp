@@ -17,7 +17,7 @@ pure::Mesh pure::Mesh::quad(DrawUsage usage)
 {
     Mesh m = {};
 
-    m.primtype = DrawPrimitive::TRIANGLES;
+    m.primtype = DrawPrimitive::TRIANGLE_STRIP;
     Quad q = Quad::create();
     m.vbo = VertexBuffer::create(q.verts, Quad::VERT_COUNT, usage);
     return m;
@@ -40,21 +40,7 @@ pure::Mesh pure::Mesh::quad(const pure::Rectui &textureRect, Texture& texture, p
 
     calcTexCoords(q.verts, Quad::VERT_COUNT, textureRect, texture.size);
 
-//    const Vec2f texRectSize = { float(textureRect.w), float(textureRect.h) };
-//    const Vec2f uvOffset = { float(textureRect.x), float(textureRect.y) };
-//
-//    for (size_t i = 0; i < Mesh::QUAD_VERT_COUNT; i++)
-//    {
-//        auto& v = verts[i];
-//        v = quadVerts[i];
-//
-//        const Vec2f texDim = texRectSize * Vec2f(v.texCoord.u, 1.f - v.texCoord.v);
-//        const Vec2f texCoord = texDim + uvOffset;
-//        const Vec2f normalizedCoords = { texCoord.x / texture.size.x, 1.f - (texCoord.y / texture.size.y) };
-//        v.texCoord = { normalizedCoords.x, normalizedCoords.y };
-//    }
-
-    Mesh m = Mesh::create(q.verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLES, usage);
+    Mesh m = Mesh::create(q.verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLE_STRIP, usage);
 
     m.texture = &texture;
     return m;

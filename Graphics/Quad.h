@@ -11,7 +11,7 @@ namespace pure
 {
     struct Quad
     {
-        static constexpr int VERT_COUNT = 6;
+        static constexpr int VERT_COUNT = 4;
         static Quad create(Vertex2D* verts = nullptr);
         Vertex2D verts[VERT_COUNT];
     };
