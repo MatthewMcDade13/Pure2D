@@ -13,6 +13,7 @@ namespace pure
 {
     struct Renderer;
     struct Texture;
+    struct Shader;
     struct Quad;
     struct Mat4;
 
@@ -24,11 +25,15 @@ namespace pure
         SpriteBatch(const Texture& texture, size_t maxNumSprites);
         ~SpriteBatch();
 
+        const Shader& shader() const;
+        void setFragShader(const char* shaderSrc);
+
         void reset(size_t maxNumSprites);
         void submit(const Quad& quad, const Mat4& transform);
         void flush();
 
         void draw(Renderer& renderer) final;
+
 
     private:
         struct SpriteBatch_Impl* m_impl;

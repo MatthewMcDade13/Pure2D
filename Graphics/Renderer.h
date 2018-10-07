@@ -63,6 +63,7 @@ namespace pure
 
         Shader m_shader;
         Shader m_instancedShader;
+
         Texture m_defaultTexture;
         Mat4 m_projection;
         Rectf m_viewport;

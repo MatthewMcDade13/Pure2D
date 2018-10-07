@@ -15,14 +15,21 @@ namespace pure
 	{
 		uint32_t id_;
 
+		int modelMatLoc_;
+		int mvpMatLoc_;
+
 		static Shader create(const char* vertShaderPath, const char* fragShaderPath);
 		static Shader createSrc(const char* vertSrc, const char* fragSrc);
 		static void createFragShader(char* outBuffer, const char *effectSrc);
 		static void createVertShader(char* outBuffer, const char* positionSrc, bool isInstanced);
 		static Shader createDefault(bool isInstanced = false);
+		static void createDefaultFragShader(char* outBuffer);
+		static void createDefaultVertShader(char* outBuffer, bool isInstanced);
 
 		static size_t getFragShaderSize(size_t inBufferCount);
 		static size_t getVertShaderSize(size_t inBufferCount);
+		static size_t getDefaultFragShaderSize();
+		static size_t getDefaultVertShaderSize(bool isInstanced);
 
 		void bind() const;
 

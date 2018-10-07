@@ -19,83 +19,7 @@ static uint32_t compileShader(const char* src, GLenum shaderType);
 static uint32_t createShaderProg(uint32_t vert, uint32_t frag);
 static bool checkShaderError(uint32_t shader, GLenum shaderQuery);
 static bool checkProgramError(uint32_t program, GLenum query);
-
-uint32_t createShaderFromFile(const char * filePath, GLenum shaderType)
-{
-	std::string shaderStr = readFile(filePath);
-	const char* shaderCStr = shaderStr.c_str();
-	return compileShader(shaderCStr, shaderType);
-}
-
-uint32_t compileShader(const char * src, GLenum shaderType)
-{
-
-	uint32_t shader = glCreateShader(shaderType);
-	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
-
-	if (checkShaderError(shader, GL_COMPILE_STATUS))
-	{
-		std::cerr << "SHADER ERROR: \n" << src << std::endl;
-		return 0;
-	}
-
-	return shader;
-}
-
-uint32_t createShaderProg(uint32_t vert, uint32_t frag)
-{
-	uint32_t shaderId = glCreateProgram();
-
-	glAttachShader(shaderId, vert);
-	glAttachShader(shaderId, frag);
-	glLinkProgram(shaderId);
-
-	if (checkProgramError(shaderId, GL_LINK_STATUS))
-	{
-		std::cerr << "SHADER LINK ERROR \n";
-		glDeleteProgram(shaderId);
-		shaderId = 0;
-	}
-
-	glDeleteShader(vert);
-	glDeleteShader(frag);
-
-	return shaderId;
-}
-
-
-bool checkShaderError(uint32_t shader, GLenum shaderQuery)
-{
-	char infoLog[512];
-	int success;
-	glGetShaderiv(shader, shaderQuery, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		std::cerr << infoLog << std::endl;
-		return true;
-	}
-
-	return false;
-}
-
-bool checkProgramError(uint32_t program, GLenum query)
-{
-	char infoLog[512];
-	int success;
-	glGetProgramiv(program, query, &success);
-
-	if (!success)
-	{
-		glGetProgramInfoLog(program, 512, nullptr, infoLog);
-		std::cerr << infoLog << std::endl;
-		return true;
-	}
-
-	return false;
-}
+static void fillCommonUniforms(Shader& s);
 
 Shader pure::Shader::create(const char * vertShaderPath, const char * fragShaderPath)
 {
@@ -104,7 +28,10 @@ Shader pure::Shader::create(const char * vertShaderPath, const char * fragShader
 
 	if (!vShader || !fShader) return { 0 };
 
-	return { createShaderProg(vShader, fShader) };
+	Shader s = { createShaderProg(vShader, fShader) };
+	fillCommonUniforms(s);
+
+	return s;
 }
 
 Shader pure::Shader::createSrc(const char * vertSrc, const char * fragSrc)
@@ -114,7 +41,10 @@ Shader pure::Shader::createSrc(const char * vertSrc, const char * fragSrc)
 
 	if (!vShader || !fShader) return { 0 };
 
-	return { createShaderProg(vShader, fShader) };
+	Shader s = { createShaderProg(vShader, fShader) };
+	fillCommonUniforms(s);
+
+	return s;
 }
 
 void pure::Shader::bind() const
@@ -244,12 +174,14 @@ static constexpr const char* VERT_TEMPLATE_MAIN = "\n"
 		"}";
 
 
-
-
 static const size_t fragTemplateLen = strlen(FRAG_TEMPLATE_VARS) + strlen(FRAG_TEMPLATE_MAIN);
 
 // assume longer template just to keep things safe and concise
 static const size_t vertTemplateLen = strlen(VERT_TEMPLATE_DECLS_INSTANCED) + strlen(VERT_TEMPLATE_MAIN);
+
+static const size_t defaultFragLen = strlen(shader::frag);
+static const size_t defaultInstancedVertLen = strlen(shader::instancedVert);
+static const size_t defaultVertLen = strlen(shader::vert);
 
 // TODO: Consider having this be the main way we create shaders?
 // Having this as main way of creating shaders should suffice this engine is only doing 2D
@@ -287,4 +219,101 @@ size_t Shader::getVertShaderSize(size_t inBufferCount)
 	return vertTemplateLen + inBufferCount;
 }
 
+size_t Shader::getDefaultFragShaderSize() { return defaultFragLen; }
+size_t Shader::getDefaultVertShaderSize(bool isInstanced) { return isInstanced ? defaultInstancedVertLen : defaultVertLen; }
 
+void Shader::createDefaultFragShader(char *outBuffer)
+{
+	strcpy(outBuffer, shader::frag);
+}
+
+void Shader::createDefaultVertShader(char *outBuffer, bool isInstanced)
+{
+	strcpy(outBuffer, isInstanced ? shader::instancedVert : shader::vert);
+}
+
+
+
+// HELPER FUNCS
+uint32_t createShaderFromFile(const char * filePath, GLenum shaderType)
+{
+	std::string shaderStr = readFile(filePath);
+	const char* shaderCStr = shaderStr.c_str();
+	return compileShader(shaderCStr, shaderType);
+}
+
+uint32_t compileShader(const char * src, GLenum shaderType)
+{
+
+	uint32_t shader = glCreateShader(shaderType);
+	glShaderSource(shader, 1, &src, nullptr);
+	glCompileShader(shader);
+
+	if (checkShaderError(shader, GL_COMPILE_STATUS))
+	{
+		std::cerr << "SHADER ERROR: \n" << src << std::endl;
+		return 0;
+	}
+
+	return shader;
+}
+
+uint32_t createShaderProg(uint32_t vert, uint32_t frag)
+{
+	uint32_t shaderId = glCreateProgram();
+
+	glAttachShader(shaderId, vert);
+	glAttachShader(shaderId, frag);
+	glLinkProgram(shaderId);
+
+	if (checkProgramError(shaderId, GL_LINK_STATUS))
+	{
+		std::cerr << "SHADER LINK ERROR \n";
+		glDeleteProgram(shaderId);
+		shaderId = 0;
+	}
+
+	glDeleteShader(vert);
+	glDeleteShader(frag);
+
+	return shaderId;
+}
+
+
+bool checkShaderError(uint32_t shader, GLenum shaderQuery)
+{
+	char infoLog[512];
+	int success;
+	glGetShaderiv(shader, shaderQuery, &success);
+
+	if (!success)
+	{
+		glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+		std::cerr << infoLog << std::endl;
+		return true;
+	}
+
+	return false;
+}
+
+bool checkProgramError(uint32_t program, GLenum query)
+{
+	char infoLog[512];
+	int success;
+	glGetProgramiv(program, query, &success);
+
+	if (!success)
+	{
+		glGetProgramInfoLog(program, 512, nullptr, infoLog);
+		std::cerr << infoLog << std::endl;
+		return true;
+	}
+
+	return false;
+}
+
+void fillCommonUniforms(Shader& s)
+{
+	s.mvpMatLoc_ = s.getLocation("u_matrixMVP");
+	s.modelMatLoc_ = s.getLocation("u_modelMatrix");
+}

@@ -4,7 +4,6 @@
 #include "Renderer.h"
 #include "Math/MatrixTransform.h"
 #include "Math/Convert.h"
-#include "Graphics/Sprite.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Renderable.h"
 #include "Graphics/Mesh.h"
@@ -123,14 +122,14 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, 
 
     if (transform)
     {
-        shader.setUniform("u_modelMatrix", *transform);
-        shader.setUniform("u_matrixMVP", m_projection * cam.view() * (*transform));
+        shader.setUniform(shader.modelMatLoc_, *transform);
+        shader.setUniform(shader.mvpMatLoc_, m_projection * cam.view() * (*transform));
     }
     else
     {
         const Mat4 mat = makeMat4();
-        shader.setUniform("u_modelMatrix", mat);
-        shader.setUniform("u_matrixMVP", mat);
+        shader.setUniform(shader.modelMatLoc_, mat);
+        shader.setUniform(shader.mvpMatLoc_, mat);
     }
 
     m_quadBuffer.writeBuffer(quad.verts, Quad::VERT_COUNT, 0);
@@ -172,8 +171,8 @@ void pure::Renderer::drawMesh(const Mesh & mesh, const Mat4 & transform)
 
     setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
-    shader.setUniform("u_matrixMVP", m_projection * cam.view() * transform);
-    shader.setUniform("u_modelMatrix", transform);
+    shader.setUniform(shader.mvpMatLoc_, m_projection * cam.view() * transform);
+    shader.setUniform(shader.modelMatLoc_, transform);
 
     drawArrays(mesh.primtype, 0, uint32_t(mesh.vbo.vertCount));
     unbindVBO();
@@ -224,8 +223,8 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
     else m_defaultTexture.bind();
 
     // TODO: Maybe we can use a different simple shader to avoid sending useless data to gpu?
-    shader.setUniform("u_modelMatrix", makeMat4());
-    shader.setUniform("u_matrixMVP", makeMat4());
+    shader.setUniform(shader.modelMatLoc_, makeMat4());
+    shader.setUniform(shader.mvpMatLoc_, makeMat4());
 
     setVertexLayout(buffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 

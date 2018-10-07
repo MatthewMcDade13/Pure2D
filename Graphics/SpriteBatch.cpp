@@ -39,6 +39,7 @@ static constexpr const char* batchVertShader = "\n"
         "uniform mat4 u_projMatrix;\n"
         "vec4 position(mat4 mvpMat, vec3 pos)\n"
         "{\n"
+        "   FragPos = pos;"
         "   return u_projMatrix * (u_viewMatrix * vec4(pos, 1.0));\n"
         "}\n";
 
@@ -121,6 +122,22 @@ void SpriteBatch::draw(Renderer& renderer)
 
     renderer.drawBuffer(0, m_impl->vbo.vertCount, m_impl->vbo, texture, m_impl->batchShader, &m_impl->ebo, DrawPrimitive::TRIANGLES);
 
+}
+
+void SpriteBatch::setFragShader(const char *shaderSrc)
+{
+    m_impl->batchShader.free();
+
+    std::string vert{};
+    vert.resize(vertShaderlen);
+    Shader::createVertShader(&vert[0], batchVertShader, false);
+
+    m_impl->batchShader = Shader::createSrc(vert.c_str(), shaderSrc);
+}
+
+const Shader &SpriteBatch::shader() const
+{
+    return m_impl->batchShader;
 }
 
 ElementBuffer createElementBuffer(size_t count)

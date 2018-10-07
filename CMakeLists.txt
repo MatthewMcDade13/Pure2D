@@ -28,7 +28,6 @@ add_library(Pure2D SHARED
         Graphics/Buffers.cpp Graphics/Buffers.h
         Graphics/Camera.cpp Graphics/Camera.h
         Graphics/Shader.cpp Graphics/Shader.h
-        Graphics/Sprite.cpp Graphics/Sprite.h
         Graphics/Texture.cpp Graphics/Texture.h
         Graphics/Mesh.h
         Graphics/Vertex.h
@@ -85,7 +84,7 @@ install(
 install(
         FILES
         "Graphics/Buffers.h" "Graphics/Camera.h"
-        "Graphics/Shader.h" "Graphics/Sprite.h"
+        "Graphics/Shader.h"
         "Graphics/Texture.h" "Graphics/Vertex.h"
         "Graphics/Renderer.h"
         "Graphics/Transform.h"
