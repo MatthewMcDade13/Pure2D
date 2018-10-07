@@ -40,14 +40,12 @@ namespace pure
 		PURE2D_API void drawMeshInstanced(const Mesh& mesh, const Mat4* transforms, uint32_t numDraws);
 
         PURE2D_API void drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture,
-                                   Shader shader, DrawPrimitive primtype = DrawPrimitive::TRIANGLE_STRIP);
+                                   Shader shader, ElementBuffer* ebo = nullptr, DrawPrimitive primtype = DrawPrimitive::TRIANGLE_STRIP);
 		PURE2D_API void drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture,
-                DrawPrimitive primtype = DrawPrimitive::TRIANGLE_STRIP);
+                                   ElementBuffer* ebo = nullptr, DrawPrimitive primtype = DrawPrimitive::TRIANGLE_STRIP);
 
 		PURE2D_API void drawQuad(const Quad& quad, const Mat4* transform, const Texture* texture = nullptr);
         PURE2D_API void drawQuad(const Quad& quad, const Mat4* transform, Shader shader, const Texture* texture = nullptr);
-
-        PURE2D_API
 
         PURE2D_API void draw(Renderable& renderable);
 

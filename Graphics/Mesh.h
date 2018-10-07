@@ -12,6 +12,7 @@ namespace pure
 	struct Mat4;
 	template<typename T> struct Rect;
 
+	// TODO: Let this have an optional ElementBuffer
 	struct Mesh
 	{
 

@@ -211,12 +211,12 @@ void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transform
     unbindVBO();
 }
 
-void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, DrawPrimitive primtype)
+void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, ElementBuffer* ebo, DrawPrimitive primtype)
 {
-    drawBuffer(start, count, buffer, texture, m_shader, primtype);
+    drawBuffer(start, count, buffer, texture, m_shader, ebo, primtype);
 }
 
-void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader, DrawPrimitive primtype)
+void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader, ElementBuffer* ebo, DrawPrimitive primtype)
 {
     m_vao.bind();
     shader.bind();
@@ -229,8 +229,16 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
 
     setVertexLayout(buffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
+    if (ebo)
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo->id_);
+        drawElements(primtype, ebo->count);
+    }
+    else
+    {
+        drawArrays(primtype, start, count);
+    }
 
-    drawArrays(primtype, start, count);
 }
 
 void Renderer::draw(Renderable &renderable)

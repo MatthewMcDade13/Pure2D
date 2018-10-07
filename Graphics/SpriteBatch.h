@@ -17,18 +17,18 @@ namespace pure
     struct Mat4;
 
     // TODO: To make this Renderable or not to make this Renderable...
-    struct SpriteBatch : private NonCopyable
+    struct SpriteBatch : public Renderable, private NonCopyable
     {
         const Texture* texture;
 
-        explicit SpriteBatch(Renderer& renderer, const Texture& texture, size_t maxNumSprites);
+        SpriteBatch(const Texture& texture, size_t maxNumSprites);
         ~SpriteBatch();
 
         void reset(size_t maxNumSprites);
         void submit(const Quad& quad, const Mat4& transform);
         void flush();
 
-        void draw() const;
+        void draw(Renderer& renderer) final;
 
     private:
         struct SpriteBatch_Impl* m_impl;

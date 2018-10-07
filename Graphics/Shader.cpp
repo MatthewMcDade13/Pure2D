@@ -6,6 +6,7 @@
 #include "Math/Vec4.h"
 #include "Math/Mat4.h"
 #include "Private/Convert.h"
+#include "System/Util.h"
 #include <iostream>
 #include <glm/mat4x4.hpp>
 #include <glm/ext.hpp>
@@ -121,37 +122,37 @@ void pure::Shader::bind() const
 	glUseProgram(id_);
 }
 
-uint32_t pure::Shader::getLocation(const char * uniform) const
+int pure::Shader::getLocation(const char *uniform) const
 {
 	return glGetUniformLocation(id_, uniform);
 }
 
-void pure::Shader::setUniform(uint32_t location, const Vec4<float>& vec) const
+void pure::Shader::setUniform(int location, const Vec4<float> &vec) const
 {
 	bind();
 	glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
 }
 
-void pure::Shader::setUniform(uint32_t location, const Vec3<float>& vec) const
+void pure::Shader::setUniform(int location, const Vec3<float> &vec) const
 {
 	bind();
 	glUniform3f(location, vec.x, vec.y, vec.z);
 }
 
-void pure::Shader::setUniform(uint32_t location, const Mat4 & matrix, bool transpose) const
+void pure::Shader::setUniform(int location, const Mat4 &matrix, bool transpose) const
 {
 	bind();
 	const glm::mat4* mat = TO_GLM_MAT4_CONST(matrix.val_);
 	glUniformMatrix4fv(location, 1, transpose, glm::value_ptr(*mat));
 }
 
-void pure::Shader::setUniform(uint32_t location, float val) const
+void pure::Shader::setUniform(int location, float val) const
 {
 	bind();
 	glUniform1f(location, val);
 }
 
-void pure::Shader::setUniform(uint32_t location, int val) const
+void pure::Shader::setUniform(int location, int val) const
 {
 	bind();
 	glUniform1i(location, val);
@@ -188,7 +189,7 @@ void pure::Shader::free()
 	id_ = 0;
 }
 
-constexpr const char* FRAG_TEMPLATE_VARS = "#version 330\n"
+static constexpr const char* FRAG_TEMPLATE_VARS = "#version 330\n"
        "out vec4 FragColor;\n"
 
        "in vec2 TexCoord;\n"
@@ -197,23 +198,93 @@ constexpr const char* FRAG_TEMPLATE_VARS = "#version 330\n"
 
        "uniform sampler2D u_texture;\n";
 
-constexpr const char* FRAG_TEMPLATE_MAIN = "\n"
+// effect signature: vec4 effect(vec4 color, sampler2D tex, vec2 texCoords, vec3 fragPos)
+static constexpr const char* FRAG_TEMPLATE_MAIN = "\n"
        "void main()\n"
        "{\n"
        "	FragColor = effect(Color, u_texture, TexCoord, FragPos);\n"
        "}";
 
+
+static constexpr const char* VERT_TEMPLATE_DECLS = "#version 330\n"
+	 "layout(location = 0) in vec3 l_pos;\n"
+	 "layout(location = 1) in vec2 l_texCoords;\n"
+	 "layout(location = 2) in vec4 l_color;\n"
+
+	 "out vec2 TexCoord;\n"
+	 "out vec4 Color;\n"
+	 "out vec3 FragPos;\n"
+
+	 "uniform mat4 u_matrixMVP;\n"
+	 "uniform mat4 u_modelMatrix;\n"
+     "mat4 matrixMVP = u_matrixMVP;\n";
+
+static constexpr const char* VERT_TEMPLATE_DECLS_INSTANCED = "#version 330\n"
+	  "layout(location = 0) in vec3 l_pos;\n"
+	  "layout(location = 1) in vec2 l_texCoords;\n"
+	  "layout(location = 2) in vec4 l_color;\n"
+	  "layout(location = 3) in mat4 l_matrixMVP;\n"
+	  "layout(location = 7) in mat4 u_modelMatrix;\n"
+
+	  "out vec2 TexCoord;\n"
+	  "out vec4 Color;\n"
+	  "out vec3 FragPos;\n"
+      "mat4 matrixMVP = l_matrixMVP;\n";
+
+// position signature: vec4 position(mat4 mvpMatrix, vec3 fragPos)
+static constexpr const char* VERT_TEMPLATE_MAIN = "\n"
+		"void main()\n"
+		"{\n"
+		"	TexCoord = l_texCoords;\n"
+		"	Color = l_color;\n"
+
+		"   FragPos = vec3(u_modelMatrix * vec4(l_pos, 1.0));\n"
+
+		"	gl_Position = position(matrixMVP, l_pos);\n"
+		"}";
+
+
+
+
+static const size_t fragTemplateLen = strlen(FRAG_TEMPLATE_VARS) + strlen(FRAG_TEMPLATE_MAIN);
+
+// assume longer template just to keep things safe and concise
+static const size_t vertTemplateLen = strlen(VERT_TEMPLATE_DECLS_INSTANCED) + strlen(VERT_TEMPLATE_MAIN);
+
 // TODO: Consider having this be the main way we create shaders?
 // Having this as main way of creating shaders should suffice this engine is only doing 2D
-Shader Shader::createTemplated(const char *effectSrc, bool isInstanced)
+void Shader::createFragShader(char* outBuffer, const char *effectSrc)
 {
-    const char* vert = isInstanced ? shader::instancedVert : shader::vert;
-
     std::string frag = FRAG_TEMPLATE_VARS;
     frag += effectSrc;
     frag += FRAG_TEMPLATE_MAIN;
 
-    return Shader::createSrc(vert, frag.c_str());
-
+    strcpy(outBuffer, frag.c_str());
 }
+
+
+void Shader::createVertShader(char *outBuffer, const char *positionSrc, bool isInstanced)
+{
+	std::string vert = isInstanced ? VERT_TEMPLATE_DECLS_INSTANCED : VERT_TEMPLATE_DECLS;
+	vert += positionSrc;
+	vert += VERT_TEMPLATE_MAIN;
+
+	strcpy(outBuffer, vert.c_str());
+}
+
+Shader Shader::createDefault(bool isInstanced)
+{
+    return Shader::createSrc(isInstanced ? shader::instancedVert : shader::vert, shader::frag);
+}
+
+size_t Shader::getFragShaderSize(size_t inBufferCount)
+{
+	return fragTemplateLen + inBufferCount;
+}
+
+size_t Shader::getVertShaderSize(size_t inBufferCount)
+{
+	return vertTemplateLen + inBufferCount;
+}
+
 

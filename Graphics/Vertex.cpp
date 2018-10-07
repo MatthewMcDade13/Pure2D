@@ -9,13 +9,13 @@
 
 using namespace pure;
 
-void pure::translateVerts(Vertex2D *verts, size_t vertCount, const Mat4 &modelMat)
+void pure::translateVerts(Vertex2D *verts, size_t vertCount, const Mat4 &transform)
 {
     for (size_t i = 0; i < vertCount; i++)
     {
         auto& v = verts[i];
         const Vec4f pos = { v.position.x, v.position.y, v.position.z, 1.f };
-        const Vec4f result = modelMat * pos;
+        const Vec4f result = transform * pos;
         v.position = { result.x, result.y, result.z };
     }
 }

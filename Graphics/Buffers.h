@@ -75,6 +75,7 @@ namespace pure
     };
 
 
+	// TODO: ElementBuffer needs some love to conform to rest of API.
 	struct ElementBuffer
 	{
 		uint32_t id_;
@@ -129,8 +130,9 @@ namespace pure
 	PURE2D_API void unbindVAO();
 	PURE2D_API void unbindVBO();
 
-	// TODO: Move this to renderer. We can store start, vertCount, and DrawPrimitive on VertexArray most likely...
 	PURE2D_API void drawArrays(DrawPrimitive prim, uint32_t start, uint32_t vertCount);
+
+	// TODO: Move this to renderer.
 	PURE2D_API void drawElements(DrawPrimitive prim, uint32_t count);
 
 	PURE2D_API void setVertexLayout(const VertexBuffer& buffer, VertexAttribute* attribs, size_t numAttribs);
