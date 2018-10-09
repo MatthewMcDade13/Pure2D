@@ -68,8 +68,8 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 
         Quad q = Quad::create();
 
-        m_vao = VertexArray::create();
-        m_vao.bind();
+        m_quadVAO = VertexArray::create();
+        m_quadVAO.bind();
 
         m_quadBuffer = VertexBuffer::create(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
 
@@ -91,7 +91,7 @@ pure::Renderer::Renderer(const Window& window) : cam({})
 
 pure::Renderer::~Renderer()
 {
-    m_vao.free();
+    m_quadVAO.free();
     m_quadBuffer.free();
     m_instancedMatBuffer.free();
 
@@ -115,7 +115,7 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Texture *
 
 void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, const Texture *texture)
 {
-    m_vao.bind();
+    m_quadVAO.bind();
     shader.bind();
     if (texture) texture->bind();
     else m_defaultTexture.bind();
@@ -217,7 +217,7 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
 
 void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader, ElementBuffer* ebo, DrawPrimitive primtype)
 {
-    m_vao.bind();
+    m_drawVAO.bind();
     shader.bind();
     if (texture) texture->bind();
     else m_defaultTexture.bind();
@@ -238,6 +238,7 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
         drawArrays(primtype, start, count);
     }
 
+    unbindVAO();
 }
 
 void Renderer::draw(Renderable &renderable)

@@ -56,7 +56,7 @@ namespace pure
         PURE2D_API void zoom(float offset);
 
     private:
-        VertexArray m_vao;
+        VertexArray m_quadVAO;
         VertexBuffer m_quadBuffer;
         VertexBuffer m_instancedMatBuffer;
         VertexArray m_drawVAO;

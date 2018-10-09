@@ -85,4 +85,11 @@ Texture Texture::createBlank()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1,
 				 0, GL_RGBA, GL_UNSIGNED_BYTE, texdata);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+
+	Texture t = {};
+	t.size = { 1, 1 };
+	t.m_unit = GL_TEXTURE0;
+	t.id_ = texture;
+	return t;
 }
