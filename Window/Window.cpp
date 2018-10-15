@@ -169,6 +169,12 @@ void pure::Window::setSize(uint32_t width, uint32_t height)
     m_impl->width = width;
     m_impl->height = height;
     glfwSetWindowSize(m_impl->handle, width, height);
+    glViewport(0, 0, m_impl->width, m_impl->height);
+}
+
+void Window::setTitle(const char *title) const
+{
+    glfwSetWindowTitle(m_impl->handle, title);
 }
 
 void onResize(GLFWwindow * win, int width, int height)

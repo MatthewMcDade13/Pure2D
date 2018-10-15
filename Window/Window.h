@@ -29,6 +29,7 @@ namespace pure
         bool isOpen() const;
 
         void setSize(uint32_t width, uint32_t height);
+        void setTitle(const char* title) const;
 
         bool create(const char* title);
         bool create(uint32_t width, uint32_t height, const char* title);

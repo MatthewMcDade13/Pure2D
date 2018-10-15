@@ -8,6 +8,9 @@
 
 #include <cinttypes>
 #include <type_traits>
+#include <Pure2D/Math/Vec2.h>
+#include "MatrixTransform.h"
+
 
 namespace pure
 {
@@ -21,6 +24,12 @@ namespace pure
             struct { T x, y, z; };
             struct { T r, g, b; };
         };
+
+        template<typename U>
+        explicit constexpr operator Vec3<U>() const { return { U(x), U(y), U(z) }; }
+
+        constexpr Vec3(Vec2<T> a, T z = T(0.0))
+                : x(a.x), y(a.y), z(z) { }
 
         constexpr Vec3(T x = T(0.0), T y = T(0.0), T z = T(0.0))
                 : x(x), y(y), z(z) { }

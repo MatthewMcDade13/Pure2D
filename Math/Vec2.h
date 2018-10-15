@@ -23,6 +23,8 @@ namespace pure
         };
 
 
+        template<typename U>
+        explicit constexpr operator Vec2<U>() const { return { U(x), U(y) }; }
 
         constexpr Vec2(T x = T(0.0), T y = T(0.0)): x(x), y(y) { }
 

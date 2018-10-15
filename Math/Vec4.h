@@ -8,9 +8,12 @@
 
 #include <cinttypes>
 #include <type_traits>
+#include <Pure2D/Math/Vec2.h>
 
 namespace pure
 {
+    template<typename T> struct Vec3;
+
     template<typename T>
     struct Vec4
     {
@@ -21,6 +24,18 @@ namespace pure
             struct { T x, y, z, w; };
             struct { T r, g, b, a; };
         };
+
+        template<typename U>
+        explicit constexpr operator Vec4<U>() const { return { U(x), U(y), U(z), U(w) }; }
+
+        constexpr Vec4(const Vec3<T>& a, T w = T(0.0))
+                : x(a.x), y(a.y), z(a.z), w(w) { }
+
+        constexpr Vec4(Vec2<T> a, T z, T w)
+                : x(a.x), y(a.y), z(z), w(w) { }
+
+        constexpr Vec4(Vec2<T> a, Vec2<T> b = {})
+                : x(a.x), y(a.y), z(a.x), w(a.y) { }
 
         constexpr Vec4(T x = T(0.0), T y = T(0.0), T z = T(0.0), T w = T(0.0))
                 : x(x), y(y), z(z), w(w) { }

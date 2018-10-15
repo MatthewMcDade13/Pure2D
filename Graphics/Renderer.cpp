@@ -31,9 +31,19 @@ static struct
 
 static const Quad defaultQuad = Quad::create();
 
-pure::Renderer::Renderer(const Window& window) : cam({})
+Renderer::Renderer(const Rectf &viewport)
 {
+    init();
+    setViewport(viewport);
+}
 
+Renderer::Renderer()
+{
+    init();
+}
+
+void Renderer::init()
+{
     constexpr int NUM_MAT4 = 2;
     {
         cam.position.z = -5.f;
@@ -51,14 +61,6 @@ pure::Renderer::Renderer(const Window& window) : cam({})
     }
 
     {
-
-        {
-            const auto w = static_cast<float>(window.width());
-            const auto h = static_cast<float>(window.height());
-            const Rectf viewport = { 0.f, 0.f, w, h };
-            setViewport({ 0.f, 0.f, w, h });
-        }
-
         m_shader = Shader::createSrc(shader::vert, shader::frag);
         m_instancedShader = Shader::createSrc(shader::instancedVert, shader::frag);
         m_defaultTexture = Texture::createBlank();
@@ -87,19 +89,6 @@ pure::Renderer::Renderer(const Window& window) : cam({})
         unbindVAO();
     }
 
-}
-
-pure::Renderer::~Renderer()
-{
-    m_quadVAO.free();
-    m_quadBuffer.free();
-    m_instancedMatBuffer.free();
-
-    m_instancedShader.free();
-    m_shader.free();
-    m_defaultTexture.free();
-
-    m_drawVAO.free();
 }
 
 const Rectf & pure::Renderer::viewport() const { return m_viewport; }
@@ -246,4 +235,16 @@ void Renderer::draw(Renderable &renderable)
     renderable.draw(*this);
 }
 
+void Renderer::destroy()
+{
+    m_quadVAO.free();
+    m_quadBuffer.free();
+    m_instancedMatBuffer.free();
+
+    m_instancedShader.free();
+    m_shader.free();
+    m_defaultTexture.free();
+
+    m_drawVAO.free();
+}
 

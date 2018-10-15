@@ -37,3 +37,8 @@ Mat4 pure::lookAt(const Vec3<float>& position, const Vec3<float>& target, const 
 {
 	return toMat4(glm::lookAt(toGlmVec3(position), toGlmVec3(target), toGlmVec3(up)));
 }
+
+Mat4 pure::inverse(const Mat4 &mat)
+{
+	return toMat4(glm::inverse(*TO_GLM_MAT4_CONST(mat)));
+}
