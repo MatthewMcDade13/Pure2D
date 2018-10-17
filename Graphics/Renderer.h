@@ -6,17 +6,17 @@
 #define PURE2D_RENDERER_H
 
 
-#include "Math/Vec2.h"
-#include "Math/Mat4.h"
-#include "Math/Rect.h"
-#include "Graphics/Shader.h"
-#include "Graphics/Vertex.h"
-#include "Graphics/Buffers.h"
-#include "Graphics/Camera.h"
-#include "Graphics/Transform.h"
-#include "System/NonCopyable.h"
-#include "Define.h"
-#include "Texture.h"
+#include <Pure2D/Math/Vec2.h>
+#include <Pure2D/Math/Mat4.h>
+#include <Pure2D/Math/Rect.h>
+#include <Pure2D/Graphics/Shader.h>
+#include <Pure2D/Graphics/Vertex.h>
+#include <Pure2D/Graphics/Buffers.h>
+#include <Pure2D/Graphics/Camera.h>
+#include <Pure2D/Graphics/Transform.h>
+#include <Pure2D/Graphics/Texture.h>
+#include <Pure2D/System/NonCopyable.h>
+#include <Pure2D/Define.h>
 
 namespace pure
 {

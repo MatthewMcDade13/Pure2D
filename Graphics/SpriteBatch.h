@@ -6,8 +6,9 @@
 #define PURE2D_SPRITEBATCH_H
 
 #include <cstddef>
-#include "Graphics/Renderable.h"
-#include "System/NonCopyable.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/Graphics/Renderable.h>
+#include <Pure2D/System/NonCopyable.h>
 
 namespace pure
 {
@@ -18,7 +19,7 @@ namespace pure
     struct Mat4;
 
     // TODO: To make this Renderable or not to make this Renderable...
-    struct SpriteBatch : public Renderable, private NonCopyable
+    struct PURE2D_API SpriteBatch : public Renderable, private NonCopyable
     {
         const Texture* texture;
 

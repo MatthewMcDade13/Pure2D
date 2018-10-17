@@ -1,11 +1,11 @@
 #ifndef PURE2D_MGRAPHICS_H
 #define PURE2D_MGRAPHICS_H
 
-#include "Graphics/Shader.h"
-#include "Graphics/Texture.h"
-#include "Graphics/Vertex.h"
-#include "Graphics/Camera.h"
-#include "Graphics/Buffers.h"
+#include <Pure2D/Graphics/Shader.h>
+#include <Pure2D/Graphics/Texture.h>
+#include <Pure2D/Graphics/Vertex.h>
+#include <Pure2D/Graphics/Camera.h>
+#include <Pure2D/Graphics/Buffers.h>
 
 #endif // PURE2D_MGRAPHICS_H
 

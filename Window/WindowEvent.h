@@ -6,8 +6,8 @@
 #define PURE2D_WINDOWEVENT_H
 
 
-#include "Keyboard.h"
-#include "Math/Vec2.h"
+#include <Pure2D/Window/Keyboard.h>
+#include <Pure2D/Math/Vec2.h>
 #include <new>
 
 namespace pure

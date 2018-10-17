@@ -3,11 +3,11 @@
 
 #include <cinttypes>
 #include <cstdio>
-#include "Define.h"
-#include "Math/Vec2.h"
-#include "Math/Vec3.h"
-#include "Math/Vec4.h"
-#include "Math/Mat4.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/Math/Vec2.h>
+#include <Pure2D/Math/Vec3.h>
+#include <Pure2D/Math/Vec4.h>
+#include <Pure2D/Math/Mat4.h>
 
 namespace pure
 {

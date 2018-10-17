@@ -1,7 +1,7 @@
 #ifndef PURE2D_MATRIX_TRANSFORM_H
 #define PURE2D_MATRIX_TRANSFORM_H
 
-#include "Define.h"
+#include <Pure2D/Define.h>
 
 namespace pure
 {

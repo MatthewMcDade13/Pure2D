@@ -6,9 +6,9 @@
 #define PURE2D_MAT4_H
 
 
-#include "Define.h"
 #include <type_traits>
-#include <Graphics/Vertex.h>
+#include <Pure2D/Define.h>
+#include <Pure2D/Graphics/Vertex.h>
 
 
 namespace pure

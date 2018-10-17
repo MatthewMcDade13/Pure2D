@@ -5,10 +5,10 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
-#include "Math/Vec2.h"
-#include "Math/Vec3.h"
-#include "Math/Vec4.h"
-#include "Math/Mat4.h"
+#include <Pure2D/Math/Vec2.h>
+#include <Pure2D/Math/Vec3.h>
+#include <Pure2D/Math/Vec4.h>
+#include <Pure2D/Math/Mat4.h>
 
 #define TO_ALIGNED_STORAGE(glm_mat4) reinterpret_cast<const std::aligned_storage_t<sizeof(float[4][4])>*>(&glm_mat4)
 

@@ -2,8 +2,8 @@
 #define PURE2D_TEXTURE_H
 
 #include <cinttypes>
-#include "Define.h"
-#include "Math/Vec2.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/Math/Vec2.h>
 
 namespace pure
 {

@@ -3,7 +3,7 @@
 
 #include <cinttypes>
 #include <cstddef>
-#include "Define.h"
+#include <Pure2D/Define.h>
 
 namespace pure
 {

@@ -1,9 +1,10 @@
 #ifndef PURE2D_MESH_H
 #define PURE2D_MESH_H
 
+#include <Pure2D/Define.h>
 #include <cinttypes>
-#include "Graphics/Shader.h"
-#include "Graphics/Buffers.h"
+#include <Pure2D/Graphics/Shader.h>
+#include <Pure2D/Graphics/Buffers.h>
 
 namespace pure
 {
@@ -13,7 +14,7 @@ namespace pure
 	template<typename T> struct Rect;
 
 	// TODO: Let this have an optional ElementBuffer
-	struct Mesh
+	struct PURE2D_API Mesh
 	{
 
 		VertexBuffer vbo;

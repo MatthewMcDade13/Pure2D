@@ -5,7 +5,7 @@
 #ifndef PURE2D_H
 #define PURE2D_H
 
-#include "Define.h"
+#include <Pure2D/Define.h>
 
 namespace pure
 {

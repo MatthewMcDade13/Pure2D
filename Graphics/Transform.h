@@ -5,10 +5,10 @@
 #ifndef PURE2D_TRANSFORM_H
 #define PURE2D_TRANSFORM_H
 
-#include "Math/Vec2.h"
-#include "Math/Vec3.h"
-#include "Math/Mat4.h"
-#include "Define.h"
+#include <Pure2D/Math/Vec2.h>
+#include <Pure2D/Math/Vec3.h>
+#include <Pure2D/Math/Mat4.h>
+#include <Pure2D/Define.h>
 
 namespace pure
 {

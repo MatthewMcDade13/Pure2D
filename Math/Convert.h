@@ -1,8 +1,8 @@
 #ifndef PURE2D_MATH_CONVERT_H
 #define PURE2D_MATH_CONVERT_H
 
-#include "Define.h"
-#include "Constants.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/Math/Constants.h>
 
 namespace pure
 {

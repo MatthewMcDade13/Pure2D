@@ -7,9 +7,9 @@
 
 
 #include <cstdint>
-#include "Define.h"
-#include "System/NonCopyable.h"
-#include "Math/Vec4.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/System/NonCopyable.h>
+#include <Pure2D/Math/Vec4.h>
 
 namespace pure
 {

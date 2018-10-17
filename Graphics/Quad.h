@@ -5,10 +5,11 @@
 #ifndef PURE2D_QUAD_H
 #define PURE2D_QUAD_H
 
-#include "Graphics/Vertex.h"
-#include "Math/Vec2.h"
-#include "Math/Vec3.h"
-#include "Graphics/Buffers.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/Graphics/Vertex.h>
+#include <Pure2D/Math/Vec2.h>
+#include <Pure2D/Math/Vec3.h>
+#include <Pure2D/Graphics/Buffers.h>
 
 
 namespace pure
@@ -17,7 +18,7 @@ namespace pure
     struct Mesh;
 
 
-    struct Quad
+    struct PURE2D_API Quad
     {
         static constexpr int VERT_COUNT = 4;
         Vertex2D verts[VERT_COUNT];

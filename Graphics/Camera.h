@@ -1,8 +1,8 @@
 #ifndef PURE2D_CAMERA_H
 #define PURE2D_CAMERA_H
 
-#include "Define.h"
-#include "Math/Vec3.h"
+#include <Pure2D/Define.h>
+#include <Pure2D/Math/Vec3.h>
 
 namespace pure
 {
