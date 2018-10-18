@@ -68,18 +68,18 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
     glfwSetKeyCallback(handle, onKeyInput);
     glfwSetScrollCallback(handle, onMouseScroll);
 
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cerr << "Failed to initialize GLAD" << std::endl;
+		return false;
+	}
+
     m_impl->handle = handle;
     m_impl->width = width;
     m_impl->height = height;
     m_impl->isFullscreen = false;
 
     glfwSetWindowUserPointer(handle, m_impl);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        return false;
-    }
 
     glViewport(0, 0, m_impl->width, m_impl->height);
     glEnable(GL_DEPTH_TEST);
@@ -92,6 +92,12 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
 void pure::Window::close() const
 {
     glfwSetWindowShouldClose(m_impl->handle, true);
+}
+
+void pure::Window::destroy()
+{
+	glfwDestroyWindow(m_impl->handle);
+	*m_impl = {};
 }
 
 bool pure::Window::isOpen() const

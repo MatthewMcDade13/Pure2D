@@ -33,6 +33,7 @@ add_library(Pure2D SHARED
         Graphics/Vertex.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
+		Engine/Game.cpp Engine/Game.h
         Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h Graphics/SpriteBatch.cpp Graphics/SpriteBatch.h Graphics/Vertex.cpp Graphics/Quad.cpp Graphics/Quad.h)
 
 pkg_search_module(GLFW REQUIRED glfw3)
@@ -102,6 +103,13 @@ install(
         "System/Time.h"
         "System/Util.h"
         DESTINATION "include/${PROJECT_NAME}/System"
+)
+
+# Engine
+install(
+	FILES
+	"Engine/Game.h"
+	DESTINATION "include/${PROJECT_NAME}/Engine"
 )
 
 install(FILES "${PROJECT_BINARY_DIR}/pure2d-config.cmake" DESTINATION lib/cmake/${PROJECT_NAME})

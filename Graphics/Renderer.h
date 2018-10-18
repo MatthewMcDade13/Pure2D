@@ -33,8 +33,8 @@ namespace pure
     {
         Camera cam;
 
-        PURE2D_API Renderer();
-        PURE2D_API explicit Renderer(const Rectf& viewport);
+		PURE2D_API void create();
+		PURE2D_API void create(const Rectf& viewport);
 
 		PURE2D_API void drawMesh(const Mesh& mesh, const Mat4& transform);
 		PURE2D_API void drawMeshInstanced(const Mesh& mesh, const Mat4* transforms, uint32_t numDraws);
@@ -69,8 +69,6 @@ namespace pure
         Texture m_defaultTexture;
         Mat4 m_projection;
         Rectf m_viewport;
-
-        void init();
     };
 }
 

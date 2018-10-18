@@ -34,6 +34,7 @@ namespace pure
         bool create(const char* title);
         bool create(uint32_t width, uint32_t height, const char* title);
         void close() const;
+		void destroy();
 
         void captureMouse() const;
         void releaseMouse() const;
@@ -46,7 +47,7 @@ namespace pure
         bool isKeyPressed(Key key) const;
 
         void toggleFullscreenWindowed();
-        private:
+    private:
         struct WindowImpl* m_impl;
     };
 

@@ -31,64 +31,59 @@ static struct
 
 static const Quad defaultQuad = Quad::create();
 
-Renderer::Renderer(const Rectf &viewport)
+void pure::Renderer::create()
 {
-    init();
-    setViewport(viewport);
+	constexpr int NUM_MAT4 = 2;
+	{
+		cam.position.z = -5.f;
+		cam.lookDir.z = -1.f;
+	}
+
+	{
+
+		attribs.vertex2dAttribs[0] = VertexAttribute::create(0, 3, BufferType::FLOAT, sizeof(Vertex2D), 0, false);
+		attribs.vertex2dAttribs[1] = VertexAttribute::create(1, 2, BufferType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, texCoord)), false);
+		attribs.vertex2dAttribs[2] = VertexAttribute::create(2, 4, BufferType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, color)), false);
+
+		for (int i = 0; i < 4 * NUM_MAT4; i++)
+			attribs.instancedMatAttribs[i] = VertexAttribute::create(i + 3, 4, BufferType::FLOAT, sizeof(Mat4) * NUM_MAT4, size_t(i * sizeof(Vec4f)), true);
+	}
+
+	{
+		m_shader = Shader::createSrc(shader::vert, shader::frag);
+		m_instancedShader = Shader::createSrc(shader::instancedVert, shader::frag);
+		m_defaultTexture = Texture::createBlank();
+	}
+
+	{
+
+		Quad q = Quad::create();
+
+		m_quadVAO = VertexArray::create();
+		m_quadVAO.bind();
+
+		m_quadBuffer = VertexBuffer::create(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
+
+		setVertexLayout(m_quadBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+
+		unbindVAO();
+	}
+
+	{
+		m_drawVAO = VertexArray::create();
+		m_drawVAO.bind();
+
+		m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
+
+		unbindVAO();
+	}
+
 }
 
-Renderer::Renderer()
+void pure::Renderer::create(const Rectf & viewport)
 {
-    init();
-}
-
-void Renderer::init()
-{
-    constexpr int NUM_MAT4 = 2;
-    {
-        cam.position.z = -5.f;
-        cam.lookDir.z = -1.f;
-    }
-
-    {
-
-        attribs.vertex2dAttribs[0] = VertexAttribute::create(0, 3, BufferType::FLOAT, sizeof(Vertex2D), 0, false);
-        attribs.vertex2dAttribs[1] = VertexAttribute::create(1, 2, BufferType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, texCoord)), false);
-        attribs.vertex2dAttribs[2] = VertexAttribute::create(2, 4, BufferType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, color)), false);
-
-        for (int i = 0; i < 4 * NUM_MAT4; i++)
-            attribs.instancedMatAttribs[i] = VertexAttribute::create(i + 3, 4, BufferType::FLOAT, sizeof(Mat4) * NUM_MAT4, size_t(i * sizeof(Vec4f)), true);
-    }
-
-    {
-        m_shader = Shader::createSrc(shader::vert, shader::frag);
-        m_instancedShader = Shader::createSrc(shader::instancedVert, shader::frag);
-        m_defaultTexture = Texture::createBlank();
-    }
-
-    {
-
-        Quad q = Quad::create();
-
-        m_quadVAO = VertexArray::create();
-        m_quadVAO.bind();
-
-        m_quadBuffer = VertexBuffer::create(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
-
-        setVertexLayout(m_quadBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
-
-        unbindVAO();
-    }
-
-    {
-        m_drawVAO = VertexArray::create();
-        m_drawVAO.bind();
-
-        m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-
-        unbindVAO();
-    }
-
+	create();
+	setViewport(viewport);
 }
 
 const Rectf & pure::Renderer::viewport() const { return m_viewport; }
