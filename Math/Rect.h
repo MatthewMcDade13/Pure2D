@@ -3,6 +3,7 @@
 
 #include <cinttypes>
 #include <type_traits>
+#include <Pure2D/Math/Vec4.h>
 
 namespace pure
 {
@@ -10,6 +11,8 @@ namespace pure
 	struct Rect
 	{
 		static_assert(std::is_fundamental<T>::value, "Type of Rect must be primitive");
+
+		explicit constexpr operator Vec4<T>() const { return { T(x), T(y), T(w), T(h) }; }
 
 		T x, y, w, h;
 
