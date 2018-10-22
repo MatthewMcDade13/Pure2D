@@ -32,7 +32,7 @@ void pure::Game::run()
 
 	load();
 
-	time::initClock(c);
+	c.init();
 	while (m_window.isOpen())
 	{
 		while (m_window.pollEvents(event))
@@ -40,7 +40,7 @@ void pure::Game::run()
 			windowEvent(event);
 		}
 
-		const float dt = time::resetClock(c);
+		const float dt = c.reset();
 
 		update(dt);
 

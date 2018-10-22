@@ -25,6 +25,7 @@ namespace pure
 
         int width() const;
         int height() const;
+		Vec2i size() const;
         Vec2<float> mousePos() const;
         bool isOpen() const;
 

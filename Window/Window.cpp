@@ -43,6 +43,11 @@ pure::Window::~Window() { delete m_impl; }
 int pure::Window::width() const { return m_impl->width; }
 int pure::Window::height() const { return m_impl->height; }
 
+Vec2i pure::Window::size() const
+{
+	return { m_impl->width, m_impl->height };
+}
+
 Vec2f pure::Window::mousePos() const { return m_impl->mousePos; }
 
 bool Window::create(const char *title)

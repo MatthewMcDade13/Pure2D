@@ -51,7 +51,9 @@ namespace pure
 
         PURE2D_API const Mat4& projection() const;
         PURE2D_API const Mat4 MVMatrix() const;
+		// Gets the cached glViewport Rect
         PURE2D_API const Rectf& viewport() const;
+		// Set the cached glViewport Rect
         PURE2D_API void setViewport(const Rectf& vp);
         PURE2D_API void zoom(float offset);
 

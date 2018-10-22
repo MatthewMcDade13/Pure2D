@@ -28,6 +28,9 @@ namespace pure
         template<typename U>
         explicit constexpr operator Vec3<U>() const { return { U(x), U(y), U(z) }; }
 
+		template<typename U>
+		explicit constexpr operator Vec2<U>() const { return { U(x), U(y) }; }
+
         constexpr Vec3(Vec2<T> a, T z = T(0.0))
                 : x(a.x), y(a.y), z(z) { }
 

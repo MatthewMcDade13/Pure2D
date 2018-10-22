@@ -7,16 +7,28 @@ namespace pure
 {
 	namespace time
 	{
-		struct Clock
+		struct PURE2D_API Clock
 		{
 			float start;
+
+			void init();
+			float reset();
+			float elapsedTime() const;
+		};
+
+		struct PURE2D_API Timer
+		{
+			float current;
+			float duration;
+
+			bool tick(float delta);
+			void start(float duration);
+			void reset();
+		
 		};
 
 
 		PURE2D_API float getTime();
-		PURE2D_API void initClock(Clock& c);
-		PURE2D_API float resetClock(Clock& c);
-		PURE2D_API float getElapsedTime(Clock c);
 	}
 }
 
