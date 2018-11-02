@@ -16,7 +16,7 @@ namespace pure
     {
 
         PURE2D_API static Transform create(Mat4 mat = makeMat4());
-        PURE2D_API Vec3f position() const;
+        PURE2D_API const Vec3f& position() const;
         PURE2D_API Vec2f size() const;
         PURE2D_API float rotation() const;
         PURE2D_API void setPosition(const Vec3f& pos);

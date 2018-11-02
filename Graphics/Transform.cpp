@@ -9,7 +9,7 @@
 
 using namespace pure;
 
-Vec3f pure::Transform::position() const { return m_position; }
+const Vec3f& pure::Transform::position() const { return m_position; }
 Vec2f pure::Transform::size() const { return m_size; }
 
 float pure::Transform::rotation() const { return m_rotation; }
