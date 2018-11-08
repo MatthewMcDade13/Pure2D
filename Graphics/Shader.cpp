@@ -6,6 +6,7 @@
 #include "Math/Vec4.h"
 #include "Math/Mat4.h"
 #include "Private/Convert.h"
+#include "Private/Util.h"
 #include "System/Util.h"
 #include <iostream>
 #include <glm/mat4x4.hpp>
@@ -20,6 +21,13 @@ static uint32_t createShaderProg(uint32_t vert, uint32_t frag);
 static bool checkShaderError(uint32_t shader, GLenum shaderQuery);
 static bool checkProgramError(uint32_t program, GLenum query);
 static void fillCommonUniforms(Shader& s);
+
+pure::Shader::Shader(uint32_t id) :
+	m_id(id), 
+	locations({ })
+{
+	locations.resize(DEFAULT_LOC_COUNT);
+}
 
 Shader pure::Shader::create(const char * vertShaderPath, const char * fragShaderPath)
 {
@@ -49,48 +57,48 @@ Shader pure::Shader::createSrc(const char * vertSrc, const char * fragSrc)
 
 void pure::Shader::bind() const
 {
-	glUseProgram(id_);
+	glUseProgram(m_id);
 }
-//
-//int pure::Shader::loadUniformLoc(int location, int index)
-//{
-//	return 0;
-//}
-//
-//int pure::Shader::loadUniformLoc(const char * uniform, int index)
-//{
-//	return 0;
-//}
-#include <memory>
+
 int pure::Shader::getLocation(const char *uniform) const
 {
-	return glGetUniformLocation(id_, uniform);
+	return glGetUniformLocation(m_id, uniform);
 }
-//
-//int pure::Shader::getLocation(int index) const
-//{
-//	return 0;
-//}
-//
-//void pure::Shader::setUniformIndx(int index, const Vec4<float>& vec) const
-//{
-//}
-//
-//void pure::Shader::setUniformIndx(int index, const Vec3<float>& vec) const
-//{
-//}
-//
-//void pure::Shader::setUniformIndx(int index, const Mat4 & matrix, bool transpose) const
-//{
-//}
-//
-//void pure::Shader::setUniformIndx(int index, float val) const
-//{
-//}
-//
-//void pure::Shader::setUniformIndx(int index, int val) const
-//{
-//}
+
+template<typename T>
+static void setUniformIndx_(const Shader& s, int index, T val)
+{
+	vec_bounds_assert(s.locations, index);
+	int loc = s.locations[index];
+	s.setUniform(loc, val);
+}
+
+void pure::Shader::setUniformIndx(int index, const Vec4<float>& vec) const
+{
+	setUniformIndx_<const Vec4<float>&>(*this, index, vec);
+}
+
+void pure::Shader::setUniformIndx(int index, const Vec3<float>& vec) const
+{
+	setUniformIndx_<const Vec3<float>&>(*this, index, vec);
+}
+
+void pure::Shader::setUniformIndx(int index, const Mat4 & matrix, bool transpose) const
+{
+	vec_bounds_assert(locations, index);
+	int loc = locations[index];
+	setUniform(loc, matrix, transpose);
+}
+
+void pure::Shader::setUniformIndx(int index, float val) const
+{
+	setUniformIndx_(*this, index, val);
+}
+
+void pure::Shader::setUniformIndx(int index, int val) const
+{
+	setUniformIndx_(*this, index, val);
+}
 
 void pure::Shader::setUniform(int location, const Vec4<float> &vec) const
 {
@@ -150,8 +158,8 @@ void pure::Shader::setUniform(const char * uniform, int val) const
 
 void pure::Shader::free()
 {
-	glDeleteProgram(id_);
-	id_ = 0;
+	glDeleteProgram(m_id);
+	m_id = 0;
 }
 
 static constexpr const char* FRAG_TEMPLATE_VARS = "#version 330\n"
@@ -347,6 +355,6 @@ bool checkProgramError(uint32_t program, GLenum query)
 
 void fillCommonUniforms(Shader& s)
 {
-	s.mvpMatLoc_ = s.getLocation("u_matrixMVP");
-	s.modelMatLoc_ = s.getLocation("u_modelMatrix");
+	s.locations[Shader::MVP_MAT_LOC] = s.getLocation("u_matrixMVP");
+	s.locations[Shader::MODEL_MAT_LOC] = s.getLocation("u_modelMatrix");
 }

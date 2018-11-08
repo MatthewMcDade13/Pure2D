@@ -106,14 +106,15 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, 
 
     if (transform)
     {
-        shader.setUniform(shader.modelMatLoc_, *transform);
-        shader.setUniform(shader.mvpMatLoc_, m_projection * cam.view() * (*transform));
+		
+        shader.setUniformIndx(Shader::MODEL_MAT_LOC, *transform);
+        shader.setUniformIndx(Shader::MVP_MAT_LOC, m_projection * cam.view() * (*transform));
     }
     else
     {
         const Mat4 mat = makeMat4();
-        shader.setUniform(shader.modelMatLoc_, mat);
-        shader.setUniform(shader.mvpMatLoc_, mat);
+        shader.setUniformIndx(Shader::MODEL_MAT_LOC, mat);
+        shader.setUniformIndx(Shader::MVP_MAT_LOC, mat);
     }
 
     m_quadBuffer.writeBuffer(quad.verts, Quad::VERT_COUNT, 0);
@@ -145,7 +146,7 @@ void pure::Renderer::drawMesh(const Mesh & mesh, const Mat4 & transform)
 {
     m_drawVAO.bind();
 
-    const Shader& shader = mesh.shader.id_ == 0 ? m_shader : mesh.shader;
+    const Shader& shader = mesh.shader.id() == 0 ? m_shader : mesh.shader;
     shader.bind();
 
     if (mesh.texture) mesh.texture->bind();
@@ -155,8 +156,8 @@ void pure::Renderer::drawMesh(const Mesh & mesh, const Mat4 & transform)
 
     setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
-    shader.setUniform(shader.mvpMatLoc_, m_projection * cam.view() * transform);
-    shader.setUniform(shader.modelMatLoc_, transform);
+    shader.setUniformIndx(Shader::MVP_MAT_LOC, m_projection * cam.view() * transform);
+    shader.setUniformIndx(Shader::MODEL_MAT_LOC, transform);
 
 	if (mesh.ebo.id_ != 0)
 	{
@@ -181,7 +182,7 @@ void pure::Renderer::drawMeshStatic(const Mesh & mesh)
 void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transforms, uint32_t numDraws)
 {
     m_drawVAO.bind();
-    if (mesh.shader.id_ == 0) m_instancedShader.bind();
+    if (mesh.shader.id() == 0) m_instancedShader.bind();
     else mesh.shader.bind();
 
     if (mesh.texture) mesh.texture->bind();
@@ -225,8 +226,8 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
 	buffer.bind();
 
     // TODO: Maybe we can use a different simple shader to avoid sending useless data to gpu?
-    shader.setUniform(shader.modelMatLoc_, makeMat4());
-    shader.setUniform(shader.mvpMatLoc_, makeMat4());
+    shader.setUniformIndx(Shader::MODEL_MAT_LOC, makeMat4());
+    shader.setUniformIndx(Shader::MVP_MAT_LOC, makeMat4());
 
     setVertexLayout(buffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 

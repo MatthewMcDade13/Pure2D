@@ -11,6 +11,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#define glfwHandle(handle) (static_cast<GLFWwindow*>(handle))
+
 using namespace pure;
 
 namespace pure
@@ -36,19 +38,15 @@ static void onKeyInput(GLFWwindow* window, int key, int scancode, int action, in
 static GLFWmonitor* getPrimaryMonitor();
 static inline Vec2i getGLFWWindowSize(GLFWwindow* win);
 
-pure::Window::Window(): m_impl(new WindowImpl()) { }
-
-pure::Window::~Window() { delete m_impl; }
-
-int pure::Window::width() const { return m_impl->width; }
-int pure::Window::height() const { return m_impl->height; }
+int pure::Window::width() const { return m_width; }
+int pure::Window::height() const { return m_height; }
 
 Vec2i pure::Window::size() const
 {
-	return { m_impl->width, m_impl->height };
+	return { m_width, m_height };
 }
 
-Vec2f pure::Window::mousePos() const { return m_impl->mousePos; }
+Vec2f pure::Window::mousePos() const { return m_mousePos; }
 
 bool Window::create(const char *title)
 {
@@ -79,14 +77,14 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
 		return false;
 	}
 
-    m_impl->handle = handle;
-    m_impl->width = width;
-    m_impl->height = height;
-    m_impl->isFullscreen = false;
+    m_handle = handle;
+    m_width = width;
+    m_height = height;
+    m_isFullscreen = false;
 
-    glfwSetWindowUserPointer(handle, m_impl);
+    glfwSetWindowUserPointer(handle, this);
 
-    glViewport(0, 0, m_impl->width, m_impl->height);
+    glViewport(0, 0, m_width, m_height);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -96,48 +94,53 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
 
 void pure::Window::close() const
 {
-    glfwSetWindowShouldClose(m_impl->handle, true);
+    glfwSetWindowShouldClose(glfwHandle(m_handle), true);
 }
 
 void pure::Window::destroy()
 {
-	glfwDestroyWindow(m_impl->handle);
-	*m_impl = {};
+	glfwDestroyWindow(glfwHandle(m_handle));
+	m_width = 0;
+	m_height = 0;
+	m_isFullscreen = false;
+	m_handle = nullptr;
+	m_mousePos = {};
+	m_events = {};
 }
 
 bool pure::Window::isOpen() const
 {
-    return !glfwWindowShouldClose(m_impl->handle);
+    return !glfwWindowShouldClose(glfwHandle(m_handle));
 }
 
 void pure::Window::captureMouse() const
 {
-    glfwSetInputMode(m_impl->handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(glfwHandle(m_handle), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void pure::Window::releaseMouse() const
 {
-    glfwSetInputMode(m_impl->handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(glfwHandle(m_handle), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 bool pure::Window::pollEvents(WindowEvent& e)
 {
     glfwPollEvents();
-    if (m_impl->events.empty()) return false;
+    if (m_events.empty()) return false;
 
-    e = m_impl->events.front();
-    m_impl->events.pop();
+    e = m_events.front();
+    m_events.pop();
     return true;
 }
 
 void pure::Window::swapBuffers() const
 {
-    glfwSwapBuffers(m_impl->handle);
+    glfwSwapBuffers(glfwHandle(m_handle));
 }
 
 bool pure::Window::isKeyPressed(Key key) const
 {
-    int keyState = glfwGetKey(m_impl->handle, static_cast<int>(key));
+    int keyState = glfwGetKey(glfwHandle(m_handle), static_cast<int>(key));
     return keyState == GLFW_PRESS;
 };
 
@@ -151,7 +154,7 @@ void pure::Window::toggleFullscreenWindowed()
     // FIXME: When going from fullscreen to windowed, the coordinates get all messed up... still not 100% sure
     // if this is something that can be done here or its something the calling code will have to handle with
     // OpenGL
-    if (m_impl->isFullscreen)
+    if (m_isFullscreen)
     {
         // TODO: Maybe have Default Size be configurable?
         const Vec2i windowPos = {
@@ -159,13 +162,15 @@ void pure::Window::toggleFullscreenWindowed()
                 DEFAULT_WIN_SIZE.y / 2
         };
 
-        glfwSetWindowMonitor(m_impl->handle, nullptr, windowPos.x, windowPos.y, DEFAULT_WIN_SIZE.x, DEFAULT_WIN_SIZE.y, mode->refreshRate);
-        m_impl->isFullscreen = false;
+        glfwSetWindowMonitor(glfwHandle(m_handle), nullptr, 
+			windowPos.x, windowPos.y, DEFAULT_WIN_SIZE.x, 
+			DEFAULT_WIN_SIZE.y, mode->refreshRate);
+        m_isFullscreen = false;
     }
     else
     {
-        glfwSetWindowMonitor(m_impl->handle, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-        m_impl->isFullscreen = true;
+        glfwSetWindowMonitor(glfwHandle(m_handle), monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        m_isFullscreen = true;
     }
 }
 
@@ -177,15 +182,15 @@ void pure::Window::clear(const Vec4f& clearColor) const
 
 void pure::Window::setSize(uint32_t width, uint32_t height)
 {
-    m_impl->width = width;
-    m_impl->height = height;
-    glfwSetWindowSize(m_impl->handle, width, height);
-    glViewport(0, 0, m_impl->width, m_impl->height);
+    m_width = width;
+    m_height = height;
+    glfwSetWindowSize(glfwHandle(m_handle), width, height);
+    glViewport(0, 0, m_width, m_height);
 }
 
 void Window::setTitle(const char *title) const
 {
-    glfwSetWindowTitle(m_impl->handle, title);
+    glfwSetWindowTitle(glfwHandle(m_handle), title);
 }
 
 void onResize(GLFWwindow * win, int width, int height)

@@ -7,9 +7,13 @@
 
 
 #include <cstdint>
+#include <queue>
 #include <Pure2D/Define.h>
+#include <Pure2D/Window/WindowEvent.h>
 #include <Pure2D/System/NonCopyable.h>
 #include <Pure2D/Math/Vec4.h>
+#include <Pure2D/Math/Vec2.h>
+
 
 namespace pure
 {
@@ -19,14 +23,10 @@ namespace pure
 
     struct PURE2D_API Window : private NonCopyable
     {
-        Window();
-
-        ~Window();
-
         int width() const;
         int height() const;
 		Vec2i size() const;
-        Vec2<float> mousePos() const;
+        Vec2f mousePos() const;
         bool isOpen() const;
 
         void setSize(uint32_t width, uint32_t height);
@@ -48,8 +48,15 @@ namespace pure
         bool isKeyPressed(Key key) const;
 
         void toggleFullscreenWindowed();
+
     private:
-        struct WindowImpl* m_impl;
+		int m_width;
+		int m_height;
+		bool m_isFullscreen;
+		void* m_handle;
+
+		Vec2f m_mousePos;
+		std::queue<WindowEvent> m_events;
     };
 
 }

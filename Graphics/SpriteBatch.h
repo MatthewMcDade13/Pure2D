@@ -6,9 +6,11 @@
 #define PURE2D_SPRITEBATCH_H
 
 #include <cstddef>
+#include <vector>
 #include <Pure2D/Define.h>
 #include <Pure2D/Graphics/Renderable.h>
 #include <Pure2D/System/NonCopyable.h>
+#include <Pure2D/Graphics/Mesh.h>
 
 namespace pure
 {
@@ -19,7 +21,7 @@ namespace pure
     struct Mat4;
 
     // TODO: Implement free() function like rest of api?
-    struct PURE2D_API SpriteBatch : public Renderable, private NonCopyable
+    struct PURE2D_API SpriteBatch : public Renderable
     {
         const Texture* texture;
 
@@ -40,7 +42,9 @@ namespace pure
 
 
     private:
-        struct SpriteBatch_Impl* m_impl;
+		std::vector<Quad> m_quads;
+		int m_uniformLocations[2];
+		Mesh m_sprites;
     };
 }
 

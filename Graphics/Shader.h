@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <Pure2D/Define.h>
 
-#if 1
+#if 0
 
 namespace pure
 {
@@ -54,6 +54,7 @@ namespace pure
 }
 #else
 #include <cinttypes>
+#include <vector>
 #include <cstddef>
 #include <Pure2D/Define.h>
 
@@ -65,18 +66,15 @@ namespace pure
 
 	struct PURE2D_API Shader
 	{
-		uint32_t id_;
+		// Use this as a lookup table to get uniform locations
+		// Index 0 and 1 are reserved for model mat and mvp mat locations respectively.
+		// Start new additions at DEFAULT_LOC_COUNT to avoid conflicts
+		std::vector<int> locations;
+		inline uint32_t id() const { return m_id; }
 
-		enum { MODEL_MAT_LOC = 0, MVP_MAT_LOC };
+		enum { MODEL_MAT_LOC = 0, MVP_MAT_LOC, DEFAULT_LOC_COUNT };
 
-		Shader();
-		~Shader();
-		Shader(const Shader& other);
-		Shader(const Shader&& other);
-		Shader& operator=(const Shader& right);
-
-		//int modelMatLoc_;
-		//int mvpMatLoc_;
+		Shader(uint32_t id = 0);
 
 		static Shader create(const char* vertShaderPath, const char* fragShaderPath);
 		static Shader createSrc(const char* vertSrc, const char* fragSrc);
@@ -93,11 +91,7 @@ namespace pure
 
 		void bind() const;
 
-		int loadUniformLoc(int location, int index = -1);
-		int loadUniformLoc(const char *uniform, int index = -1);
-
 		int getLocation(const char *uniform) const;
-		int getLocation(int index) const;
 
 		void setUniformIndx(int index, const Vec4<float> &vec) const;
 		void setUniformIndx(int index, const Vec3<float> &vec) const;
@@ -120,7 +114,7 @@ namespace pure
 		void free();
 
 	private:
-		struct Shader_Impl* m_impl;
+		uint32_t m_id;
 	};
 }
 

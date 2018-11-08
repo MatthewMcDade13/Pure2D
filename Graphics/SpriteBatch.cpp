@@ -17,19 +17,7 @@
 #include "Quad.h"
 #include "External/glad.h"
 
-namespace pure
-{
-
-    struct SpriteBatch_Impl
-    {
-        std::vector<Quad> quads;
-        int uniformLocations[2];
-		Mesh sprites;
-    };
-
-    enum { PROJ_MAT = 0, VIEW_MAT };
-
-}
+enum { PROJ_MAT = 0, VIEW_MAT };
 
 using namespace pure;
 
@@ -52,7 +40,7 @@ static const size_t vertShaderlen = Shader::getVertShaderSize(strlen(batchVertSh
 static const size_t fragShaderlen = Shader::getFragShaderSize(strlen(batchFragShader));
 
 pure::SpriteBatch::SpriteBatch(const pure::Texture &texture, size_t maxNumSprites):
-    texture(&texture), m_impl(new SpriteBatch_Impl())
+    texture(&texture)
 {
 	reset(maxNumSprites);
 
@@ -65,43 +53,41 @@ pure::SpriteBatch::SpriteBatch(const pure::Texture &texture, size_t maxNumSprite
     Shader::createVertShader(&vert[0], batchVertShader, false);
     Shader::createFragShader(&frag[0], batchFragShader);
 
-    m_impl->sprites.shader = Shader::createSrc(vert.c_str(), frag.c_str());
-    m_impl->uniformLocations[PROJ_MAT] = m_impl->sprites.shader.getLocation("u_projMatrix");
-    m_impl->uniformLocations[VIEW_MAT] = m_impl->sprites.shader.getLocation("u_viewMatrix");
+    m_sprites.shader = Shader::createSrc(vert.c_str(), frag.c_str());
+    m_uniformLocations[PROJ_MAT] = m_sprites.shader.getLocation("u_projMatrix");
+    m_uniformLocations[VIEW_MAT] = m_sprites.shader.getLocation("u_viewMatrix");
 }
 
 pure::SpriteBatch::~SpriteBatch()
 {
-    m_impl->sprites.vbo.free();
-    m_impl->sprites.shader.free();
-	m_impl->sprites.ebo.free();
-    delete m_impl;
-    m_impl = nullptr;
+    m_sprites.vbo.free();
+    m_sprites.shader.free();
+	m_sprites.ebo.free();
 }
 
 size_t SpriteBatch::submit(const Quad& quad, const Mat4& transform)
 {
     Quad q = quad;
     q.translate(transform);
-    m_impl->quads.push_back(q);
-	return m_impl->quads.size() - 1;
+    m_quads.push_back(q);
+	return m_quads.size() - 1;
 }
 
 Quad & pure::SpriteBatch::get(size_t index)
 {
-	assert(index >= 0 && index < m_impl->quads.size());
-	return m_impl->quads[index];
+	assert(index >= 0 && index < m_quads.size());
+	return m_quads[index];
 }
 
 void pure::SpriteBatch::flush()
 {
-    m_impl->quads.clear();
-    m_impl->sprites.vbo.vertCount = 0;
+    m_quads.clear();
+    m_sprites.vbo.vertCount = 0;
 }
 
 void pure::SpriteBatch::reset(size_t maxNumSprites)
 {
-	Mesh& sprites = m_impl->sprites;
+	Mesh& sprites = m_sprites;
 	sprites.vbo.free();
 	sprites.ebo.free();
 
@@ -111,37 +97,37 @@ void pure::SpriteBatch::reset(size_t maxNumSprites)
 	sprites.ebo = ElementBuffer::quad(maxNumSprites * 6);
 
 	flush();
-	m_impl->quads.reserve(maxNumSprites);
+	m_quads.reserve(maxNumSprites);
 }
 
 void SpriteBatch::draw(Renderer& renderer)
 {
-    const auto* verts = reinterpret_cast<Vertex2D*>(&m_impl->quads[0]);
-    const size_t numVerts = m_impl->quads.size() * Quad::VERT_COUNT;
+    const auto* verts = reinterpret_cast<Vertex2D*>(&m_quads[0]);
+    const size_t numVerts = m_quads.size() * Quad::VERT_COUNT;
 
-    m_impl->sprites.vbo.writeBuffer(verts, numVerts, 0);
-    m_impl->sprites.vbo.vertCount = numVerts;
+    m_sprites.vbo.writeBuffer(verts, numVerts, 0);
+    m_sprites.vbo.vertCount = numVerts;
 
-    m_impl->sprites.shader.setUniform(m_impl->uniformLocations[PROJ_MAT], renderer.projection());
-    m_impl->sprites.shader.setUniform(m_impl->uniformLocations[VIEW_MAT], renderer.cam.view());
+    m_sprites.shader.setUniform(m_uniformLocations[PROJ_MAT], renderer.projection());
+    m_sprites.shader.setUniform(m_uniformLocations[VIEW_MAT], renderer.cam.view());
 
-	renderer.drawMeshStatic(m_impl->sprites);
+	renderer.drawMeshStatic(m_sprites);
 
 }
 
 void SpriteBatch::setFragShader(const char *shaderSrc)
 {
-    m_impl->sprites.shader.free();
+    m_sprites.shader.free();
 
     std::string vert{};
     vert.resize(vertShaderlen);
     Shader::createVertShader(&vert[0], batchVertShader, false);
 
-    m_impl->sprites.shader = Shader::createSrc(vert.c_str(), shaderSrc);
+    m_sprites.shader = Shader::createSrc(vert.c_str(), shaderSrc);
 }
 
 const Shader &SpriteBatch::shader() const
 {
-    return m_impl->sprites.shader;
+    return m_sprites.shader;
 }
 
