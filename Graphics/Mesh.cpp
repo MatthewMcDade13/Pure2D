@@ -17,9 +17,10 @@ pure::Mesh pure::Mesh::quad(DrawUsage usage)
 {
     Mesh m = {};
 
-    m.primtype = DrawPrimitive::TRIANGLE_STRIP;
+    m.primtype = DrawPrimitive::TRIANGLES;
     Quad q = Quad::create();
     m.vbo = VertexBuffer::create(q.verts, Quad::VERT_COUNT, usage);
+	m.ebo = ElementBuffer::quad(6);
     return m;
 
 }

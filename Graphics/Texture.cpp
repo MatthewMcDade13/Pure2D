@@ -23,6 +23,11 @@ void pure::Texture::bind() const
 	glBindTexture(GL_TEXTURE_2D, id_);
 }
 
+void pure::Texture::setAlignment(int alignment)
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+}
+
 Texture pure::Texture::create(const char * fileName, bool shouldFlip)
 {
 	uint32_t texture;
@@ -68,28 +73,54 @@ Texture pure::Texture::create(const char * fileName, bool shouldFlip)
 	return t;
 }
 
+Texture pure::Texture::create(size_t w, size_t h, Format internalFormat, Format format, void * data, DataType type)
+{
+	uint32_t texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLenum>(internalFormat), w, h,
+		0, static_cast<GLenum>(format), static_cast<GLenum>(type), data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	Texture t = {};
+	t.size = { int(w), int(h) };
+	t.m_unit = GL_TEXTURE0;
+	t.id_ = texture;
+	return t;
+}
+
 void pure::Texture::free()
 {
 	glDeleteTextures(1, &id_);
 	*this = { };
 }
 
+void pure::Texture::write(Vec2i offset, size_t w, size_t h, Format format, DataType type, void * data)
+{
+	bind();
+	glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, w, h, 
+		static_cast<GLenum>(format), static_cast<GLenum>(type), data);
+
+}
+
+// TODO: Verify this still works
 Texture Texture::createBlank()
 {
-	uint32_t texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
 	GLubyte texdata[] = { 255, 255, 255, 255 };
+	return Texture::create(1, 1, Format::RGBA, Format::RGBA, texdata);
+	//uint32_t texture;
+	//glGenTextures(1, &texture);
+	//glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1,
-				 0, GL_RGBA, GL_UNSIGNED_BYTE, texdata);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1,
+	//			 0, GL_RGBA, GL_UNSIGNED_BYTE, texdata);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
-	Texture t = {};
-	t.size = { 1, 1 };
-	t.m_unit = GL_TEXTURE0;
-	t.id_ = texture;
-	return t;
+	//Texture t = {};
+	//t.size = { 1, 1 };
+	//t.m_unit = GL_TEXTURE0;
+	//t.id_ = texture;
+	//return t;
 }

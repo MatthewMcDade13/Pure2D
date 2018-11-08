@@ -12,6 +12,7 @@
 #include <Pure2D/Graphics/Renderable.h>
 #include <Pure2D/Graphics/Renderer.h>
 #include <Pure2D/Graphics/Transform.h>
+#include <Pure2D/Graphics/Font.h>
 
 #endif // PURE2D_MGRAPHICS_H
 

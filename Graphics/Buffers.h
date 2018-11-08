@@ -3,6 +3,7 @@
 
 #include <cinttypes>
 #include <cstdio>
+#include <Pure2D/System/DataType.h>
 #include <Pure2D/Define.h>
 #include <Pure2D/Math/Vec2.h>
 #include <Pure2D/Math/Vec3.h>
@@ -17,17 +18,6 @@ namespace pure
 		STATIC_DRAW = 0x88E4,
 		DYNAMIC_DRAW = 0x88E8,
 		STREAM_DRAW = 0x88E0
-	};
-
-	enum class BufferType
-	{
-		BYTE = 0x1400,
-		UBYTE = 0x1401,
-		SHORT = 0x1402,
-		USHORT = 0x1403,
-		INT = 0x1404,
-		UINT = 0x1405,
-		FLOAT = 0x1406
 	};
 
 	enum class DrawPrimitive
@@ -56,12 +46,12 @@ namespace pure
         uint8_t bufferIndex;
         uint8_t elemCount;
         bool isInstanced;
-        BufferType type : 16;
+        DataType type : 16;
         size_t offset;
         size_t stride;
 
         static inline VertexAttribute create(uint8_t bufferIndex, uint8_t elemCount,
-                BufferType type, size_t stride, size_t offset, bool isInstanced)
+                DataType type, size_t stride, size_t offset, bool isInstanced)
         {
             VertexAttribute va = {};
             va.bufferIndex = bufferIndex;
@@ -74,10 +64,16 @@ namespace pure
         }
     };
 
-
 	// TODO: ElementBuffer needs some love to conform to rest of API.
-	struct ElementBuffer
+	struct PURE2D_API ElementBuffer
 	{
+		static ElementBuffer create(const uint32_t* indicies, size_t count, DrawUsage usage = DrawUsage::STATIC_DRAW);
+		static ElementBuffer quad(size_t count);
+
+		void bind() const;
+
+		void free();
+
 		uint32_t id_;
 		size_t count;
 	};
@@ -86,18 +82,18 @@ namespace pure
 	{
 		uint32_t id_;
 //		uint32_t vertexSize;
-		BufferType type;
+		DataType type;
 		size_t vertCount;
 		size_t size;
 //		size_t capacity;
 
-		static VertexBuffer createZeroed(size_t typeSize, size_t count, DrawUsage usage, BufferType type);
+		static VertexBuffer createZeroed(size_t typeSize, size_t count, DrawUsage usage, DataType type);
 
 		template<typename T>
-		static VertexBuffer create(const T* verts, size_t count, DrawUsage usage, BufferType type = BufferType::FLOAT);
+		static VertexBuffer create(const T* verts, size_t count, DrawUsage usage, DataType type = DataType::FLOAT);
 
 		template<typename T>
-		void alloc(const T* verts, size_t count, DrawUsage usage, BufferType type = BufferType::FLOAT);
+		void alloc(const T* verts, size_t count, DrawUsage usage, DataType type = DataType::FLOAT);
 
 		template<typename T>
 		void writeBuffer(const T* verts, size_t count, intptr_t bufferOffset);
@@ -122,9 +118,6 @@ namespace pure
 		void free();
 		void setLayout(const VertexBuffer& buffer, uint32_t index, int elemCount, bool normalized, size_t stride, void* ptr);
 	};
-
-	PURE2D_API ElementBuffer createEBO(const uint32_t* indicies, size_t count, DrawUsage usage = DrawUsage::STATIC_DRAW);
-	PURE2D_API void deleteEBO(ElementBuffer& buffer);
 
 	PURE2D_API void unbindEBO();
 	PURE2D_API void unbindVAO();

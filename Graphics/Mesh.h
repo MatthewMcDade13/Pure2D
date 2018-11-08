@@ -18,6 +18,7 @@ namespace pure
 	{
 
 		VertexBuffer vbo;
+		ElementBuffer ebo = { 0 };
 		const Texture* texture;
 		Shader shader;
 		DrawPrimitive primtype;

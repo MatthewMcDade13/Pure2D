@@ -14,6 +14,9 @@ namespace pure
 
 		explicit constexpr operator Vec4<T>() const { return { T(x), T(y), T(w), T(h) }; }
 
+		template<typename U>
+		explicit constexpr operator Rect<U>() const { return { U(x), U(y), U(w), U(h) }; }
+
 		T x, y, w, h;
 
 		T bottom() const { return y + h; }

@@ -8,6 +8,7 @@
 #include <cstring>
 #include <iostream>
 
+#include <Pure2D/Graphics/Mesh.h>
 #include "SpriteBatch.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Quad.h"
@@ -22,10 +23,8 @@ namespace pure
     struct SpriteBatch_Impl
     {
         std::vector<Quad> quads;
-        Shader batchShader;
-        VertexBuffer vbo = {};
         int uniformLocations[2];
-        ElementBuffer ebo;
+		Mesh sprites;
     };
 
     enum { PROJ_MAT = 0, VIEW_MAT };
@@ -49,14 +48,14 @@ static constexpr const char* batchFragShader = "\n"
         "   return texture(tex, texCoord) * color;\n"
         "}\n";
 
-static ElementBuffer createElementBuffer(size_t count);
-
 static const size_t vertShaderlen = Shader::getVertShaderSize(strlen(batchVertShader));
 static const size_t fragShaderlen = Shader::getFragShaderSize(strlen(batchFragShader));
 
 pure::SpriteBatch::SpriteBatch(const pure::Texture &texture, size_t maxNumSprites):
     texture(&texture), m_impl(new SpriteBatch_Impl())
 {
+	reset(maxNumSprites);
+
     std::string vert{};
     std::string frag{};
 
@@ -66,47 +65,53 @@ pure::SpriteBatch::SpriteBatch(const pure::Texture &texture, size_t maxNumSprite
     Shader::createVertShader(&vert[0], batchVertShader, false);
     Shader::createFragShader(&frag[0], batchFragShader);
 
-    m_impl->batchShader = Shader::createSrc(vert.c_str(), frag.c_str());
-    m_impl->uniformLocations[PROJ_MAT] = m_impl->batchShader.getLocation("u_projMatrix");
-    m_impl->uniformLocations[VIEW_MAT] = m_impl->batchShader.getLocation("u_viewMatrix");
-
-    m_impl->ebo = createElementBuffer(maxNumSprites * 6);
-
-    reset(maxNumSprites);
+    m_impl->sprites.shader = Shader::createSrc(vert.c_str(), frag.c_str());
+    m_impl->uniformLocations[PROJ_MAT] = m_impl->sprites.shader.getLocation("u_projMatrix");
+    m_impl->uniformLocations[VIEW_MAT] = m_impl->sprites.shader.getLocation("u_viewMatrix");
 }
 
 pure::SpriteBatch::~SpriteBatch()
 {
-    m_impl->vbo.free();
-    m_impl->batchShader.free();
-    deleteEBO(m_impl->ebo);
+    m_impl->sprites.vbo.free();
+    m_impl->sprites.shader.free();
+	m_impl->sprites.ebo.free();
     delete m_impl;
     m_impl = nullptr;
 }
 
-void SpriteBatch::submit(const Quad& quad, const Mat4& transform)
+size_t SpriteBatch::submit(const Quad& quad, const Mat4& transform)
 {
     Quad q = quad;
     q.translate(transform);
     m_impl->quads.push_back(q);
+	return m_impl->quads.size() - 1;
+}
+
+Quad & pure::SpriteBatch::get(size_t index)
+{
+	assert(index >= 0 && index < m_impl->quads.size());
+	return m_impl->quads[index];
 }
 
 void pure::SpriteBatch::flush()
 {
     m_impl->quads.clear();
-    m_impl->vbo.vertCount = 0;
+    m_impl->sprites.vbo.vertCount = 0;
 }
 
 void pure::SpriteBatch::reset(size_t maxNumSprites)
 {
-    if (m_impl->vbo.id_ != 0) m_impl->vbo.free();
-    if (m_impl->ebo.id_ != 0) deleteEBO(m_impl->ebo);
+	Mesh& sprites = m_impl->sprites;
+	sprites.vbo.free();
+	sprites.ebo.free();
 
-    m_impl->vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), maxNumSprites * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, BufferType::FLOAT);
-    m_impl->ebo = createElementBuffer(maxNumSprites * 6);
+	sprites.primtype = DrawPrimitive::TRIANGLES;
+	sprites.texture = this->texture;
+	sprites.vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), maxNumSprites * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
+	sprites.ebo = ElementBuffer::quad(maxNumSprites * 6);
 
-    flush();
-    m_impl->quads.reserve(maxNumSprites);
+	flush();
+	m_impl->quads.reserve(maxNumSprites);
 }
 
 void SpriteBatch::draw(Renderer& renderer)
@@ -114,51 +119,29 @@ void SpriteBatch::draw(Renderer& renderer)
     const auto* verts = reinterpret_cast<Vertex2D*>(&m_impl->quads[0]);
     const size_t numVerts = m_impl->quads.size() * Quad::VERT_COUNT;
 
-    m_impl->vbo.writeBuffer(verts, numVerts, 0);
-    m_impl->vbo.vertCount = numVerts;
+    m_impl->sprites.vbo.writeBuffer(verts, numVerts, 0);
+    m_impl->sprites.vbo.vertCount = numVerts;
 
-    m_impl->batchShader.setUniform(m_impl->uniformLocations[PROJ_MAT], renderer.projection());
-    m_impl->batchShader.setUniform(m_impl->uniformLocations[VIEW_MAT], renderer.cam.view());
+    m_impl->sprites.shader.setUniform(m_impl->uniformLocations[PROJ_MAT], renderer.projection());
+    m_impl->sprites.shader.setUniform(m_impl->uniformLocations[VIEW_MAT], renderer.cam.view());
 
-    renderer.drawBuffer(0, m_impl->vbo.vertCount, m_impl->vbo, texture, m_impl->batchShader, &m_impl->ebo, DrawPrimitive::TRIANGLES);
+	renderer.drawMeshStatic(m_impl->sprites);
 
 }
 
 void SpriteBatch::setFragShader(const char *shaderSrc)
 {
-    m_impl->batchShader.free();
+    m_impl->sprites.shader.free();
 
     std::string vert{};
     vert.resize(vertShaderlen);
     Shader::createVertShader(&vert[0], batchVertShader, false);
 
-    m_impl->batchShader = Shader::createSrc(vert.c_str(), shaderSrc);
+    m_impl->sprites.shader = Shader::createSrc(vert.c_str(), shaderSrc);
 }
 
 const Shader &SpriteBatch::shader() const
 {
-    return m_impl->batchShader;
+    return m_impl->sprites.shader;
 }
 
-ElementBuffer createElementBuffer(size_t count)
-{
-    std::vector<uint32_t> indices(count);
-
-    const size_t itrRange = indices.size() / 6;
-
-    for (size_t i = 0; i < itrRange; i++)
-    {
-        size_t quadIndex = i * 6;
-        auto vertexIndex = static_cast<uint32_t>(i * 4);
-
-        indices[quadIndex + 0] = vertexIndex + 0;
-        indices[quadIndex + 1] = vertexIndex + 1;
-        indices[quadIndex + 2] = vertexIndex + 2;
-
-        indices[quadIndex + 3] = vertexIndex + 2;
-        indices[quadIndex + 4] = vertexIndex + 3;
-        indices[quadIndex + 5] = vertexIndex + 1;
-    }
-
-    return createEBO(&indices[0], indices.size());
-}

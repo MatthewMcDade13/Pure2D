@@ -51,11 +51,46 @@ void pure::Shader::bind() const
 {
 	glUseProgram(id_);
 }
-
+//
+//int pure::Shader::loadUniformLoc(int location, int index)
+//{
+//	return 0;
+//}
+//
+//int pure::Shader::loadUniformLoc(const char * uniform, int index)
+//{
+//	return 0;
+//}
+#include <memory>
 int pure::Shader::getLocation(const char *uniform) const
 {
 	return glGetUniformLocation(id_, uniform);
 }
+//
+//int pure::Shader::getLocation(int index) const
+//{
+//	return 0;
+//}
+//
+//void pure::Shader::setUniformIndx(int index, const Vec4<float>& vec) const
+//{
+//}
+//
+//void pure::Shader::setUniformIndx(int index, const Vec3<float>& vec) const
+//{
+//}
+//
+//void pure::Shader::setUniformIndx(int index, const Mat4 & matrix, bool transpose) const
+//{
+//}
+//
+//void pure::Shader::setUniformIndx(int index, float val) const
+//{
+//}
+//
+//void pure::Shader::setUniformIndx(int index, int val) const
+//{
+//}
 
 void pure::Shader::setUniform(int location, const Vec4<float> &vec) const
 {
@@ -174,11 +209,6 @@ static constexpr const char* VERT_TEMPLATE_MAIN = "\n"
 		"}";
 
 
-static const size_t fragTemplateLen = strlen(FRAG_TEMPLATE_VARS) + strlen(FRAG_TEMPLATE_MAIN);
-
-// assume longer template just to keep things safe and concise
-static const size_t vertTemplateLen = strlen(VERT_TEMPLATE_DECLS_INSTANCED) + strlen(VERT_TEMPLATE_MAIN);
-
 static const size_t defaultFragLen = strlen(shader::frag);
 static const size_t defaultInstancedVertLen = strlen(shader::instancedVert);
 static const size_t defaultVertLen = strlen(shader::vert);
@@ -211,11 +241,14 @@ Shader Shader::createDefault(bool isInstanced)
 
 size_t Shader::getFragShaderSize(size_t inBufferCount)
 {
+	static const size_t fragTemplateLen = strlen(FRAG_TEMPLATE_VARS) + strlen(FRAG_TEMPLATE_MAIN);
 	return fragTemplateLen + inBufferCount;
 }
 
 size_t Shader::getVertShaderSize(size_t inBufferCount)
 {
+	// assume longer template just to keep things safe and concise
+	static const size_t vertTemplateLen = strlen(VERT_TEMPLATE_DECLS_INSTANCED) + strlen(VERT_TEMPLATE_MAIN);
 	return vertTemplateLen + inBufferCount;
 }
 

@@ -18,7 +18,7 @@ namespace pure
     struct Quad;
     struct Mat4;
 
-    // TODO: To make this Renderable or not to make this Renderable...
+    // TODO: Implement free() function like rest of api?
     struct PURE2D_API SpriteBatch : public Renderable, private NonCopyable
     {
         const Texture* texture;
@@ -30,8 +30,11 @@ namespace pure
         void setFragShader(const char* shaderSrc);
 
         void reset(size_t maxNumSprites);
-        void submit(const Quad& quad, const Mat4& transform);
-        void flush();
+		// submits quad to SpriteBatch. Returns id index to quad in batch
+        size_t submit(const Quad& quad, const Mat4& transform);
+		Quad& get(size_t index);
+
+		void flush();
 
         void draw(Renderer& renderer) final;
 

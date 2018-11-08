@@ -25,6 +25,7 @@ add_library(Pure2D SHARED
         Private/FileIO.cpp Private/FileIO.h
         Private/Shaders.h
         Private/Util.h
+		Private/FreeType.cpp Private/FreeType.h
         Graphics/Buffers.cpp Graphics/Buffers.h
         Graphics/Camera.cpp Graphics/Camera.h
         Graphics/Shader.cpp Graphics/Shader.h

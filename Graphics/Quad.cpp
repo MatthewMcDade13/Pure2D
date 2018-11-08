@@ -13,8 +13,8 @@
 
 using namespace pure;
 
-static void resetTexCoords(Quad& q);
-static void resetPositions(Quad& q);
+static inline void resetTexCoords(Quad& q);
+static inline void resetPositions(Quad& q);
 
 static constexpr Vertex2D quadVerts[Quad::VERT_COUNT] = {
     { 0.0f, 0.0f, 0.0f,  0.0f, 1.0f,   1.f, 1.f, 1.f, 1.f },  // top left
