@@ -23,7 +23,7 @@ namespace pure
             {
                 struct { float x, y, z; } position;
                 struct { float u, v; } texCoord;
-                struct { float r, g, b, a; } m_color;
+                struct { float r, g, b, a; } color;
             };
 
             float buffer[COUNT];

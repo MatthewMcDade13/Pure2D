@@ -1,7 +1,10 @@
 #if 1
 #include "Font.h"
-#include "Private/FreeType.h"
 #include "External/stb_truetype.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H  
+
 #include <Pure2D/Graphics/Transform.h>
 #include <Pure2D/Graphics/Texture.h>
 #include <Pure2D/Graphics/Quad.h> 
@@ -15,20 +18,22 @@
 #include <algorithm>
 
 #define fttFace(handle) (static_cast<FT_Face>(handle))
+#define fttLib(handle) (static_cast<FT_Library>(handle))
 
 using namespace pure;
 
-static void moveGlyph(Vec2f pos, Glyph& g);
-
-enum UniLocs
-{
-	PROJ_MAT_LOC = 0, COLOR_LOC
-};
+static inline void translateGlyph(Transform& t, const Vec3f& pos, const Glyph& g);
 
 static struct FontShader
 {
+
 	Shader base;
-	int m_uniformLocs[2];
+
+	enum
+	{
+		PROJ_MAT = Shader::DEFAULT_LOC_COUNT,
+		COLOR
+	};
 
 	static FontShader& defaultInstance()
 	{
@@ -71,49 +76,24 @@ private:
 		Shader::createFragShader(&f[0], FontShader::defaultFrag);
 
 		base = Shader::createSrc(v.c_str(), f.c_str());
-		m_uniformLocs[COLOR_LOC] = base.getLocation("u_color");
-		m_uniformLocs[PROJ_MAT_LOC] = base.getLocation("u_projMatrix");
+		base.locations.resize(base.locations.size() + 2);
+		base.locations[COLOR] = base.getLocation("u_color");
+		base.locations[PROJ_MAT] = base.getLocation("u_projMatrix");
 	}
 
-	void setColor(const Vec4f& m_color) const
+	void setColor(const Vec4f& color) const
 	{
-		base.setUniform(m_uniformLocs[COLOR_LOC], m_color);
+		base.setUniformIndx(COLOR, color);
 	}
 
 	void setProjMat(const Mat4& projMat) const
 	{
-		base.setUniform(m_uniformLocs[PROJ_MAT_LOC], projMat);
+		base.setUniformIndx(PROJ_MAT, projMat);
 	}
 };
 
 const size_t FontShader::defaultVertShaderlen = Shader::getVertShaderSize(strlen(FontShader::defaultVert));
 const size_t FontShader::defaultFragShaderlen = Shader::getFragShaderSize(strlen(FontShader::defaultFrag));
-
-void pure::Text::updateVerts()
-{
-	//Font::FontMap& fm = m_parentFont->m_glyphs[m_characterSize];
-
-	//Vec3f pos = m_transform.position();
-	//
-	//for (size_t i = 0; i < m_textString.size(); i++)
-	//{
-	//	char c = m_textString[i];
-	//	Quad& q = m_quads[i];
-	//	const Glyph& g = fm.glyphs[c];
-
-	//	Transform t = m_transform;
-
-	//	t.setPosition({ pos.x + g.bitmap.x, pos.y + g.bitmap.y });
-	//	q.translate(t.modelMatrix());
-
-	//	pos += g.advance;
-	//}
-
-	//const auto* verts = reinterpret_cast<Vertex2D*>(&m_quads[0]);
-	//const size_t numVerts = m_quads.size() * Quad::VERT_COUNT;
-	//m_mesh.vbo.writeBuffer(verts, numVerts, 0);
-
-}
 
 void pure::Text::setSize(Vec2f size)
 {
@@ -121,9 +101,15 @@ void pure::Text::setSize(Vec2f size)
 	m_needsUpdate = true;
 }
 
-void pure::Text::setPosition(Vec3f pos)
+void pure::Text::setPosition(const Vec3f& pos)
 {
 	m_transform.setPosition(pos);
+	m_needsUpdate = true;
+}
+
+void pure::Text::setPosition(Vec2f pos)
+{
+	m_transform.setPosition({pos.x, pos.y, m_transform.position().z });
 	m_needsUpdate = true;
 }
 
@@ -133,9 +119,84 @@ void pure::Text::setRotation(float rot)
 	m_needsUpdate = true;
 }
 
-void pure::Text::setColor(const Vec4<float>& m_color)
+void pure::Text::move(const Vec3f & pos)
 {
-	this->m_color = m_color;
+	m_transform.setPosition(m_transform.position() + pos);
+	m_needsUpdate = true;
+}
+
+void pure::Text::scale(Vec2f size)
+{
+	m_transform.setSize(m_transform.size() + size);
+	m_needsUpdate = true;
+}
+
+void pure::Text::rotate(float rot)
+{
+	m_transform.setRotation(m_transform.rotation() + rot);
+	m_needsUpdate = true;
+}
+
+void pure::Text::setString(const char * text)
+{
+	const Font::FontMap& fm = parentFont->m_glyphs[m_characterSize];
+
+	Vec2f pos = {};
+
+	m_quads.clear();
+
+	for (const char* c = text; *c; c++)
+	{
+		Transform t = Transform::create();
+		Quad q = Quad::create();
+
+		const Glyph& g = fm.glyphs[*c];
+
+		Rectui r = {
+			uint32_t(g.xOffsetCoord),
+			fm.height - g.bitmap.h,
+			uint32_t(g.bitmap.w),
+			uint32_t(g.bitmap.h)
+		};
+		q.setTextureCoords(r, { int(fm.width), int(fm.height) });
+
+		q.flipVerticalTexCoords(0.f, g.bitmap.h / fm.height);
+
+		translateGlyph(t, { pos.x, pos.y, 50.f }, g);
+		t.setSize({ g.bitmap.w, g.bitmap.h });
+		q.translate(t.modelMatrix());
+
+		if (*(c + 1))
+		{
+			Vec2i kerning = parentFont->getKerning(*c, *(c + 1));
+			pos.x += g.advance.x + (kerning.x >> 6);
+		}
+
+		m_quads.push_back(q);
+	}
+
+	const auto* verts = reinterpret_cast<Vertex2D*>(&m_quads[0]);
+	const size_t vertCount = m_quads.size() * Quad::VERT_COUNT;
+	const size_t reserveSpace = m_quads.size() * 2;
+
+	if (m_quads.size() * sizeof(Quad) >= mesh.vbo.size)
+	{
+		m_quads.reserve(reserveSpace);
+
+		mesh.vbo.alloc((Vertex2D*)0, reserveSpace * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
+		mesh.vbo.writeBuffer(verts, vertCount, 0);
+		mesh.ebo.free();
+
+		mesh.ebo = ElementBuffer::quad(6 * reserveSpace);
+		m_quads.reserve(reserveSpace);
+	}
+	else
+	{
+		mesh.vbo.writeBuffer(verts, vertCount, 0);
+	}
+
+	m_textString = text;
+
 }
 
 const Transform & pure::Text::transform() const
@@ -147,22 +208,35 @@ void pure::Text::draw(Renderer & renderer)
 	if (m_needsUpdate)
 		updateVerts();
 
-	m_mesh.shader.setUniform(m_uniformLocs[PROJ_MAT_LOC], renderer.projection());
+	mesh.shader.setUniformIndx(FontShader::PROJ_MAT, renderer.projection());
 	updateColorUniform();
-	renderer.drawMeshStatic(m_mesh);
+	renderer.drawMeshStatic(mesh);
 }
 
 void pure::Font::free()
 {
-	clear();
-}
+	for (auto& kv : m_cache)
+		kv.second.free();
 
+	FT_Done_Face(fttFace(m_face));
+	m_face = nullptr;
+
+	FT_Done_FreeType(fttLib(m_lib));
+	m_lib = nullptr;
+}
 
 bool pure::Font::loadFromFile(const char * filename)
 {
-	clear();
+	free();
 
-	if (FT_New_Face(FreeType::get().lib, filename, 0, reinterpret_cast<FT_Face*>(&m_face)))
+	if (FT_Init_FreeType(reinterpret_cast<FT_Library*>(&m_lib)))
+	{
+		std::cerr << "Could not init FreeType" << std::endl;
+		return false;
+	}
+
+
+	if (FT_New_Face(fttLib(m_lib), filename, 0, reinterpret_cast<FT_Face*>(&m_face)))
 	{
 		std::cerr << "Could not open font: " << filename << std::endl;
 		return false;
@@ -173,125 +247,52 @@ bool pure::Font::loadFromFile(const char * filename)
 
 void pure::Text::updateColorUniform()
 {
-	m_mesh.shader.setUniform(m_uniformLocs[COLOR_LOC], m_color);
+	mesh.shader.setUniformIndx(FontShader::COLOR, color);
+}
+
+void pure::Text::updateVerts()
+{
+	Font::FontMap& fm = parentFont->m_glyphs[m_characterSize];
+
+	Vec3f pos = m_transform.position();
+
+	for (size_t i = 0; i < m_textString.size(); i++)
+	{
+		const char* c = m_textString.c_str() + i;
+		Transform t = Transform::create();
+		Quad& q = m_quads[i];
+
+		const Glyph& g = fm.glyphs[*c];
+
+		translateGlyph(t, pos, g);
+		t.setSize({ m_transform.size().x + g.bitmap.w, m_transform.size().y + g.bitmap.h });
+		t.setRotation(m_transform.rotation());
+		q.translate(t.modelMatrix());
+
+		if (*(c + 1))
+		{
+			Vec2i kerning = parentFont->getKerning(*c, *(c + 1));
+			pos.x += g.advance.x + (kerning.x >> 6);
+		}
+	}
+
+	const auto* verts = reinterpret_cast<Vertex2D*>(&m_quads[0]);
+	const size_t vertCount = m_quads.size() * Quad::VERT_COUNT;
+
+	mesh.vbo.writeBuffer(verts, vertCount, 0);
 }
 
 void pure::Font::loadSize(int size)
 {
-	//// if we already have glyphs for this size we don't need to do anything else.
-	//auto itr = m_glyphs.insert(std::make_pair(size, FontMap{}));
-	//if (!itr.second) return;
-	//
-	//FontMap& fm = itr.first->second;
+	auto itr = m_glyphs.insert(std::make_pair(size, FontMap{}));
+	if (!itr.second) return;
 
-	//Texture::setAlignment(1);
+	FontMap& fm = itr.first->second;
 
-	//FT_GlyphSlot g = fttFace(m_face)->glyph;
-
-	//FT_Set_Pixel_Sizes(fttFace(m_face), 0, size);
-
-	//int w = 0, h = 0;
-	//for (size_t i = 0; i < MAX_NUM_CHARS; i++)
-	//{
-	//	if (FT_Load_Char(fttFace(m_face), i, FT_LOAD_RENDER))
-	//	{
-	//		std::cerr << "Loading character: " << char(i) << "failed." << std::endl;
-	//	}
-
-	//	FT_GlyphSlot g = fttFace(m_face)->glyph;
-	//	w += g->bitmap.width;
-	//	h = std::max(h, (int)g->bitmap.rows);
-	//}
-
-	//Texture& texture = m_cache.insert(
-	//	std::make_pair(size, Texture::create(w, h, Texture::Format::RED, Texture::Format::RED, nullptr))
-	//).first->second;
-
-	//int offset = 0;
-
-	//for (size_t i = 0; i < MAX_NUM_CHARS; i++)
-	//{
-	//	if (FT_Load_Char(fttFace(m_face), i, FT_LOAD_RENDER))
-	//	{
-	//		std::cerr << "Loading character: " << char(i) << "failed." << std::endl;
-	//	}
-
-	//	FT_GlyphSlot g = fttFace(m_face)->glyph;
-
-	//	fm.glyphs[i].xOffsetCoord = float(offset);
-	//	fm.glyphs[i].bitmap = {
-	//		float(g->bitmap_left),
-	//		float(g->bitmap_top),
-	//		float(g->bitmap.width),
-	//		float(g->bitmap.rows)
-	//	};
-	//	fm.glyphs[i].advance = {
-	//		g->advance.x >> 6,
-	//		g->advance.y >> 6
-	//	};
-
-	//	texture.write({ offset, 0 }, g->bitmap.width, g->bitmap.rows, Texture::Format::RED, DataType::UBYTE, g->bitmap.buffer);
-	//	offset += g->bitmap.width + 1;
-	//}
-
-	/*uint32_t w = 0;
-	uint32_t h = 0;
-
-	FT_Set_Pixel_Sizes(fttFace(m_face), 0, size);
-
-	for (int i = 0; i < MAX_NUM_CHARS; i++)
-	{
-		if (FT_Load_Char(fttFace(m_face), i, FT_LOAD_RENDER))
-		{
-			std::cerr << "Loading character: " << char(i) << "failed." << std::endl;
-			continue;
-		}
-
-		w += g->bitmap.width;
-		h = std::max(h, g->bitmap.rows);
-	}
-
-	fm.height = h;
-	fm.width = w;
-
-	Texture& tex = m_cache.insert(
-		std::make_pair(size, Texture::create(w, h, Texture::Format::RED, Texture::Format::RED, nullptr))
-	).first->second;
-
-	uint32_t x = 0;
-
-	for (int i = 0; i < MAX_NUM_CHARS; i++)
-	{
-		if (FT_Load_Char(fttFace(m_face), i, FT_LOAD_RENDER))
-			continue;
-
-		tex.write({ int(x), 0 }, g->bitmap.width, g->bitmap.rows, Texture::Format::RED, DataType::UBYTE, g->bitmap.buffer);
-
-		fm.m_glyphs[i].advance.x = g->advance.x >> 6;
-		fm.m_glyphs[i].advance.y = g->advance.y >> 6;
-
-		fm.m_glyphs[i].bitmap.w = g->bitmap.width;
-		fm.m_glyphs[i].bitmap.h = g->bitmap.rows;
-
-		fm.m_glyphs[i].bitmap.x = g->bitmap_left;
-		fm.m_glyphs[i].bitmap.y = g->bitmap_top;
-
-		fm.m_glyphs[i].xOffsetCoord = static_cast<float>(x) / w;
-
-		x += g->bitmap.width + 1;
-	}*/
-	
-	Texture::setAlignment(4);
-}
-
-pure::Text pure::Font::makeText(const char * text, int size)
-{
 	Texture::setAlignment(1);
+
 	FT_Set_Pixel_Sizes(fttFace(m_face), 0, size);
 
-	const size_t texLen = strlen(text);
-
-	int w = 0, h = 0;
 	for (size_t i = 0; i < MAX_NUM_CHARS; i++)
 	{
 		if (FT_Load_Char(fttFace(m_face), i, FT_LOAD_RENDER))
@@ -300,107 +301,85 @@ pure::Text pure::Font::makeText(const char * text, int size)
 		}
 
 		FT_GlyphSlot g = fttFace(m_face)->glyph;
-		w += g->bitmap.width;
-		h = std::max(h, (int)g->bitmap.rows);
+		fm.width += g->bitmap.width;
+		fm.height = std::max(fm.height, float(g->bitmap.rows));
 	}
 
-	Texture texture = Texture::create(w, h, Texture::Format::RED, Texture::Format::RED, nullptr);
+	Texture texture = Texture::create(fm.width, fm.height, Texture::Format::RED, Texture::Format::RED, nullptr);
 
 	int offset = 0;
 
-	struct {
-		int offset;
-		int w, h;
-		float advance;
-		int x, y;
-	} characters[MAX_NUM_CHARS];
-
 	for (size_t i = 0; i < MAX_NUM_CHARS; i++)
 	{
 		if (FT_Load_Char(fttFace(m_face), i, FT_LOAD_RENDER))
 		{
 			std::cerr << "Loading character: " << char(i) << "failed." << std::endl;
-		}		
+		}
 
 		FT_GlyphSlot g = fttFace(m_face)->glyph;
 
-		characters[i].offset = offset;
-		characters[i].w = g->bitmap.width;
-		characters[i].h = g->bitmap.rows;
-		characters[i].advance = g->advance.x >> 6;
-		characters[i].x = g->bitmap_left;
-		characters[i].y = g->bitmap_top;
+		fm.glyphs[i].xOffsetCoord = static_cast<float>(offset);
+		fm.glyphs[i].bitmap.w = static_cast<float>(g->bitmap.width);
+		fm.glyphs[i].bitmap.h = static_cast<float>(g->bitmap.rows);
+		fm.glyphs[i].bitmap.x = static_cast<float>(g->bitmap_left);
+		fm.glyphs[i].bitmap.y = static_cast<float>(g->bitmap_top);
+		fm.glyphs[i].advance.x = g->advance.x >> 6;
+		fm.glyphs[i].advance.y = g->advance.y >> 6;
 
 		texture.write({ offset, 0 }, g->bitmap.width, g->bitmap.rows, Texture::Format::RED, DataType::UBYTE, g->bitmap.buffer);
 		offset += g->bitmap.width;
 	}
 
 	m_cache[size] = texture;
+
 	Texture::setAlignment(4);
+}
+
+pure::Text pure::Font::makeText(const char * text, int size)
+{
+	auto itr = m_glyphs.find(size);
+	if (itr == m_glyphs.end())
+	{
+		loadSize(size);
+		itr = m_glyphs.find(size);
+	}
+
+	const FontMap& fm = itr->second;
+	const size_t texLen = strlen(text);
+	const size_t reserveSpace = texLen * 2;
 
 	Text tex = {};
 
-	tex.m_parentFont = this;
-	tex.m_textString = text;
+	tex.parentFont = this;
 	tex.m_characterSize = size;
 
-	tex.m_mesh.vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), strlen(text) * 2 * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
-	tex.m_mesh.ebo = ElementBuffer::quad(6 * strlen(text) * 2);
-	tex.m_mesh.primtype = DrawPrimitive::TRIANGLES;
-	tex.m_mesh.texture = &m_cache[size];
+	tex.mesh.vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), reserveSpace * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
+	tex.mesh.ebo = ElementBuffer::quad(6 * reserveSpace);
+	tex.mesh.primtype = DrawPrimitive::TRIANGLES;
+	tex.mesh.texture = &m_cache[size];
 
-	tex.m_mesh.shader = FontShader::defaultInstance().base;
-	memcpy_s(tex.m_uniformLocs, sizeof(tex.m_uniformLocs), FontShader::defaultInstance().m_uniformLocs, sizeof(FontShader::defaultInstance().m_uniformLocs));
-	tex.m_quads.reserve(1);
+	tex.mesh.shader = FontShader::defaultInstance().base;
+	tex.m_quads.reserve(reserveSpace);
 
-	std::vector<Quad> qs;
-	float xPos = 50.f;
-	const float yPos = 50.f;
-	for (const char* c = text; *c; c++)
-	{
-		Transform t = Transform::create();
-		Quad q = Quad::create();
-
-		auto character = characters[*c];
-
-		Rectui r = {
-			uint32_t(character.offset),
-			h - character.h,
-			uint32_t(character.w),
-			uint32_t(character.h)
-		};
-		q.setTextureCoords(r, { w, h });
-
-		q.flipVerticalTexCoords(0.f, (float)character.h / (float)h);
-
-		t.setPosition({ character.x + xPos, (yPos + (character.h - character.y)) - character.h, 50.0f });
-		t.setSize({ (float)character.w, (float)character.h });
-		q.translate(t.modelMatrix());
-
-		if (*(c + 1))
-		{
-			FT_Vector delta;
-			FT_Get_Kerning(fttFace(m_face), *c, *(c + 1), FT_KERNING_DEFAULT, &delta);
-
-			xPos += character.advance + (delta.x >> 6);
-
-		}
-		qs.push_back(q);
-	}
-
-	tex.m_mesh.vbo.writeBuffer(reinterpret_cast<Vertex2D*>(&qs[0]), qs.size() * Quad::VERT_COUNT, 0);
+	tex.setString(text);
 	return tex;
 }
 
-void pure::Font::clear()
+Vec2i pure::Font::getKerning(char left, char right)
 {
-	for (auto& kv : m_cache)
-		kv.second.free();
-
-	FT_Done_Face(fttFace(m_face));
-	m_face = nullptr;
+	FT_Vector delta;
+	FT_Get_Kerning(fttFace(m_face), left, right, FT_KERNING_DEFAULT, &delta);
+	return {
+		delta.x,
+		delta.y
+	};
 }
 
+
+void translateGlyph(Transform& t, const Vec3f& pos, const Glyph& g)
+{
+	t.setPosition({ g.bitmap.x + pos.x, (pos.y + (g.bitmap.h - g.bitmap.y)) - g.bitmap.h, pos.z });
+}
 
 #else
 #include "Font.h"

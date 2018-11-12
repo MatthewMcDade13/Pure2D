@@ -39,6 +39,8 @@ namespace pure
 
 		Text makeText(const char* text, int size);
 
+		Vec2i getKerning(char left, char right);
+
 	private:
 		static constexpr int MAX_NUM_CHARS = 128;
 		struct FontMap
@@ -52,19 +54,29 @@ namespace pure
 		std::unordered_map<int, Texture> m_cache;
 		std::unordered_map<int, FontMap> m_glyphs;
 
-		void* m_face;
-
-		void clear();
+		void* m_face = nullptr;
+		void* m_lib = nullptr;
 	};
 
 	struct PURE2D_API Text : public Renderable
 	{
+		Font* parentFont;
+		Vec4f color = Vec4f::single(1.f);
+		Mesh mesh;
+
 		friend Font;
 
 		void setSize(Vec2f size);
-		void setPosition(Vec3f pos);
+		void setPosition(const Vec3f& pos);
+		void setPosition(Vec2f pos);
 		void setRotation(float rot);
-		void setColor(const Vec4<float>& m_color);
+
+		void move(const Vec3f& pos);
+		void scale(Vec2f size);
+		void rotate(float rot);
+
+		// TODO: Handle newlines and potentially other whitespace characters.
+		void setString(const char* text);
 
 		const Transform& transform() const;
 
@@ -74,16 +86,12 @@ namespace pure
 
 		void updateVerts();
 
-		Font* m_parentFont;
-		float m_characterSize;
 		std::string m_textString;
 		std::vector<Quad> m_quads;
-		Mesh m_mesh;
-		Transform m_transform;
-		Vec4f m_color = Vec4f::single(1.f);
-		bool m_needsUpdate;
+		float m_characterSize;
 
-		int m_uniformLocs[2];
+		Transform m_transform;
+		bool m_needsUpdate;
 
 		void updateColorUniform();
 	};

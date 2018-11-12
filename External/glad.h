@@ -3235,7 +3235,7 @@ GLAPI PFNGLVERTEXATTRIBI4USVPROC glad_glVertexAttribI4usv;
 typedef void (APIENTRYP PFNGLGETUNIFORMUIVPROC)(GLuint program, GLint location, GLuint *params);
 GLAPI PFNGLGETUNIFORMUIVPROC glad_glGetUniformuiv;
 #define glGetUniformuiv glad_glGetUniformuiv
-typedef void (APIENTRYP PFNGLBINDFRAGDATALOCATIONPROC)(GLuint program, GLuint m_color, const GLchar *name);
+typedef void (APIENTRYP PFNGLBINDFRAGDATALOCATIONPROC)(GLuint program, GLuint color, const GLchar *name);
 GLAPI PFNGLBINDFRAGDATALOCATIONPROC glad_glBindFragDataLocation;
 #define glBindFragDataLocation glad_glBindFragDataLocation
 typedef GLint (APIENTRYP PFNGLGETFRAGDATALOCATIONPROC)(GLuint program, const GLchar *name);
@@ -3631,22 +3631,22 @@ GLAPI PFNGLNORMALP3UIPROC glad_glNormalP3ui;
 typedef void (APIENTRYP PFNGLNORMALP3UIVPROC)(GLenum type, const GLuint *coords);
 GLAPI PFNGLNORMALP3UIVPROC glad_glNormalP3uiv;
 #define glNormalP3uiv glad_glNormalP3uiv
-typedef void (APIENTRYP PFNGLCOLORP3UIPROC)(GLenum type, GLuint m_color);
+typedef void (APIENTRYP PFNGLCOLORP3UIPROC)(GLenum type, GLuint color);
 GLAPI PFNGLCOLORP3UIPROC glad_glColorP3ui;
 #define glColorP3ui glad_glColorP3ui
-typedef void (APIENTRYP PFNGLCOLORP3UIVPROC)(GLenum type, const GLuint *m_color);
+typedef void (APIENTRYP PFNGLCOLORP3UIVPROC)(GLenum type, const GLuint *color);
 GLAPI PFNGLCOLORP3UIVPROC glad_glColorP3uiv;
 #define glColorP3uiv glad_glColorP3uiv
-typedef void (APIENTRYP PFNGLCOLORP4UIPROC)(GLenum type, GLuint m_color);
+typedef void (APIENTRYP PFNGLCOLORP4UIPROC)(GLenum type, GLuint color);
 GLAPI PFNGLCOLORP4UIPROC glad_glColorP4ui;
 #define glColorP4ui glad_glColorP4ui
-typedef void (APIENTRYP PFNGLCOLORP4UIVPROC)(GLenum type, const GLuint *m_color);
+typedef void (APIENTRYP PFNGLCOLORP4UIVPROC)(GLenum type, const GLuint *color);
 GLAPI PFNGLCOLORP4UIVPROC glad_glColorP4uiv;
 #define glColorP4uiv glad_glColorP4uiv
-typedef void (APIENTRYP PFNGLSECONDARYCOLORP3UIPROC)(GLenum type, GLuint m_color);
+typedef void (APIENTRYP PFNGLSECONDARYCOLORP3UIPROC)(GLenum type, GLuint color);
 GLAPI PFNGLSECONDARYCOLORP3UIPROC glad_glSecondaryColorP3ui;
 #define glSecondaryColorP3ui glad_glSecondaryColorP3ui
-typedef void (APIENTRYP PFNGLSECONDARYCOLORP3UIVPROC)(GLenum type, const GLuint *m_color);
+typedef void (APIENTRYP PFNGLSECONDARYCOLORP3UIVPROC)(GLenum type, const GLuint *color);
 GLAPI PFNGLSECONDARYCOLORP3UIVPROC glad_glSecondaryColorP3uiv;
 #define glSecondaryColorP3uiv glad_glSecondaryColorP3uiv
 #endif

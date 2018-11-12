@@ -3,7 +3,6 @@
 //
 
 #include "Init.h"
-#include "Private/FreeType.h"
 #include "glad.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -22,14 +21,10 @@ bool pure::init()
 		return false;
 	}
 
-	if (!FreeType::get().init())
-		return false;
-
 	return true;
 }
 
 void pure::terminate()
 {
-	FreeType::get().destroy();
 	glfwTerminate();
 }
