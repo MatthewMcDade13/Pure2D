@@ -2,7 +2,7 @@
 #include <fstream>
 
 
-std::string pure::detail::readFile(const char * path)
+std::string readFile(const char * path)
 {
 	FILE* f = fopen(path, "rb");
 	fseek(f, 0, SEEK_END);

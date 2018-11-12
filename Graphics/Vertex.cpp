@@ -20,6 +20,16 @@ void pure::translateVerts(Vertex2D *verts, size_t vertCount, const Mat4 &transfo
     }
 }
 
+void pure::flipVerticalTexCoords(Vertex2D * verts, size_t count, float min, float max)
+{
+
+	for (size_t i = 0; i < count; i++)
+	{
+		auto& v = verts[i];
+		v.texCoord.v = min + (max - v.texCoord.v);
+	}
+}
+
 void pure::calcTexCoords(Vertex2D* verts, size_t vertCount, const Rectui& textureRect, Vec2i textureSize)
 {
     const Vec2f texRectSize = { float(textureRect.w), float(textureRect.h) };
@@ -29,8 +39,10 @@ void pure::calcTexCoords(Vertex2D* verts, size_t vertCount, const Rectui& textur
     {
         auto& v = verts[i];
 
-        const Vec2f texDim = texRectSize * Vec2f(v.texCoord.u, 1.f - v.texCoord.v);
+        const Vec2f texDim = texRectSize * Vec2f(v.texCoord.u, 1.f - v.texCoord.v); // flip tex coords from bottom-left to top-left origin
+		// get texcoord relative to top-left
         const Vec2f texCoord = texDim + uvOffset;
+		// normalize coordinate into NDC and flip back to bottom-left Y origin
         const Vec2f normalizedCoords = { texCoord.x / textureSize.x, 1.f - (texCoord.y / textureSize.y) };
         v.texCoord = { normalizedCoords.x, normalizedCoords.y };
     }

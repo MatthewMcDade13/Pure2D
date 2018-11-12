@@ -23,7 +23,7 @@ namespace pure
             {
                 struct { float x, y, z; } position;
                 struct { float u, v; } texCoord;
-                struct { float r, g, b, a; } color;
+                struct { float r, g, b, a; } m_color;
             };
 
             float buffer[COUNT];
@@ -34,6 +34,10 @@ namespace pure
     // TODO: Probably don't need vertCount, might be safe to assume this is Quad::VERT_COUNT (since we are uing a textureRect
     // to find coordinates)
     void calcTexCoords(Vertex2D* verts, size_t vertCount, const Rect<uint32_t>& textureRect, Vec2i textureSize);
+
+	// Flips given verts tex coordinates along vertical (y) axis. Assumes
+	// coordinates are NDC
+	void flipVerticalTexCoords(Vertex2D* verts, size_t count, float min, float max);
 }
 
 #endif // PURE2D_VERTEX_H

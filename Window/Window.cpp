@@ -17,24 +17,18 @@ using namespace pure;
 
 namespace pure
 {
-    struct WindowImpl
-    {
-        int width;
-        int height;
-        bool isFullscreen;
-        GLFWwindow* handle;
-
-        Vec2f mousePos;
-        std::queue<WindowEvent> events;
-    };
+	static struct WinEventHandler
+	{
+		static void onResize(GLFWwindow* win, int width, int height);
+		static void onMouseMove(GLFWwindow* window, double xpos, double ypos);
+		static void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset);
+		static void onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods);
+	};
 }
 
 static constexpr Vec2i DEFAULT_WIN_SIZE = { 1024, 768 };
 
-static void onResize(GLFWwindow* win, int width, int height);
-static void onMouseMove(GLFWwindow* window, double xpos, double ypos);
-static void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset);
-static void onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 static GLFWmonitor* getPrimaryMonitor();
 static inline Vec2i getGLFWWindowSize(GLFWwindow* win);
 
@@ -66,10 +60,10 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
     }
 
     glfwMakeContextCurrent(handle);
-    glfwSetFramebufferSizeCallback(handle, onResize);
-    glfwSetCursorPosCallback(handle, onMouseMove);
-    glfwSetKeyCallback(handle, onKeyInput);
-    glfwSetScrollCallback(handle, onMouseScroll);
+    glfwSetFramebufferSizeCallback(handle, WinEventHandler::onResize);
+    glfwSetCursorPosCallback(handle, WinEventHandler::onMouseMove);
+    glfwSetKeyCallback(handle, WinEventHandler::onKeyInput);
+    glfwSetScrollCallback(handle, WinEventHandler::onMouseScroll);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -86,8 +80,8 @@ bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
 
     glViewport(0, 0, m_width, m_height);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return true;
 }
@@ -193,42 +187,42 @@ void Window::setTitle(const char *title) const
     glfwSetWindowTitle(glfwHandle(m_handle), title);
 }
 
-void onResize(GLFWwindow * win, int width, int height)
+void WinEventHandler::onResize(GLFWwindow * win, int width, int height)
 {
-    WindowImpl* window = static_cast<WindowImpl*>(glfwGetWindowUserPointer(win));
-    window->width = width;
-    window->height = height;
+	Window* window = static_cast<Window*>(glfwGetWindowUserPointer(win));
+    window->m_width = width;
+    window->m_height = height;
 
     WindowEvent e;
     e.type = WindowEvent::Type::Resize;
-    e.winSize = { window->width, window->height };
-    window->events.push(e);
+    e.winSize = { window->m_width, window->m_height };
+    window->m_events.push(e);
 
-    glViewport(0, 0, window->width, window->height);
+    glViewport(0, 0, window->m_width, window->m_height);
 }
 
 
-void onMouseMove(GLFWwindow* window, double xpos, double ypos)
+void WinEventHandler::onMouseMove(GLFWwindow* window, double xpos, double ypos)
 {
-    WindowImpl* win = static_cast<WindowImpl*>(glfwGetWindowUserPointer(window));
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-    win->mousePos = {
+    win->m_mousePos = {
             static_cast<float>(xpos),
             static_cast<float>(ypos)
     };
 
     WindowEvent e;
     e.type = WindowEvent::Type::MouseMove;
-    e.mousePos = { win->mousePos.x, win->mousePos.y };
-    win->events.push(e);
+    e.mousePos = { win->m_mousePos.x, win->m_mousePos.y };
+    win->m_events.push(e);
 }
 
-void onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods)
+void WinEventHandler::onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     // Ignoring repeat events for now...
     if (action == GLFW_REPEAT) return;
 
-    WindowImpl* win = static_cast<WindowImpl*>(glfwGetWindowUserPointer(window));
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
     WindowEvent e;
 
@@ -239,7 +233,21 @@ void onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 
     e.key = static_cast<Key>(key);
 
-    win->events.push(e);
+    win->m_events.push(e);
+}
+
+void WinEventHandler::onMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    WindowEvent e;
+    e.type = WindowEvent::Type::MouseScroll;
+    e.scrollOffset = {
+            static_cast<float>(xoffset),
+            static_cast<float>(yoffset)
+    };
+
+    win->m_events.push(e);
 }
 
 GLFWmonitor * getPrimaryMonitor()
@@ -257,16 +265,3 @@ inline Vec2i getGLFWWindowSize(GLFWwindow* win)
     return { width, height };
 }
 
-void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
-{
-    WindowImpl* win = static_cast<WindowImpl*>(glfwGetWindowUserPointer(window));
-
-    WindowEvent e;
-    e.type = WindowEvent::Type::MouseScroll;
-    e.scrollOffset = {
-            static_cast<float>(xoffset),
-            static_cast<float>(yoffset)
-    };
-
-    win->events.push(e);
-}

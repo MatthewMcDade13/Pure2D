@@ -13,7 +13,6 @@
 #include <glm/ext.hpp>
 
 using namespace pure;
-using namespace pure::detail;
 
 static uint32_t createShaderFromFile(const char* filePath, GLenum shaderType);
 static uint32_t compileShader(const char* src, GLenum shaderType);

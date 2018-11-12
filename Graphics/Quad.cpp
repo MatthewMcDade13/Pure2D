@@ -64,6 +64,11 @@ Mesh Quad::toMesh(DrawUsage usage) const
     return Mesh::create(verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLE_STRIP, usage);
 }
 
+void pure::Quad::flipVerticalTexCoords(float min, float max)
+{
+	pure::flipVerticalTexCoords(verts, Quad::VERT_COUNT, min, max);
+}
+
 void Quad::setTextureCoords(const Rect<uint32_t> &textureRect, Vec2i textureSize)
 {
     resetTexCoords(*this);

@@ -57,6 +57,8 @@ namespace pure
 
 		Vec2f m_mousePos;
 		std::queue<WindowEvent> m_events;
+
+		friend struct WinEventHandler;
     };
 
 }

@@ -29,6 +29,7 @@ namespace pure
 
         Mesh toMesh(DrawUsage usage = DrawUsage::STATIC_DRAW) const;
 
+		void flipVerticalTexCoords(float min, float max);
         void setTextureCoords(const Rect<uint32_t>& textureRect, Vec2i textureSize);
         void translate(const Mat4& transform);
     };
