@@ -20,6 +20,12 @@ void pure::Transform::setPosition(const pure::Vec3f& pos)
     m_needsUpdate = true;
 }
 
+void  pure::Transform::setPosition(Vec2f pos)
+{
+	m_position = { pos.x, pos.y, m_position.z };
+	m_needsUpdate = true;
+}
+
 void pure::Transform::setSize(pure::Vec2f size)
 {
     m_size = size;

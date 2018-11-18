@@ -35,7 +35,7 @@ void pure::Renderer::create()
 {
 	constexpr int NUM_MAT4 = 2;
 	{
-		cam.position.z = -5.f;
+		cam.position.z = 0.f;
 		cam.lookDir.z = -1.f;
 	}
 
@@ -91,11 +91,13 @@ const Mat4 &Renderer::projection() const { return m_projection; }
 
 const Mat4 Renderer::MVMatrix() const { return m_projection * cam.view(); }
 
+float Renderer::clipNear() { return CLIP_NEAR; }
+float Renderer::clipFar() { return CLIP_FAR; }
+
 void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Texture *texture)
 {
     drawQuad(quad, transform, m_shader, texture);
 }
-
 
 void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, const Texture *texture)
 {
@@ -142,53 +144,53 @@ void pure::Renderer::zoom(float offset)
 
 }
 
-void pure::Renderer::drawMesh(const Mesh & mesh, const Mat4 & transform)
+void pure::Renderer::drawMesh(const Mesh & m_mesh, const Mat4 & transform)
 {
     m_drawVAO.bind();
 
-    const Shader& shader = mesh.shader.id() == 0 ? m_shader : mesh.shader;
+    const Shader& shader = m_mesh.shader.id() == 0 ? m_shader : m_mesh.shader;
     shader.bind();
 
-    if (mesh.texture) mesh.texture->bind();
+    if (m_mesh.texture) m_mesh.texture->bind();
     else m_defaultTexture.bind();
 
-    mesh.vbo.bind();
+    m_mesh.vbo.bind();
 
-    setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+    setVertexLayout(m_mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
     shader.setUniformIndx(Shader::MVP_MAT_LOC, m_projection * cam.view() * transform);
     shader.setUniformIndx(Shader::MODEL_MAT_LOC, transform);
 
-	if (mesh.ebo.id_ != 0)
+	if (m_mesh.ebo.id_ != 0)
 	{
-		mesh.ebo.bind();
-		drawElements(mesh.primtype, mesh.ebo.count);
+		m_mesh.ebo.bind();
+		drawElements(m_mesh.primtype, m_mesh.ebo.count);
 		unbindEBO();
 	}
 	else
 	{
-		drawArrays(mesh.primtype, 0, uint32_t(mesh.vbo.vertCount));
+		drawArrays(m_mesh.primtype, 0, uint32_t(m_mesh.vbo.vertCount));
 	}
 
     unbindVBO();
 }
 
-void pure::Renderer::drawMeshStatic(const Mesh & mesh)
+void pure::Renderer::drawMeshStatic(const Mesh & m_mesh)
 {
-	drawBuffer(0, mesh.vbo.vertCount, mesh.vbo, mesh.texture, mesh.shader, 
-		(mesh.ebo.id_ ? &mesh.ebo : nullptr), mesh.primtype);
+	drawBuffer(0, m_mesh.vbo.vertCount, m_mesh.vbo, m_mesh.texture, m_mesh.shader, 
+		(m_mesh.ebo.id_ ? &m_mesh.ebo : nullptr), m_mesh.primtype);
 }
 
-void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transforms, uint32_t numDraws)
+void pure::Renderer::drawMeshInstanced(const Mesh & m_mesh, const Mat4 * transforms, uint32_t numDraws)
 {
     m_drawVAO.bind();
-    if (mesh.shader.id() == 0) m_instancedShader.bind();
-    else mesh.shader.bind();
+    if (m_mesh.shader.id() == 0) m_instancedShader.bind();
+    else m_mesh.shader.bind();
 
-    if (mesh.texture) mesh.texture->bind();
+    if (m_mesh.texture) m_mesh.texture->bind();
     else m_defaultTexture.bind();
 
-    setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+    setVertexLayout(m_mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
     std::vector<Mat4> transformData;
     transformData.reserve(numDraws);
@@ -207,7 +209,7 @@ void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transform
     else
         m_instancedMatBuffer.writeBuffer(&transformData[0], transformData.size(), 0);
 
-    glDrawArraysInstanced(static_cast<GLenum>(mesh.primtype), 0, uint32_t(mesh.vbo.vertCount), numDraws);
+    glDrawArraysInstanced(static_cast<GLenum>(m_mesh.primtype), 0, uint32_t(m_mesh.vbo.vertCount), numDraws);
     unbindVBO();
 }
 

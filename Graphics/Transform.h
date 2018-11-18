@@ -19,6 +19,7 @@ namespace pure
         PURE2D_API const Vec3f& position() const;
         PURE2D_API Vec2f size() const;
         PURE2D_API float rotation() const;
+		PURE2D_API void setPosition(Vec2f pos);
         PURE2D_API void setPosition(const Vec3f& pos);
         PURE2D_API void setSize(Vec2f size);
         PURE2D_API void setRotation(float angle);

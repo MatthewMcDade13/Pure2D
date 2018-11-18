@@ -33,15 +33,18 @@ namespace pure
     {
         Camera cam;
 
+		PURE2D_API static float clipNear();
+		PURE2D_API static float clipFar();
+
 		PURE2D_API void create();
 		PURE2D_API void create(const Rectf& viewport);
 
-		PURE2D_API void drawMesh(const Mesh& mesh, const Mat4& transform);
+		PURE2D_API void drawMesh(const Mesh& m_mesh, const Mat4& transform);
 
 		// draws mesh without transforming verts by renderer projection and view matrix
-		PURE2D_API void drawMeshStatic(const Mesh& mesh);
+		PURE2D_API void drawMeshStatic(const Mesh& m_mesh);
 
-		PURE2D_API void drawMeshInstanced(const Mesh& mesh, const Mat4* transforms, uint32_t numDraws);
+		PURE2D_API void drawMeshInstanced(const Mesh& m_mesh, const Mat4* transforms, uint32_t numDraws);
 
         PURE2D_API void drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture,
                                    Shader shader, const ElementBuffer* ebo = nullptr, DrawPrimitive primtype = DrawPrimitive::TRIANGLE_STRIP);
@@ -64,6 +67,8 @@ namespace pure
         PURE2D_API void destroy();
 
     private:
+		float m_clipNear, m_clipFar;
+
         VertexArray m_quadVAO;
         VertexBuffer m_quadBuffer;
         VertexBuffer m_instancedMatBuffer;
