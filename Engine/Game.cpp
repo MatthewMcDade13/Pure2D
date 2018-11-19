@@ -33,7 +33,7 @@ void pure::Game::run()
 	load();
 
 	c.init();
-	while (m_window.isOpen())
+	while (m_window.isActive)
 	{
 		while (m_window.pollEvents(event))
 		{

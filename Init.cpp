@@ -5,26 +5,27 @@
 #include "Init.h"
 #include "glad.h"
 #include <GLFW/glfw3.h>
+#include <SDL2/SDL.h>
 #include <iostream>
+
+#define USING_GLFW 0
 
 bool pure::init()
 {
-	if (glfwInit())
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	}
-	else
-	{
-		std::cerr << "Failed to initialize GLFW" << std::endl;
+		std::cerr << "SDL :: Failed to initialize" << std::endl;
 		return false;
 	}
 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	return true;
+
 }
 
 void pure::terminate()
 {
-	glfwTerminate();
+	SDL_Quit();
 }

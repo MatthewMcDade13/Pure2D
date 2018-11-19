@@ -17,50 +17,49 @@
 
 namespace pure
 {
-    template<typename T> struct Vec2;
-    struct WindowEvent;
-    enum class Key : uint32_t;
 
-    struct PURE2D_API Window : private NonCopyable
-    {
-        int width() const;
-        int height() const;
+	template<typename T> struct Vec2;
+	struct WindowEvent;
+	enum class Key : uint32_t;
+
+	struct PURE2D_API Window : private NonCopyable
+	{
+		bool isActive;
+
+		int width() const;
+		int height() const;
 		Vec2i size() const;
-        Vec2f mousePos() const;
-        bool isOpen() const;
+		Vec2f mousePos() const;
 
-        void setSize(uint32_t width, uint32_t height);
-        void setTitle(const char* title) const;
+		void setSize(uint32_t width, uint32_t height);
+		void setTitle(const char* title) const;
 
-        bool create(const char* title);
-        bool create(uint32_t width, uint32_t height, const char* title);
-        void close() const;
+		bool create(const char* title);
+		bool create(uint32_t width, uint32_t height, const char* title);
 		void destroy();
 
-        void captureMouse() const;
-        void releaseMouse() const;
+		void captureMouse() const;
+		void releaseMouse() const;
 
-        bool pollEvents(WindowEvent& e);
+		bool pollEvents(WindowEvent& e);
 
-        void clear(const Vec4<float>& clearColor = Vec4<float>::single(0.f)) const;
-        void swapBuffers() const;
+		void clear(const Vec4<float>& clearColor = Vec4<float>::single(0.f)) const;
+		void swapBuffers() const;
 
-        bool isKeyPressed(Key key) const;
+		void toggleFullscreenWindowed();
 
-        void toggleFullscreenWindowed();
-
-    private:
+	private:
 		int m_width;
 		int m_height;
 		bool m_isFullscreen;
 		void* m_handle;
+		void* m_ctx;
 
 		Vec2f m_mousePos;
 		std::queue<WindowEvent> m_events;
 
 		friend struct WinEventHandler;
-    };
-
+	};
 }
 
 #endif //PURE2D_WINDOW_H

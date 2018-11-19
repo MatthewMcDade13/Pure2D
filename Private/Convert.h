@@ -9,6 +9,8 @@
 #include <Pure2D/Math/Vec3.h>
 #include <Pure2D/Math/Vec4.h>
 #include <Pure2D/Math/Mat4.h>
+#include <Pure2D/Window/Keyboard.h>
+#include <SDL2/SDL_events.h>
 
 #define TO_ALIGNED_STORAGE(glm_mat4) reinterpret_cast<const std::aligned_storage_t<sizeof(float[4][4])>*>(&glm_mat4)
 
@@ -63,6 +65,9 @@ constexpr pure::Vec2f toVec2(const glm::vec2& vec)
 	};
 }
 
+
+SDL_Scancode toSDLScancode(pure::Key key);
+pure::Key toPureKey(SDL_Scancode code);
 
 
 inline pure::Mat4 toMat4(const glm::mat4& mat) { return { *TO_ALIGNED_STORAGE(mat) }; }
