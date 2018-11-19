@@ -9,6 +9,7 @@ namespace pure
 		{
 			void free();
 
+			void setVolume(float percentage);
 			bool loadWavFromFile(const char* filename);
 
 			bool play(int loops = 0, int channel = -1);
