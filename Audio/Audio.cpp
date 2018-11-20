@@ -1,12 +1,21 @@
 #include "Audio.h"
 #include <iostream>
+#include <Pure2D/Audio/Listener.h>
 #include <SDL2/SDL_mixer.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 static constexpr int frequency = 22050;
 static constexpr int chunkSize = 4096;
 
-bool pure::audio::init()
+static thread_local ALCdevice* device = nullptr;
+static thread_local ALCcontext* context = nullptr;
+
+bool pure::initAudio()
 {
+	// NOTE/BOTTLENECK: We are only using SDL_mixer for loading audio files easily. Sadly it looks like
+	// its API requires it to open an Audio Device on its own. Not sure what the performance
+	// implication of this are, but if there are issues you can probably look here.
 	if (Mix_OpenAudio(frequency, MIX_DEFAULT_FORMAT, 2, chunkSize) == -1)
 	{
 		std::cout << "SDL_Mixer :: Could not Open Audio" << std::endl;
@@ -21,11 +30,36 @@ bool pure::audio::init()
 	{
 		std::cout << "SDL_Mixer :: Could not initialize mixer. Result: " << result << std::endl;
 		std::cout << "SDL_Mixer :: " << Mix_GetError() << std::endl;
+		Mix_Quit();
 		return false;
 	}
+
+	device = alcOpenDevice(nullptr);
+	if (!device)
+	{
+		std::cerr << "OpenAL :: Could not load Audio Device: " << alGetError() << std::endl;
+		Mix_Quit();
+		return false;
+	}
+
+	context = alcCreateContext(device, nullptr);
+
+	if (!alcMakeContextCurrent(context))
+	{
+		std::cerr << "OpenAL :: Could not make context current: " << alGetError() << std::endl;
+		Mix_Quit();
+		alcCloseDevice(device);
+		return false;
+	}
+
+	listener::resetDefaults();
+
+	return true;
 }
 
-void pure::audio::terminate()
+void pure::terminateAudio()
 {
 	Mix_Quit();
+	alcDestroyContext(context);
+	alcCloseDevice(device);
 }

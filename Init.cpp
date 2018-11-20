@@ -4,11 +4,8 @@
 
 #include "Init.h"
 #include "glad.h"
-#include <GLFW/glfw3.h>
 #include <SDL2/SDL.h>
 #include <iostream>
-
-#define USING_GLFW 0
 
 bool pure::init()
 {

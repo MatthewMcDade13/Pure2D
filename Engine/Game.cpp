@@ -32,7 +32,7 @@ void pure::Game::run()
 
 	load();
 
-	c.init();
+	c.initAudio();
 	while (m_window.isActive)
 	{
 		while (m_window.pollEvents(event))

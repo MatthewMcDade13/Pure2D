@@ -3,21 +3,18 @@
 
 namespace pure
 {
-	namespace audio
+	struct Sound
 	{
-		struct Sound
-		{
-			void free();
+		void free();
 
-			void setVolume(float percentage);
-			bool loadWavFromFile(const char* filename);
+		void setVolume(float percentage);
+		bool loadWavFromFile(const char* filename);
 
-			bool play(int loops = 0, int channel = -1);
+		bool play(int loops = 0, int channel = -1);
 
-		private:
-			void* m_handle;
-		};
-	}
+	private:
+		void* m_handle;
+	};
 }
 
 #endif // PURE2D_AUDIO_SOUND_H

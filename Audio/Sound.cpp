@@ -6,15 +6,13 @@
 #define sdlChunk(handle) (static_cast<Mix_Chunk*>(handle))
 
 using namespace pure;
-using namespace audio;
 
-
-void pure::audio::Sound::free()
+void pure::Sound::free()
 {
 	Mix_FreeChunk(sdlChunk(m_handle));
 }
 
-bool pure::audio::Sound::loadWavFromFile(const char * filename)
+bool pure::Sound::loadWavFromFile(const char * filename)
 {
 	m_handle = Mix_LoadWAV(filename);
 	if (!m_handle)
@@ -32,7 +30,7 @@ void Sound::setVolume(float percentage)
 	Mix_VolumeChunk(sdlChunk(m_handle), volume);
 }
 
-bool pure::audio::Sound::play(int loops, int channel)
+bool pure::Sound::play(int loops, int channel)
 {
 	Mix_Chunk* c = sdlChunk(m_handle);
 

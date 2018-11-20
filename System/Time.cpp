@@ -9,7 +9,7 @@ float pure::time::getTime()
 	return static_cast<float>(SDL_GetTicks());
 }
 
-void pure::time::Clock::init()
+void pure::time::Clock::initAudio()
 {
 	start = getTime();
 }

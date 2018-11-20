@@ -3,11 +3,8 @@
 
 namespace pure
 {
-	namespace audio
-	{
-		bool init();
-		void terminate();
-	}
+	bool initAudio();
+	void terminateAudio();
 }
 
 #endif // PURE2D_AUDIO_AUDIO_H
