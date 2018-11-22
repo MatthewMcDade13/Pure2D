@@ -36,8 +36,8 @@ namespace pure
 		PURE2D_API static float clipNear();
 		PURE2D_API static float clipFar();
 
-		PURE2D_API void create();
-		PURE2D_API void create(const Rectf& viewport);
+		PURE2D_API void make();
+		PURE2D_API void make(const Rectf& viewport);
 
 		PURE2D_API void drawMesh(const Mesh& m_mesh, const Mat4& transform);
 

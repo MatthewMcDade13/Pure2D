@@ -20,7 +20,6 @@ namespace pure
 
 	template<typename T> struct Vec2;
 	struct WindowEvent;
-	enum class Key : uint32_t;
 
 	struct PURE2D_API Window : private NonCopyable
 	{
@@ -34,8 +33,8 @@ namespace pure
 		void setSize(uint32_t width, uint32_t height);
 		void setTitle(const char* title) const;
 
-		bool create(const char* title);
-		bool create(uint32_t width, uint32_t height, const char* title);
+		bool make(const char* title);
+		bool make(uint32_t width, uint32_t height, const char* title);
 		void destroy();
 
 		void captureMouse() const;
@@ -56,9 +55,7 @@ namespace pure
 		void* m_ctx;
 
 		Vec2f m_mousePos;
-		std::queue<WindowEvent> m_events;
 
-		friend struct WinEventHandler;
 	};
 }
 

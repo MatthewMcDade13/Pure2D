@@ -28,7 +28,7 @@ void pure::Texture::setAlignment(int alignment)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
 }
 
-Texture pure::Texture::create(const char * fileName, bool shouldFlip)
+Texture pure::Texture::make(const char * fileName, bool shouldFlip)
 {
 	uint32_t texture;
 	glGenTextures(1, &texture);
@@ -73,7 +73,7 @@ Texture pure::Texture::create(const char * fileName, bool shouldFlip)
 	return t;
 }
 
-Texture pure::Texture::create(size_t w, size_t h, Format internalFormat, Format format, void * data, DataType type)
+Texture pure::Texture::make(size_t w, size_t h, Format internalFormat, Format format, void * data, DataType type)
 {
 	uint32_t texture;
 	glGenTextures(1, &texture);
@@ -108,7 +108,7 @@ void pure::Texture::write(Vec2i offset, size_t w, size_t h, Format format, DataT
 Texture Texture::createBlank()
 {
 	GLubyte texdata[] = { 255, 255, 255, 255 };
-	return Texture::create(1, 1, Format::RGBA, Format::RGBA, texdata);
+	return Texture::make(1, 1, Format::RGBA, Format::RGBA, texdata);
 	//uint32_t texture;
 	//glGenTextures(1, &texture);
 	//glBindTexture(GL_TEXTURE_2D, texture);

@@ -4,12 +4,13 @@
 #include <SDL2/SDL_mixer.h>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include "Private/ErrorHandling.h"
 
-static constexpr int frequency = 22050;
+static constexpr int frequency = 48000;
 static constexpr int chunkSize = 4096;
 
-static thread_local ALCdevice* device = nullptr;
-static thread_local ALCcontext* context = nullptr;
+static ALCdevice* device = nullptr;
+static ALCcontext* context = nullptr;
 
 bool pure::initAudio()
 {
@@ -60,6 +61,6 @@ bool pure::initAudio()
 void pure::terminateAudio()
 {
 	Mix_Quit();
-	alcDestroyContext(context);
-	alcCloseDevice(device);
+	alCall(alcDestroyContext(context));
+	alCall(alcCloseDevice(device));
 }

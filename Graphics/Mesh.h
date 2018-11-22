@@ -23,7 +23,7 @@ namespace pure
 		Shader shader;
 		DrawPrimitive primtype;
 
-		static Mesh create(const Vertex2D* verts, size_t vertCount, DrawPrimitive primtype = DrawPrimitive::TRIANGLES,
+		static Mesh make(const Vertex2D* verts, size_t vertCount, DrawPrimitive primtype = DrawPrimitive::TRIANGLES,
 		        DrawUsage usage = DrawUsage::STATIC_DRAW);
 
 		static Mesh quad(DrawUsage usage = DrawUsage::STATIC_DRAW);

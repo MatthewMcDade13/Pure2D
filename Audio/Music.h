@@ -3,14 +3,14 @@
 
 namespace pure
 {
-	struct Sound
+	struct Music
 	{
 		void free();
 
 		void setVolume(float percentage);
-		bool loadWavFromFile(const char* filename);
+		bool loadFromFile(const char* filename);
 
-		bool play(int loops = 0, int channel = -1);
+		bool play(int loops = 0);
 
 	private:
 		void* m_handle;

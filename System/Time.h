@@ -11,7 +11,7 @@ namespace pure
 		{
 			float start;
 
-			void initAudio();
+			void init();
 			float reset();
 			float elapsedTime() const;
 		};

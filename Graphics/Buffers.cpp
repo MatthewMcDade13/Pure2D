@@ -47,7 +47,7 @@ ElementBuffer ElementBuffer::quad(size_t count)
 		indices[quadIndex + 5] = vertexIndex + 1;
 	}
 
-	return ElementBuffer::create(&indices[0], indices.size());
+	return ElementBuffer::make(&indices[0], indices.size());
 }
 
 void ElementBuffer::bind() const
@@ -55,7 +55,7 @@ void ElementBuffer::bind() const
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
 }
 
-ElementBuffer ElementBuffer::create(const uint32_t* indicies, size_t count, DrawUsage usage)
+ElementBuffer ElementBuffer::make(const uint32_t* indicies, size_t count, DrawUsage usage)
 {
 	uint32_t ebo;
 	glGenBuffers(1, &ebo);
@@ -132,7 +132,7 @@ void pure::VertexBuffer::bind() const
 	glBindBuffer(GL_ARRAY_BUFFER, id_);
 }
 
-VertexArray pure::VertexArray::create()
+VertexArray pure::VertexArray::make()
 {
 	uint32_t vao;
 	glGenVertexArrays(1, &vao);
@@ -183,7 +183,7 @@ void pure::VertexBuffer::writeBuffer(const T * verts, size_t count, intptr_t buf
 }
 
 template<typename T>
-VertexBuffer pure::VertexBuffer::create(const T * verts, size_t count, DrawUsage usage, DataType type)
+VertexBuffer pure::VertexBuffer::make(const T * verts, size_t count, DrawUsage usage, DataType type)
 {
 	uint32_t id;
 	glGenBuffers(1, &id);
@@ -219,12 +219,12 @@ void VertexBuffer::copyData(VertexBuffer other, intptr_t readOffset, intptr_t wr
 
 
 // TODO: float overload is broken and doesn't properly set offsets and count/capacity of buffers
-template VertexBuffer VertexBuffer::create<Vertex2D>(const Vertex2D* verts, size_t count, DrawUsage usage, DataType type);
-template VertexBuffer VertexBuffer::create<float>(const float* verts, size_t count, DrawUsage usage, DataType type);
-template VertexBuffer VertexBuffer::create<Vec2f>(const Vec2f* verts, size_t count, DrawUsage usage, DataType type);
-template VertexBuffer VertexBuffer::create<Vec3f>(const Vec3f* verts, size_t count, DrawUsage usage, DataType type);
-template VertexBuffer VertexBuffer::create<Vec4f>(const Vec4f* verts, size_t count, DrawUsage usage, DataType type);
-template VertexBuffer VertexBuffer::create<Mat4>(const Mat4* verts, size_t count, DrawUsage usage, DataType type);
+template VertexBuffer VertexBuffer::make<Vertex2D>(const Vertex2D* verts, size_t count, DrawUsage usage, DataType type);
+template VertexBuffer VertexBuffer::make<float>(const float* verts, size_t count, DrawUsage usage, DataType type);
+template VertexBuffer VertexBuffer::make<Vec2f>(const Vec2f* verts, size_t count, DrawUsage usage, DataType type);
+template VertexBuffer VertexBuffer::make<Vec3f>(const Vec3f* verts, size_t count, DrawUsage usage, DataType type);
+template VertexBuffer VertexBuffer::make<Vec4f>(const Vec4f* verts, size_t count, DrawUsage usage, DataType type);
+template VertexBuffer VertexBuffer::make<Mat4>(const Mat4* verts, size_t count, DrawUsage usage, DataType type);
 
 template void VertexBuffer::alloc<Vertex2D>(const Vertex2D* verts, size_t count, DrawUsage usage, DataType type);
 template void VertexBuffer::alloc<float>(const float* verts, size_t count, DrawUsage usage, DataType type);

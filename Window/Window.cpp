@@ -27,12 +27,12 @@ void pure::Window::setTitle(const char* title) const
 	SDL_SetWindowTitle(sdlwin(m_handle), title);
 }
 
-bool pure::Window::create(const char* title)
+bool pure::Window::make(const char* title)
 {
-	return create(DEFAULT_WIN_SIZE.x, DEFAULT_WIN_SIZE.y, title);
+	return make(DEFAULT_WIN_SIZE.x, DEFAULT_WIN_SIZE.y, title);
 }
 
-bool pure::Window::create(uint32_t width, uint32_t height, const char* title)
+bool pure::Window::make(uint32_t width, uint32_t height, const char* title)
 {
 	m_handle = SDL_CreateWindow(title,
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -94,8 +94,10 @@ bool pure::Window::pollEvents(WindowEvent& e)
 
 	switch (sdlEvent.type)
 	{
-	case SDL_KEYDOWN: 
+	case SDL_KEYDOWN: {
 		e.type = WindowEvent::Type::KeyPress;
+		e.key = toPureKey(sdlEvent.key.keysym.scancode);
+	} break;
 	case SDL_KEYUP: {
 		e.type = WindowEvent::Type::KeyRelease;
 		e.key = toPureKey(sdlEvent.key.keysym.scancode);
@@ -127,6 +129,10 @@ bool pure::Window::pollEvents(WindowEvent& e)
 
 			}
 		} break;
+	case SDL_QUIT: {
+		isActive = false;
+	} break;
+
 	}
 
 	return isPendingEvents;

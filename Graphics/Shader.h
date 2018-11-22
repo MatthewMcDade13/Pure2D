@@ -76,7 +76,7 @@ namespace pure
 
 		Shader(uint32_t id = 0);
 
-		static Shader create(const char* vertShaderPath, const char* fragShaderPath);
+		static Shader make(const char* vertShaderPath, const char* fragShaderPath);
 		static Shader createSrc(const char* vertSrc, const char* fragSrc);
 		static void createFragShader(char* outBuffer, const char *effectSrc);
 		static void createVertShader(char* outBuffer, const char* positionSrc, bool isInstanced);

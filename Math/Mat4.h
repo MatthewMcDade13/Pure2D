@@ -21,6 +21,7 @@ namespace pure
     {
         // TODO: Might need copy ctor/copyData assignment operator?
         std::aligned_storage_t<sizeof(float[4][4])> val_;
+		static Mat4 make();
 
         void raw(float out[16]) const;
         float* ptr();
@@ -46,8 +47,6 @@ namespace pure
 
     };
 
-
-    PURE2D_API Mat4 makeMat4();
 
     PURE2D_API Mat4 operator-(const Mat4& operand);
 

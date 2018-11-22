@@ -28,7 +28,7 @@ pure::Shader::Shader(uint32_t id) :
 	locations.resize(DEFAULT_LOC_COUNT);
 }
 
-Shader pure::Shader::create(const char * vertShaderPath, const char * fragShaderPath)
+Shader pure::Shader::make(const char * vertShaderPath, const char * fragShaderPath)
 {
 	uint32_t vShader = createShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);
 	uint32_t fShader = createShaderFromFile(fragShaderPath, GL_FRAGMENT_SHADER);

@@ -50,7 +50,7 @@ namespace pure
         size_t offset;
         size_t stride;
 
-        static inline VertexAttribute create(uint8_t bufferIndex, uint8_t elemCount,
+        static inline VertexAttribute make(uint8_t bufferIndex, uint8_t elemCount,
                 DataType type, size_t stride, size_t offset, bool isInstanced)
         {
             VertexAttribute va = {};
@@ -67,7 +67,7 @@ namespace pure
 	// TODO: ElementBuffer needs some love to conform to rest of API.
 	struct PURE2D_API ElementBuffer
 	{
-		static ElementBuffer create(const uint32_t* indicies, size_t count, DrawUsage usage = DrawUsage::STATIC_DRAW);
+		static ElementBuffer make(const uint32_t* indicies, size_t count, DrawUsage usage = DrawUsage::STATIC_DRAW);
 		static ElementBuffer quad(size_t count);
 
 		void bind() const;
@@ -90,7 +90,7 @@ namespace pure
 		static VertexBuffer createZeroed(size_t typeSize, size_t count, DrawUsage usage, DataType type);
 
 		template<typename T>
-		static VertexBuffer create(const T* verts, size_t count, DrawUsage usage, DataType type = DataType::FLOAT);
+		static VertexBuffer make(const T* verts, size_t count, DrawUsage usage, DataType type = DataType::FLOAT);
 
 		template<typename T>
 		void alloc(const T* verts, size_t count, DrawUsage usage, DataType type = DataType::FLOAT);
@@ -112,7 +112,7 @@ namespace pure
 	{
 		uint32_t id_;
 
-		static VertexArray create();
+		static VertexArray make();
 
 		void bind() const;
 		void free();

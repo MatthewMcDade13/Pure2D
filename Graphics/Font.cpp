@@ -177,8 +177,8 @@ void pure::Text::setString(const char * text)
 
 	for (const char* c = text; *c; c++)
 	{
-		Transform t = Transform::create();
-		Quad q = Quad::create();
+		Transform t = Transform::make();
+		Quad q = Quad::make();
 
 		const Glyph* g = &fm->glyphs[*c];
 
@@ -334,7 +334,7 @@ void pure::Text::updateVerts()
 			continue;
 		}
 
-		Transform t = Transform::create();
+		Transform t = Transform::make();
 		Quad& q = m_quads[i];
 
 		const Glyph& g = fm->glyphs[*c];
@@ -378,7 +378,7 @@ void pure::Font::loadSize(int size)
 		fm.height = std::max(fm.height, float(g->bitmap.rows));
 	}
 
-	Texture texture = Texture::create(fm.width, fm.height, Texture::Format::RED, Texture::Format::RED, nullptr);
+	Texture texture = Texture::make(fm.width, fm.height, Texture::Format::RED, Texture::Format::RED, nullptr);
 
 
 	int offset = 0;

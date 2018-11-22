@@ -10,11 +10,11 @@
 
 using namespace pure;
 
-Mat4 pure::makeMat4()
+Mat4 pure::Mat4::make()
 {
-    Mat4 m = { };
-    new (&m.val_) glm::mat4(1);
-    return m;
+	Mat4 m = {};
+	new (&m.val_) glm::mat4(1);
+	return m;
 }
 
 Mat4 pure::operator-(const Mat4 & operand)
@@ -65,11 +65,6 @@ bool pure::operator!=(const Mat4 & left, const Mat4 & right)
 void pure::Mat4::raw(float out[16]) const
 {
     memcpy(out, TO_GLM_MAT4_CONST(val_), 16 * sizeof(float));
-    //const glm::mat4& self = *TO_GLM_MAT4_CONST(val_);
-    //for (size_t i = 0; i < 4; i++)
-    //{
-    //
-    //}
 }
 
 float * pure::Mat4::ptr()

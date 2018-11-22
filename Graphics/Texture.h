@@ -34,8 +34,8 @@ namespace pure
 		PURE2D_API void bind() const;
 
 		PURE2D_API static void setAlignment(int alignment);
-		PURE2D_API static Texture create(const char* fileName, bool shouldFlip = true);
-		PURE2D_API static Texture create(size_t w, size_t h, 
+		PURE2D_API static Texture make(const char* fileName, bool shouldFlip = true);
+		PURE2D_API static Texture make(size_t w, size_t h, 
 			Format internalFormat, Format format, void* data, DataType type = DataType::UBYTE);
 		PURE2D_API static Texture createBlank();
 		PURE2D_API void free();

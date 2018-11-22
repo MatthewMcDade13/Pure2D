@@ -18,30 +18,30 @@ pure::Mesh pure::Mesh::quad(DrawUsage usage)
     Mesh m = {};
 
     m.primtype = DrawPrimitive::TRIANGLES;
-    Quad q = Quad::create();
-    m.vbo = VertexBuffer::create(q.verts, Quad::VERT_COUNT, usage);
+    Quad q = Quad::make();
+    m.vbo = VertexBuffer::make(q.verts, Quad::VERT_COUNT, usage);
 	m.ebo = ElementBuffer::quad(6);
     return m;
 
 }
 
-pure::Mesh pure::Mesh::create(const pure::Vertex2D *verts, size_t vertCount,
+pure::Mesh pure::Mesh::make(const pure::Vertex2D *verts, size_t vertCount,
         pure::DrawPrimitive primtype, pure::DrawUsage usage)
 {
     Mesh m = {};
 
     m.primtype = primtype;
-    m.vbo = VertexBuffer::create(verts, vertCount, usage);
+    m.vbo = VertexBuffer::make(verts, vertCount, usage);
     return m;
 }
 
 pure::Mesh pure::Mesh::quad(const pure::Rectui &textureRect, Texture& texture, pure::DrawUsage usage)
 {
-    Quad q = Quad::create();
+    Quad q = Quad::make();
 
     calcTexCoords(q.verts, Quad::VERT_COUNT, textureRect, texture.size);
 
-    Mesh m = Mesh::create(q.verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLE_STRIP, usage);
+    Mesh m = Mesh::make(q.verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLE_STRIP, usage);
 
     m.texture = &texture;
     return m;

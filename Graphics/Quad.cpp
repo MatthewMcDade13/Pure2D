@@ -23,7 +23,7 @@ static constexpr Vertex2D quadVerts[Quad::VERT_COUNT] = {
     { 1.f, 1.f, 0.0f,    1.0f, 0.0f,   1.f, 1.f, 1.f, 1.f },  // bottom right
 };
 
-pure::Quad pure::Quad::create(pure::Vertex2D *verts)
+pure::Quad pure::Quad::make(pure::Vertex2D *verts)
 {
     Quad q = {};
     if (verts == nullptr)
@@ -35,21 +35,21 @@ pure::Quad pure::Quad::create(pure::Vertex2D *verts)
 
 }
 
-Quad Quad::create(Vec3f pos, Vec2f size, float rotation, const Rect<uint32_t> *textureRect, Vec2i texSize)
+Quad Quad::make(Vec3f pos, Vec2f size, float rotation, const Rect<uint32_t> *textureRect, Vec2i texSize)
 {
 
-    Transform transform = Transform::create();
+    Transform transform = Transform::make();
     transform.setPosition(pos);
     transform.setSize(size);
     transform.setRotation(rotation);
 
-    return Quad::create(transform.modelMatrix(), textureRect, texSize);
+    return Quad::make(transform.modelMatrix(), textureRect, texSize);
 
 }
 
-Quad Quad::create(const Mat4& transform, const Rect<uint32_t> *textureRect, Vec2i texSize)
+Quad Quad::make(const Mat4& transform, const Rect<uint32_t> *textureRect, Vec2i texSize)
 {
-    Quad q = Quad::create();
+    Quad q = Quad::make();
 
     translateVerts(q.verts, Quad::VERT_COUNT, transform);
 
@@ -61,7 +61,7 @@ Quad Quad::create(const Mat4& transform, const Rect<uint32_t> *textureRect, Vec2
 
 Mesh Quad::toMesh(DrawUsage usage) const
 {
-    return Mesh::create(verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLE_STRIP, usage);
+    return Mesh::make(verts, Quad::VERT_COUNT, DrawPrimitive::TRIANGLE_STRIP, usage);
 }
 
 void pure::Quad::flipVerticalTexCoords(float min, float max)

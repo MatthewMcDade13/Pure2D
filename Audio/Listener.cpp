@@ -1,4 +1,5 @@
 #include "Listener.h"
+#include "Private/ErrorHandling.h"
 #include <Pure2D/Math/Vec3.h>
 #include <AL/al.h>
 
@@ -10,7 +11,7 @@ static Vec3f l_position = { 0.f, 0.f, 0.f };
 static Vec3f l_velocity = { 0.f, 0.f, 0.f };
 static float l_volume = 100.f;
 
-static constexpr float toAlVolume(float volume) { return volume * 0.001f; }
+static constexpr float toAlPercent(float volume) { return volume * 0.01f; }
 
 // TODO: Error Handling for OpenAL calls
 
@@ -21,7 +22,7 @@ void pure::listener::setUpVector(const Vec3<float>& up)
 		up.x, up.y, up.z
 	};
 
-	alListenerfv(AL_ORIENTATION, orientation);
+	alCall(alListenerfv(AL_ORIENTATION, orientation));
 
 	l_up = up;
 }
@@ -33,7 +34,7 @@ void pure::listener::setDirection(const Vec3<float>& direction)
 		l_up.x, l_up.y, l_up.z
 	};
 
-	alListenerfv(AL_ORIENTATION, orientation);
+	alCall(alListenerfv(AL_ORIENTATION, orientation));
 
 	l_direction = direction;
 }
@@ -45,7 +46,7 @@ void pure::listener::setOrientation(const Vec3<float>& direction, const Vec3<flo
 		up.x, up.y, up.z
 	};
 
-	alListenerfv(AL_ORIENTATION, orientation);
+	alCall(alListenerfv(AL_ORIENTATION, orientation));
 
 	l_up = up;
 	l_direction = direction;
@@ -58,27 +59,27 @@ void pure::listener::resetDefaults()
 		l_up.x, l_up.y, l_up.z
 	};
 
-	alListenerfv(AL_ORIENTATION, orientation);
-	alListener3f(AL_POSITION, l_position.x, l_position.y, l_position.z);
-	alListener3f(AL_VELOCITY, l_velocity.x, l_velocity.y, l_velocity.z);
-	alListenerf(AL_GAIN, toAlVolume(l_volume));
+	alCall(alListenerfv(AL_ORIENTATION, orientation));
+	alCall(alListener3f(AL_POSITION, l_position.x, l_position.y, l_position.z));
+	alCall(alListener3f(AL_VELOCITY, l_velocity.x, l_velocity.y, l_velocity.z));
+	alCall(alListenerf(AL_GAIN, toAlPercent(l_volume)));
 }
 
 void pure::listener::setPosition(const Vec3<float>& pos)
 {
-	alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
+	alCall(alListener3f(AL_POSITION, pos.x, pos.y, pos.z));
 	l_position = pos;
 }
 
 void pure::listener::setVelocity(const Vec3<float>& vel)
 {
-	alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
+	alCall(alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z));
 	l_velocity = vel;
 }
 
 void pure::listener::setVolume(float volume)
 {
-	alListenerf(AL_GAIN, toAlVolume(volume));
+	alCall(alListenerf(AL_GAIN, toAlPercent(volume)));
 	l_volume = volume;
 }
 

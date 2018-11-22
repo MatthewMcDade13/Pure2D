@@ -23,9 +23,9 @@ namespace pure
         static constexpr int VERT_COUNT = 4;
         Vertex2D verts[VERT_COUNT];
 
-        static Quad create(Vertex2D* verts = nullptr);
-        static Quad create(Vec3f pos, Vec2f size, float rotation = 0, const Rect<uint32_t>* textureRect = nullptr, Vec2i texSize = {});
-        static Quad create(const Mat4& transform, const Rect<uint32_t>* textureRect = nullptr, Vec2i texSize = {});
+        static Quad make(Vertex2D* verts = nullptr);
+        static Quad make(Vec3f pos, Vec2f size, float rotation = 0, const Rect<uint32_t>* textureRect = nullptr, Vec2i texSize = {});
+        static Quad make(const Mat4& transform, const Rect<uint32_t>* textureRect = nullptr, Vec2i texSize = {});
 
         Mesh toMesh(DrawUsage usage = DrawUsage::STATIC_DRAW) const;
 

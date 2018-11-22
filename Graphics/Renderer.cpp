@@ -29,9 +29,9 @@ static struct
     VertexAttribute instancedMatAttribs [8] = {};
 } attribs = {};
 
-static const Quad defaultQuad = Quad::create();
+static const Quad defaultQuad = Quad::make();
 
-void pure::Renderer::create()
+void pure::Renderer::make()
 {
 	constexpr int NUM_MAT4 = 2;
 	{
@@ -41,12 +41,12 @@ void pure::Renderer::create()
 
 	{
 
-		attribs.vertex2dAttribs[0] = VertexAttribute::create(0, 3, DataType::FLOAT, sizeof(Vertex2D), 0, false);
-		attribs.vertex2dAttribs[1] = VertexAttribute::create(1, 2, DataType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, texCoord)), false);
-		attribs.vertex2dAttribs[2] = VertexAttribute::create(2, 4, DataType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, color)), false);
+		attribs.vertex2dAttribs[0] = VertexAttribute::make(0, 3, DataType::FLOAT, sizeof(Vertex2D), 0, false);
+		attribs.vertex2dAttribs[1] = VertexAttribute::make(1, 2, DataType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, texCoord)), false);
+		attribs.vertex2dAttribs[2] = VertexAttribute::make(2, 4, DataType::FLOAT, sizeof(Vertex2D), size_t(GET_MEM_OFFSET(Vertex2D, color)), false);
 
 		for (int i = 0; i < 4 * NUM_MAT4; i++)
-			attribs.instancedMatAttribs[i] = VertexAttribute::create(i + 3, 4, DataType::FLOAT, sizeof(Mat4) * NUM_MAT4, size_t(i * sizeof(Vec4f)), true);
+			attribs.instancedMatAttribs[i] = VertexAttribute::make(i + 3, 4, DataType::FLOAT, sizeof(Mat4) * NUM_MAT4, size_t(i * sizeof(Vec4f)), true);
 	}
 
 	{
@@ -57,12 +57,12 @@ void pure::Renderer::create()
 
 	{
 
-		Quad q = Quad::create();
+		Quad q = Quad::make();
 
-		m_quadVAO = VertexArray::create();
+		m_quadVAO = VertexArray::make();
 		m_quadVAO.bind();
 
-		m_quadBuffer = VertexBuffer::create(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
+		m_quadBuffer = VertexBuffer::make(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
 
 		setVertexLayout(m_quadBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
@@ -70,7 +70,7 @@ void pure::Renderer::create()
 	}
 
 	{
-		m_drawVAO = VertexArray::create();
+		m_drawVAO = VertexArray::make();
 		m_drawVAO.bind();
 
 		m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
@@ -80,9 +80,9 @@ void pure::Renderer::create()
 
 }
 
-void pure::Renderer::create(const Rectf & viewport)
+void pure::Renderer::make(const Rectf & viewport)
 {
-	create();
+	make();
 	setViewport(viewport);
 }
 
@@ -114,7 +114,7 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, 
     }
     else
     {
-        const Mat4 mat = makeMat4();
+        const Mat4 mat = Mat4::make();
         shader.setUniformIndx(Shader::MODEL_MAT_LOC, mat);
         shader.setUniformIndx(Shader::MVP_MAT_LOC, mat);
     }
@@ -228,8 +228,8 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
 	buffer.bind();
 
     // TODO: Maybe we can use a different simple shader to avoid sending useless data to gpu?
-    shader.setUniformIndx(Shader::MODEL_MAT_LOC, makeMat4());
-    shader.setUniformIndx(Shader::MVP_MAT_LOC, makeMat4());
+    shader.setUniformIndx(Shader::MODEL_MAT_LOC, Mat4::make());
+    shader.setUniformIndx(Shader::MVP_MAT_LOC, Mat4::make());
 
     setVertexLayout(buffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
