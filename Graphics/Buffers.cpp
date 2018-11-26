@@ -3,6 +3,7 @@
 #include "Vertex.h"
 #include <vector>
 #include <iostream>
+#include <Pure2D/Graphics/Texture.h>
 #include <cassert>
 
 using namespace pure;
@@ -240,3 +241,32 @@ template void VertexBuffer::writeBuffer<Vec3f>(const Vec3f* verts, size_t count,
 template void VertexBuffer::writeBuffer<Vec4f>(const Vec4f* verts, size_t count, intptr_t bufferOffset);
 template void VertexBuffer::writeBuffer<Mat4>(const Mat4* verts, size_t count, intptr_t bufferOffset);
 
+FrameBuffer pure::FrameBuffer::make()
+{
+	FrameBuffer buff = {};
+	glGenFramebuffers(1, &buff.id);
+	buff.bind();
+	return buff;
+}
+
+void pure::FrameBuffer::bind() const
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+}
+
+void pure::FrameBuffer::unbind() const
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void pure::FrameBuffer::attachTexture(const Texture & tex, int attachmentNum) const
+{
+	bind();
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentNum, GL_TEXTURE_2D, tex.id_, 0);
+}
+
+void pure::FrameBuffer::free()
+{
+	glDeleteFramebuffers(1, &id);
+	id = 0;
+}

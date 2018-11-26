@@ -12,6 +12,7 @@
 
 namespace pure
 {
+	struct Texture;
 
 	enum class DrawUsage
 	{
@@ -39,6 +40,20 @@ namespace pure
 		READ_ONLY  = 0x88B8,
 		WRITE_ONLY = 0x88B9,
 		READ_WRITE = 0x88BA
+	};
+
+	struct PURE2D_API FrameBuffer
+	{
+		uint32_t id;
+
+		static FrameBuffer make();
+
+		void bind() const;
+		void unbind() const;
+
+		void attachTexture(const Texture& tex, int attachmentNum = 0) const;
+
+		void free();
 	};
 
 	struct PURE2D_API VertexAttribute
