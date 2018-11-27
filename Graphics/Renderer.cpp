@@ -4,11 +4,14 @@
 #include "Renderer.h"
 #include "Math/MatrixTransform.h"
 #include "Math/Convert.h"
+#include "Private/Convert.h"
 #include "Graphics/Texture.h"
 #include "Graphics/Renderable.h"
+#include <Pure2D/Graphics/RenderTexture.h>
 #include "Graphics/Mesh.h"
 #include "Window/Window.h"
 #include "Private/Shaders.h"
+#include "Private/GlContext.h"
 #include "Private/Util.h"
 #include <string>
 #include <vector>
@@ -56,17 +59,9 @@ void pure::Renderer::make()
 	}
 
 	{
-
 		Quad q = Quad::make();
 
-		m_quadVAO = VertexArray::make();
-		m_quadVAO.bind();
-
 		m_quadBuffer = VertexBuffer::make(q.verts, Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW);
-
-		setVertexLayout(m_quadBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
-
-		unbindVAO();
 	}
 
 	{
@@ -74,8 +69,6 @@ void pure::Renderer::make()
 		m_drawVAO.bind();
 
 		m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
-
-		unbindVAO();
 	}
 
 }
@@ -86,10 +79,24 @@ void pure::Renderer::make(const Rectf & viewport)
 	setViewport(viewport);
 }
 
+void pure::Renderer::beginDrawTexture(const RenderTexture & rt)
+{
+	FrameBuffer::bind(rt.frameBuffer);
+	m_userDrawTarget = &rt;
+}
+
+void pure::Renderer::endDrawTexture()
+{
+	FrameBuffer::unbind();
+	m_userDrawTarget = nullptr;
+}
+
+const RenderTexture * pure::Renderer::drawTarget() const { return m_userDrawTarget; }
+
 const Rectf & pure::Renderer::viewport() const { return m_viewport; }
 const Mat4 &Renderer::projection() const { return m_projection; }
 
-const Mat4 Renderer::MVMatrix() const { return m_projection * cam.view(); }
+Mat4 Renderer::MVMatrix() const { return m_projection * cam.view(); }
 
 float Renderer::clipNear() { return CLIP_NEAR; }
 float Renderer::clipFar() { return CLIP_FAR; }
@@ -101,10 +108,11 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Texture *
 
 void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, const Texture *texture)
 {
-    m_quadVAO.bind();
     shader.bind();
     if (texture) texture->bind();
     else m_defaultTexture.bind();
+
+	setVertexLayout(m_quadBuffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
     if (transform)
     {
@@ -122,7 +130,7 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, 
     m_quadBuffer.writeBuffer(quad.verts, Quad::VERT_COUNT, 0);
 
 
-    drawArrays(DrawPrimitive::TRIANGLE_STRIP, 0, m_quadBuffer.vertCount);
+    gl::drawArrays(DrawPrimitive::TRIANGLE_STRIP, 0, m_quadBuffer.vertCount);
 }
 
 
@@ -144,35 +152,33 @@ void pure::Renderer::zoom(float offset)
 
 }
 
-void pure::Renderer::drawMesh(const Mesh & m_mesh, const Mat4 & transform)
+void pure::Renderer::drawMesh(const Mesh & mesh, const Mat4 & transform)
 {
-    m_drawVAO.bind();
-
-    const Shader& shader = m_mesh.shader.id() == 0 ? m_shader : m_mesh.shader;
+    const Shader& shader = mesh.shader.id() == 0 ? m_shader : mesh.shader;
     shader.bind();
 
-    if (m_mesh.texture) m_mesh.texture->bind();
+    if (mesh.texture) mesh.texture->bind();
     else m_defaultTexture.bind();
 
-    m_mesh.vbo.bind();
+    //mesh.vbo.bind();
 
-    setVertexLayout(m_mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+    setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
     shader.setUniformIndx(Shader::MVP_MAT_LOC, m_projection * cam.view() * transform);
     shader.setUniformIndx(Shader::MODEL_MAT_LOC, transform);
 
-	if (m_mesh.ebo.id_ != 0)
+	if (mesh.ebo.id_ != 0)
 	{
-		m_mesh.ebo.bind();
-		drawElements(m_mesh.primtype, m_mesh.ebo.count);
-		unbindEBO();
+		mesh.ebo.bind();
+		gl::drawElements(mesh.primtype, mesh.ebo.count);
+		gl::unbindElementBuffer();
 	}
 	else
 	{
-		drawArrays(m_mesh.primtype, 0, uint32_t(m_mesh.vbo.vertCount));
+		gl::drawArrays(mesh.primtype, 0, uint32_t(mesh.vbo.vertCount));
 	}
 
-    unbindVBO();
+	gl::unbindArrayBuffer();
 }
 
 void pure::Renderer::drawMeshStatic(const Mesh & m_mesh)
@@ -181,16 +187,15 @@ void pure::Renderer::drawMeshStatic(const Mesh & m_mesh)
 		(m_mesh.ebo.id_ ? &m_mesh.ebo : nullptr), m_mesh.primtype);
 }
 
-void pure::Renderer::drawMeshInstanced(const Mesh & m_mesh, const Mat4 * transforms, uint32_t numDraws)
+void pure::Renderer::drawMeshInstanced(const Mesh & mesh, const Mat4 * transforms, uint32_t numDraws)
 {
-    m_drawVAO.bind();
-    if (m_mesh.shader.id() == 0) m_instancedShader.bind();
-    else m_mesh.shader.bind();
+    if (mesh.shader.id() == 0) m_instancedShader.bind();
+    else mesh.shader.bind();
 
-    if (m_mesh.texture) m_mesh.texture->bind();
+    if (mesh.texture) mesh.texture->bind();
     else m_defaultTexture.bind();
 
-    setVertexLayout(m_mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
+    setVertexLayout(mesh.vbo, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 
     std::vector<Mat4> transformData;
     transformData.reserve(numDraws);
@@ -209,8 +214,8 @@ void pure::Renderer::drawMeshInstanced(const Mesh & m_mesh, const Mat4 * transfo
     else
         m_instancedMatBuffer.writeBuffer(&transformData[0], transformData.size(), 0);
 
-    glDrawArraysInstanced(static_cast<GLenum>(m_mesh.primtype), 0, uint32_t(m_mesh.vbo.vertCount), numDraws);
-    unbindVBO();
+    glDrawArraysInstanced(toGlPrim(mesh.primtype), 0, uint32_t(mesh.vbo.vertCount), numDraws);
+	gl::unbindArrayBuffer();
 }
 
 void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, const ElementBuffer* ebo, DrawPrimitive primtype)
@@ -220,12 +225,11 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
 
 void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader, const ElementBuffer* ebo, DrawPrimitive primtype)
 {
-    m_drawVAO.bind();
     shader.bind();
     if (texture) texture->bind();
     else m_defaultTexture.bind();
 
-	buffer.bind();
+	//buffer.bind();
 
     // TODO: Maybe we can use a different simple shader to avoid sending useless data to gpu?
     shader.setUniformIndx(Shader::MODEL_MAT_LOC, Mat4::make());
@@ -236,15 +240,15 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
     if (ebo)
     {
 		ebo->bind();
-        drawElements(primtype, ebo->count);
-		unbindEBO();
+        gl::drawElements(primtype, ebo->count);
+		gl::unbindElementBuffer();
     }
     else
     {
-        drawArrays(primtype, start, count);
+        gl::drawArrays(primtype, start, count);
     }
 
-    unbindVBO();
+	gl::unbindArrayBuffer();
 }
 
 void Renderer::draw(Renderable &renderable)
@@ -254,7 +258,6 @@ void Renderer::draw(Renderable &renderable)
 
 void Renderer::destroy()
 {
-    m_quadVAO.free();
     m_quadBuffer.free();
     m_instancedMatBuffer.free();
 
@@ -263,5 +266,10 @@ void Renderer::destroy()
     m_defaultTexture.free();
 
     m_drawVAO.free();
+}
+
+void pure::Renderer::activate()
+{
+	m_drawVAO.bind();
 }
 

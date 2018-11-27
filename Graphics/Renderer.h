@@ -25,6 +25,7 @@ namespace pure
 	struct Mesh;
 	struct Renderable;
 	struct Quad;
+	struct RenderTexture;
     template <typename T> struct Vec2;
     template <typename T> struct Vec4;
     template <typename T> struct Rect;
@@ -39,12 +40,17 @@ namespace pure
 		PURE2D_API void make();
 		PURE2D_API void make(const Rectf& viewport);
 
-		PURE2D_API void drawMesh(const Mesh& m_mesh, const Mat4& transform);
+		PURE2D_API void beginDrawTexture(const RenderTexture& rt);
+		PURE2D_API void endDrawTexture();
+
+		PURE2D_API const RenderTexture* drawTarget() const;
+
+		PURE2D_API void drawMesh(const Mesh& mesh, const Mat4& transform);
 
 		// draws mesh without transforming verts by renderer projection and view matrix
-		PURE2D_API void drawMeshStatic(const Mesh& m_mesh);
+		PURE2D_API void drawMeshStatic(const Mesh& mesh);
 
-		PURE2D_API void drawMeshInstanced(const Mesh& m_mesh, const Mat4* transforms, uint32_t numDraws);
+		PURE2D_API void drawMeshInstanced(const Mesh& mesh, const Mat4* transforms, uint32_t numDraws);
 
         PURE2D_API void drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture,
                                    Shader shader, const ElementBuffer* ebo = nullptr, DrawPrimitive primtype = DrawPrimitive::TRIANGLE_STRIP);
@@ -57,7 +63,7 @@ namespace pure
         PURE2D_API void draw(Renderable& renderable);
 
         PURE2D_API const Mat4& projection() const;
-        PURE2D_API const Mat4 MVMatrix() const;
+        PURE2D_API Mat4 MVMatrix() const;
 		// Gets the cached glViewport Rect
         PURE2D_API const Rectf& viewport() const;
 		// Set the cached glViewport Rect
@@ -66,13 +72,16 @@ namespace pure
 
         PURE2D_API void destroy();
 
+		// Binds internal VAO if not already bound in case
+		// you want to use external VAO for whatever reason
+		PURE2D_API void activate();
+
     private:
 		float m_clipNear, m_clipFar;
 
-        VertexArray m_quadVAO;
+        VertexArray m_drawVAO;
         VertexBuffer m_quadBuffer;
         VertexBuffer m_instancedMatBuffer;
-        VertexArray m_drawVAO;
 
         Shader m_shader;
         Shader m_instancedShader;
@@ -80,6 +89,10 @@ namespace pure
         Texture m_defaultTexture;
         Mat4 m_projection;
         Rectf m_viewport;
+
+		// NOTE: Do we even need this? guess its cool if we want to check 
+		// if and what we have as active draw target.
+		const RenderTexture* m_userDrawTarget;
     };
 }
 

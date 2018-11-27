@@ -469,7 +469,7 @@ void setGlyphTexCoords(const Glyph& g, const FontMap& fm, Quad& q)
 {
 	Rectui r = {
 		uint32_t(g.xOffsetCoord),
-		fm.height - g.bitmap.h,
+		uint32_t(fm.height - g.bitmap.h),
 		uint32_t(g.bitmap.w),
 		uint32_t(g.bitmap.h)
 	};

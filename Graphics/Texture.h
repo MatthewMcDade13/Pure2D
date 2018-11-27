@@ -14,13 +14,13 @@ namespace pure
 	{
 		enum class Format
 		{
-			RED = 0x1903,
-			GREEN = 0x1904,
-			BLUE = 0x1905,
-			ALPHA = 0x1906,
-			RGB = 0x1907,
-			RGBA = 0x1908,
-			R8 = 0x8229
+			RED,
+			GREEN,
+			BLUE,
+			ALPHA,
+			RGB,
+			RGBA,
+			R8
 		};
 
 

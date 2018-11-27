@@ -3,22 +3,12 @@
 #include "Vertex.h"
 #include <vector>
 #include <iostream>
+#include "Private/Convert.h"
+#include "Private/GlContext.h"
 #include <Pure2D/Graphics/Texture.h>
 #include <cassert>
 
 using namespace pure;
-
-static constexpr GLenum mapToGLUsage(DrawUsage usage)
-{
-	switch (usage)
-	{
-	case DrawUsage::STATIC_DRAW: return GL_STATIC_DRAW;
-	case DrawUsage::DYNAMIC_DRAW: return GL_DYNAMIC_DRAW;
-	case DrawUsage::STREAM_DRAW: return GL_STREAM_DRAW;
-	}
-
-	return 0;
-}
 
 
 template<typename T>
@@ -53,7 +43,9 @@ ElementBuffer ElementBuffer::quad(size_t count)
 
 void ElementBuffer::bind() const
 {
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
+	if (gl::isElementBufferBound(id_)) return;
+
+	gl::bindElementBuffer(id_);
 }
 
 ElementBuffer ElementBuffer::make(const uint32_t* indicies, size_t count, DrawUsage usage)
@@ -61,8 +53,8 @@ ElementBuffer ElementBuffer::make(const uint32_t* indicies, size_t count, DrawUs
 	uint32_t ebo;
 	glGenBuffers(1, &ebo);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indicies, static_cast<GLenum>(usage));
+	gl::bindElementBuffer(ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indicies, toGlUsage(usage));
 
 	return { ebo, count };
 }
@@ -73,41 +65,16 @@ void ElementBuffer::free()
 	id_ = 0;
 }
 
-
-void pure::unbindVAO()
-{
-	glBindVertexArray(0);
-}
-
-void pure::unbindEBO()
-{
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void pure::unbindVBO()
-{
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void pure::drawArrays(DrawPrimitive prim, uint32_t start, uint32_t vertCount)
-{
-	glDrawArrays(static_cast<GLenum>(prim), start, vertCount);
-}
-
-void pure::drawElements(DrawPrimitive prim, uint32_t count)
-{
-	glDrawElements(static_cast<GLenum>(prim), count, GL_UNSIGNED_INT, 0);
-}
-
 void pure::setVertexLayout(const VertexBuffer &buffer, VertexAttribute *attribs, size_t numAttribs)
 {
-    buffer.bind();
+    //buffer.bind();
+	gl::bindArrayBuffer(buffer.id_);
     for (size_t i = 0; i < numAttribs; i++)
     {
         VertexAttribute& attrib = attribs[i];
 
         glVertexAttribPointer(attrib.bufferIndex, attrib.elemCount,
-                static_cast<GLenum>(attrib.type), GL_FALSE,
+                toGlDataType(attrib.type), GL_FALSE,
                 static_cast<GLsizei>(attrib.stride), (void*)attrib.offset);
         glEnableVertexAttribArray(attrib.bufferIndex);
 
@@ -122,15 +89,25 @@ VertexBuffer pure::VertexBuffer::createZeroed(size_t typeSize, size_t count, Dra
 
 	const size_t nBytes = typeSize * count;
 
-	glBindBuffer(GL_ARRAY_BUFFER, id);
-	glBufferData(GL_ARRAY_BUFFER, nBytes, nullptr, static_cast<GLenum>(usage));
+	gl::bindArrayBuffer(id);
+	glBufferData(GL_ARRAY_BUFFER, nBytes, nullptr, toGlUsage(usage));
 
 	return { id, type, 0, nBytes };
 }
 
 void pure::VertexBuffer::bind() const
 {
-	glBindBuffer(GL_ARRAY_BUFFER, id_);
+	// TODO: WHY THE FUCK IS THIS NOT WORKING?!?!?!?
+	// It looks like it is preventing binding at some point and
+	// the default quad vao and the user draw vao arent getting 
+	// proper vbos bound or some shit? i am literally at a fucking loss and
+	// on the fucking verge of suicide.
+
+	if (gl::isArrayBufferBound(id_))
+	{
+		return;
+	}
+	gl::bindArrayBuffer(id_);
 }
 
 VertexArray pure::VertexArray::make()
@@ -142,7 +119,9 @@ VertexArray pure::VertexArray::make()
 
 void pure::VertexArray::bind() const
 {
-	glBindVertexArray(id_);
+	if (gl::getStates().activeVAO == id_) return;
+
+	gl::bindVertexArray(id_);
 }
 
 void pure::VertexBuffer::free()
@@ -159,7 +138,7 @@ void pure::VertexArray::setLayout(const VertexBuffer & buffer, uint32_t index, i
 {
 	buffer.bind();
 
-	glVertexAttribPointer(index, elemCount, static_cast<GLenum>(buffer.type), normalized, stride, ptr);
+	glVertexAttribPointer(index, elemCount, toGlDataType(buffer.type), normalized, stride, ptr);
 	glEnableVertexAttribArray(index);
 }
 
@@ -172,7 +151,7 @@ void pure::VertexBuffer::alloc(const T* verts, size_t count, DrawUsage usage, Da
 {
 	bind();
 	size = count * sizeof(T);
-	glBufferData(GL_ARRAY_BUFFER, size, verts, static_cast<GLenum>(usage));
+	glBufferData(GL_ARRAY_BUFFER, size, verts, toGlUsage(usage));
 }
 
 template<typename T>
@@ -201,7 +180,7 @@ VertexBuffer pure::VertexBuffer::make(const T * verts, size_t count, DrawUsage u
 void *VertexBuffer::map(BufferAccess access)
 {
 	bind();
-    return glMapBuffer(GL_ARRAY_BUFFER, static_cast<GLenum>(access));
+    return glMapBuffer(GL_ARRAY_BUFFER, toGlBuffAccess(access));
 }
 
 void VertexBuffer::unmap()
@@ -212,8 +191,8 @@ void VertexBuffer::unmap()
 
 void VertexBuffer::copyData(VertexBuffer other, intptr_t readOffset, intptr_t writeOffset, size_t size)
 {
-    glBindBuffer(GL_COPY_READ_BUFFER, other.id_);
-    glBindBuffer(GL_COPY_WRITE_BUFFER, id_);
+	gl::bindCopyReadBuffer(other.id_);
+	gl::bindCopyWriteBuffer(id_);
 
     glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, readOffset, writeOffset, size);
 }
@@ -245,28 +224,77 @@ FrameBuffer pure::FrameBuffer::make()
 {
 	FrameBuffer buff = {};
 	glGenFramebuffers(1, &buff.id);
-	buff.bind();
+	bind(buff);
 	return buff;
 }
 
-void pure::FrameBuffer::bind() const
+static inline void clear_(const Vec4f & color)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glClearColor(color.r, color.g, color.b, color.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void pure::FrameBuffer::unbind() const
+void pure::FrameBuffer::clear(FrameBuffer fb, const Vec4f & color)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	bind(fb);
+	clear_(color);
+}
+
+void pure::FrameBuffer::clear(const Vec4f & color)
+{
+	unbind();
+	clear_(color);
+}
+
+void pure::FrameBuffer::bind(FrameBuffer fb)
+{
+	if (gl::isStateBound(gl::BindState::FRAME_BUFFER, fb.id)) return;
+	gl::bindFrameBuffer(fb.id);
+}
+
+void pure::FrameBuffer::unbind()
+{
+	gl::unbindFrameBuffer();
 }
 
 void pure::FrameBuffer::attachTexture(const Texture & tex, int attachmentNum) const
 {
-	bind();
+	bind(*this);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentNum, GL_TEXTURE_2D, tex.id_, 0);
+}
+
+void pure::FrameBuffer::attachRenderBuffer(RenderBuffer rb)
+{
+	bind(*this);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb.id);
 }
 
 void pure::FrameBuffer::free()
 {
 	glDeleteFramebuffers(1, &id);
+	id = 0;
+}
+
+RenderBuffer pure::RenderBuffer::make(size_t w, size_t h)
+{
+	RenderBuffer rb = {};
+
+	glGenRenderbuffers(1, &rb.id);
+	rb.bind();
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+
+	return rb;
+}
+
+void pure::RenderBuffer::bind() const
+{
+	if (gl::isStateBound(gl::BindState::RENDER_BUFFER, id)) return;
+	gl::bindRenderBuffer(id);
+}
+
+void pure::RenderBuffer::free()
+{
+	glDeleteRenderbuffers(1, &id);
 	id = 0;
 }

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cassert>
 #include "glad.h"
+#include "Private/Convert.h"
+#include "Private/GlContext.h"
 #include "stb_image.h"
 
 using namespace pure;
@@ -19,8 +21,9 @@ void pure::Texture::setUnit(uint32_t unitNum)
 
 void pure::Texture::bind() const
 {
+	if (gl::isStateBound(gl::BindState::TEXTURE, id_)) return;
 	glActiveTexture(m_unit);
-	glBindTexture(GL_TEXTURE_2D, id_);
+	gl::bindTexture(id_);
 }
 
 void pure::Texture::setAlignment(int alignment)
@@ -32,7 +35,7 @@ Texture pure::Texture::make(const char * fileName, bool shouldFlip)
 {
 	uint32_t texture;
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	gl::bindTexture(texture);
 
 	// TODO: Create a function that can alter these values and do this there...
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -77,10 +80,10 @@ Texture pure::Texture::make(size_t w, size_t h, Format internalFormat, Format fo
 {
 	uint32_t texture;
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	gl::bindTexture(texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLenum>(internalFormat), w, h,
-		0, static_cast<GLenum>(format), static_cast<GLenum>(type), data);
+	glTexImage2D(GL_TEXTURE_2D, 0, toGlTexFormat(internalFormat), w, h,
+		0, toGlTexFormat(format), toGlDataType(type), data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	Texture t = {};
@@ -100,7 +103,7 @@ void pure::Texture::write(Vec2i offset, size_t w, size_t h, Format format, DataT
 {
 	bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, w, h, 
-		static_cast<GLenum>(format), static_cast<GLenum>(type), data);
+		toGlTexFormat(format), toGlDataType(type), data);
 
 }
 
@@ -109,18 +112,4 @@ Texture Texture::createBlank()
 {
 	GLubyte texdata[] = { 255, 255, 255, 255 };
 	return Texture::make(1, 1, Format::RGBA, Format::RGBA, texdata);
-	//uint32_t texture;
-	//glGenTextures(1, &texture);
-	//glBindTexture(GL_TEXTURE_2D, texture);
-
-
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1,
-	//			 0, GL_RGBA, GL_UNSIGNED_BYTE, texdata);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-
-	//Texture t = {};
-	//t.size = { 1, 1 };
-	//t.m_unit = GL_TEXTURE0;
-	//t.id_ = texture;
-	//return t;
 }

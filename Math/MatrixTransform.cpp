@@ -6,6 +6,12 @@
 
 using namespace pure;
 
+#if defined(_WIN32) || defined(_WIN64)
+// Lmfao wtf is this shit. need to undef to avoid some meme macro smdh windows...
+#undef near
+#undef far
+#endif
+
 // TODO: Remove dependency on GLM
 
 Mat4 pure::translate(const Mat4 & mat, const Vec3<float>& vec)

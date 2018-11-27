@@ -2,6 +2,7 @@
 //#include <gl/GL.h>
 #include "glad.h"
 #include "Private/FileIO.h"
+#include "Private/GlContext.h"
 #include "Private/Shaders.h"
 #include "Math/Vec4.h"
 #include "Math/Mat4.h"
@@ -56,7 +57,8 @@ Shader pure::Shader::createSrc(const char * vertSrc, const char * fragSrc)
 
 void pure::Shader::bind() const
 {
-	glUseProgram(m_id);
+	if (gl::isStateBound(gl::BindState::SHADER_PROGRAM, m_id)) return;
+	gl::bindShader(m_id);
 }
 
 int pure::Shader::getLocation(const char *uniform) const

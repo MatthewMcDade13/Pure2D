@@ -16,30 +16,39 @@ namespace pure
 
 	enum class DrawUsage
 	{
-		STATIC_DRAW = 0x88E4,
-		DYNAMIC_DRAW = 0x88E8,
-		STREAM_DRAW = 0x88E0
+		STATIC_DRAW,
+		DYNAMIC_DRAW,
+		STREAM_DRAW
 	};
 
 	enum class DrawPrimitive
 	{
-		POINTS = 0x0000,
-		LINES = 0x0001,
-		LINE_LOOP = 0x0002,
-		LINE_STRIP = 0x0003,
-		TRIANGLES = 0x0004,
-		TRIANGLE_STRIP = 0x0005,
-		TRIANGLE_FAN = 0x0006,
-		QUADS = 0x0007,
-		QUAD_STRIP = 0x0008,
-		POLYGON = 0x0009
+		POINTS,
+		LINES,
+		LINE_LOOP,
+		LINE_STRIP,
+		TRIANGLES,
+		TRIANGLE_STRIP,
+		TRIANGLE_FAN,
+		QUADS,
+		QUAD_STRIP,
+		POLYGON
 	};
 
 	enum class BufferAccess
 	{
-		READ_ONLY  = 0x88B8,
-		WRITE_ONLY = 0x88B9,
-		READ_WRITE = 0x88BA
+		READ_ONLY,
+		WRITE_ONLY,
+		READ_WRITE
+	};
+
+	struct PURE2D_API RenderBuffer
+	{
+		uint32_t id;
+		static RenderBuffer make(size_t w, size_t h);
+
+		void bind() const;
+		void free();
 	};
 
 	struct PURE2D_API FrameBuffer
@@ -48,13 +57,21 @@ namespace pure
 
 		static FrameBuffer make();
 
-		void bind() const;
-		void unbind() const;
+		static void clear(FrameBuffer fb, const Vec4f& color = { 0.f, 0.f, 0.f, 1.f });
+		// Clears default framebuffer (framebuffer 0)
+		static void clear(const Vec4f& color = { 0.f, 0.f, 0.f, 1.f });
+
+		// Since binding to framebuffer 0 is considered the window,
+		// we will make bind and unbind static methods instead of instance methods
+		static void bind(FrameBuffer fb);
+		static void unbind();
 
 		void attachTexture(const Texture& tex, int attachmentNum = 0) const;
+		void attachRenderBuffer(RenderBuffer rb);
 
 		void free();
 	};
+
 
 	struct PURE2D_API VertexAttribute
     {
@@ -133,15 +150,6 @@ namespace pure
 		void free();
 		void setLayout(const VertexBuffer& buffer, uint32_t index, int elemCount, bool normalized, size_t stride, void* ptr);
 	};
-
-	PURE2D_API void unbindEBO();
-	PURE2D_API void unbindVAO();
-	PURE2D_API void unbindVBO();
-
-	PURE2D_API void drawArrays(DrawPrimitive prim, uint32_t start, uint32_t vertCount);
-
-	// TODO: Move this to renderer.
-	PURE2D_API void drawElements(DrawPrimitive prim, uint32_t count);
 
 	PURE2D_API void setVertexLayout(const VertexBuffer& buffer, VertexAttribute* attribs, size_t numAttribs);
 }
