@@ -1,4 +1,8 @@
-# Pure2D
+# Pure2D Rendering Library
+
+I made this library to just play around with OpenGL and learn about what goes into rendering and making games.
+Lots of bugs still. This is continually being worked on and subject to change as i use this for games that i make.
+
 
 # Dependencies
 * SDL2
