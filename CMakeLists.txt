@@ -7,35 +7,64 @@ include(GNUInstallDirs)
 find_package(PkgConfig REQUIRED 3.3)
 
 add_library(Pure2D SHARED
-        Define.h
-        Graphics.h PureMath.h System.h Window.h Init.h Init.cpp
-        Window/Window.cpp Window/Window.h
+
+        Audio/Audio.h Audio/Audio.cpp
+        Audio/AudioSource.h Audio/AudioSource.cpp
+        Audio/Listener.h Audio/Listener.cpp
+        Audio/Music.h Audio/Music.cpp
+        Audio/SoundBuffer.h Audio/SoundBuffer.cpp
+
+        Engine/Game.cpp Engine/Game.h
+
         External/glad.c External/glad.h
         External/khrplatform.h
         External/stb_image.cpp External/stb_image.h
-        Window/Keyboard.h Window/WindowEvent.h
-        Math/Vec2.h Math/Vec3.h Math/Vec4.h
+
+        Graphics/Buffers.cpp Graphics/Buffers.h
+        Graphics/Camera.cpp Graphics/Camera.h
+        Graphics/Font.h Graphics/Font.cpp
+        Graphics/Mesh.h Graphics/Mesh.cpp
+        Graphics/Quad.cpp Graphics/Quad.h
+        Graphics/RenderTexture.h Graphics/RenderTexture.cpp
+        Graphics/Renderable.h 
+        Graphics/Renderer.cpp Graphics/Renderer.h 
+        Graphics/Shader.cpp Graphics/Shader.h
+        Graphics/SpriteBatch.cpp Graphics/SpriteBatch.h 
+        Graphics/Texture.cpp Graphics/Texture.h
+        Graphics/Transform.cpp Graphics/Transform.h
+        Graphics/Vertex.h Graphics/Vertex.cpp
+
+        Math/Constants.h
+        Math/Convert.h
+        Math/Manip.cpp Math/Manip.h
         Math/Mat4.cpp Math/Mat4.h
         Math/MatrixTransform.cpp Math/MatrixTransform.h
         Math/Rect.h
-        Math/Manip.cpp Math/Manip.h
-        Math/Convert.h
-        Math/Constants.h
-        Private/Convert.h
+        Math/Vec2.h Math/Vec3.h Math/Vec4.h
+
+        Private/Convert.h Private/Convert.cpp
+        Private/Debug.h
+        Private/ErrorHandling.h Private/ErrorHandling.cpp
         Private/FileIO.cpp Private/FileIO.h
+        Private/GlContext.h Private/GlContext.cpp
         Private/Shaders.h
         Private/Util.h
-		Private/FreeType.cpp Private/FreeType.h
-        Graphics/Buffers.cpp Graphics/Buffers.h
-        Graphics/Camera.cpp Graphics/Camera.h
-        Graphics/Shader.cpp Graphics/Shader.h
-        Graphics/Texture.cpp Graphics/Texture.h
-        Graphics/Mesh.h
-        Graphics/Vertex.h
+
+        System/DataType.h
+        System/Defer.h
         System/NonCopyable.h
         System/Time.cpp System/Time.h
-		Engine/Game.cpp Engine/Game.h
-        Graphics/Renderer.cpp Graphics/Renderer.h Pure2D.h System/Util.h Graphics/Transform.cpp Graphics/Transform.h Graphics/Mesh.cpp Graphics/Renderable.h Graphics/SpriteBatch.cpp Graphics/SpriteBatch.h Graphics/Vertex.cpp Graphics/Quad.cpp Graphics/Quad.h)
+        System/Util.h 
+
+        Window/Keyboard.h Window/Keyboard.cpp
+        Window/Window.h Window/Window.cpp
+        Window/WindowEvent.h
+
+        Define.h
+        Graphics.h PureMath.h System.h Window.h Audio.h
+        Pure2D.h 
+        Init.h Init.cpp 
+        )
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
@@ -59,50 +88,63 @@ install(TARGETS Pure2D DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(
         FILES
         "Define.h"
-        Graphics.h PureMath.h System.h Window.h Init.h Pure2D.h
+        Graphics.h PureMath.h System.h Window.h Init.h Pure2D.h Audio.h
         DESTINATION "include/${PROJECT_NAME}"
 )
 
 # WINDOW
 install(
         FILES
-        "Window/Window.h"
-        "Window/WindowEvent.h"
         Window/Keyboard.h
+        Window/Window.h
+        Window/WindowEvent.h
+
         DESTINATION "include/${PROJECT_NAME}/Window"
 )
 
 # MATH
 install(
         FILES
-        "Math/Vec2.h" "Math/Vec3.h" "Math/Vec4.h"
-        "Math/Mat4.h" "Math/MatrixTransform.h"
-        "Math/Rect.h" "Math/Manip.h"
-        "Math/Convert.h" "Math/Constants.h"
+        Math/Constants.h
+        Math/Convert.h
+        Math/Manip.h
+        Math/Mat4.h
+        Math/MatrixTransform.h
+        Math/Rect.h
+        Math/Vec2.h Math/Vec3.h Math/Vec4.h
+
         DESTINATION "include/${PROJECT_NAME}/Math"
 )
 
 # GRAPHICS
 install(
         FILES
-        "Graphics/Buffers.h" "Graphics/Camera.h"
-        "Graphics/Shader.h"
-        "Graphics/Texture.h" "Graphics/Vertex.h"
-        "Graphics/Renderer.h"
-        "Graphics/Transform.h"
-        "Graphics/Renderable.h"
-        "Graphics/Mesh.h"
-        "Graphics/SpriteBatch.h"
-        "Graphics/Quad.h"
+        Graphics/Buffers.h
+        Graphics/Camera.h
+        Graphics/Font.h
+        Graphics/Mesh.h
+        Graphics/Quad.cpp Graphics/Quad.h
+        Graphics/RenderTexture.h
+        Graphics/Renderable.h 
+        Graphics/Renderer.h 
+        Graphics/Shader.h
+        Graphics/SpriteBatch.h 
+        Graphics/Texture.h
+        Graphics/Transform.h
+        Graphics/Vertex.h
         DESTINATION "include/${PROJECT_NAME}/Graphics"
 )
 
 # SYSTEM
 install(
         FILES
-        "System/NonCopyable.h"
-        "System/Time.h"
-        "System/Util.h"
+
+        System/DataType.h
+        System/Defer.h
+        System/NonCopyable.h
+        System/Time.h
+        System/Util.h 
+
         DESTINATION "include/${PROJECT_NAME}/System"
 )
 
@@ -111,6 +153,18 @@ install(
 	FILES
 	"Engine/Game.h"
 	DESTINATION "include/${PROJECT_NAME}/Engine"
+)
+
+# Audio
+install(
+        FILES
+
+        Audio/Audio.h
+        Audio/AudioSource.h
+        Audio/Listener.h
+        Audio/Music.h
+        Audio/SoundBuffer.h
+        DESTINATION "include/${PROJECT_NAME}/Audio"
 )
 
 install(FILES "${PROJECT_BINARY_DIR}/pure2d-config.cmake" DESTINATION lib/cmake/${PROJECT_NAME})

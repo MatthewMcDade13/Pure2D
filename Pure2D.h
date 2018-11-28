@@ -11,6 +11,7 @@
 #include <Pure2D/Graphics.h>
 #include <Pure2D/System.h>
 #include <Pure2D/Window.h>
-#include <Pure2D/Graphics/Renderer.h>
+#include <Pure2D/Graphics.h>
+#include <Pure2D/Audio.h>
 
 #endif //PURE2D_PURE2D_H
