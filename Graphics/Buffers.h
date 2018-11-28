@@ -57,10 +57,6 @@ namespace pure
 
 		static FrameBuffer make();
 
-		static void clear(FrameBuffer fb, const Vec4f& color = { 0.f, 0.f, 0.f, 1.f });
-		// Clears default framebuffer (framebuffer 0)
-		static void clear(const Vec4f& color = { 0.f, 0.f, 0.f, 1.f });
-
 		// Since binding to framebuffer 0 is considered the window,
 		// we will make bind and unbind static methods instead of instance methods
 		static void bind(FrameBuffer fb);

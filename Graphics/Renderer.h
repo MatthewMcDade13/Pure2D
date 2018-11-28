@@ -7,6 +7,7 @@
 
 
 #include <Pure2D/Math/Vec2.h>
+#include <Pure2D/Math/Vec4.h>
 #include <Pure2D/Math/Mat4.h>
 #include <Pure2D/Math/Rect.h>
 #include <Pure2D/Graphics/Shader.h>
@@ -37,8 +38,10 @@ namespace pure
 		PURE2D_API static float clipNear();
 		PURE2D_API static float clipFar();
 
-		PURE2D_API void make();
-		PURE2D_API void make(const Rectf& viewport);
+		PURE2D_API void clear(const Vec4f& color = { 0.f, 0.f, 0.f, 1.f }) const;
+		PURE2D_API void present() const;
+
+		PURE2D_API void create(const Window& win);
 
 		PURE2D_API void beginDrawTexture(const RenderTexture& rt);
 		PURE2D_API void endDrawTexture();
@@ -89,6 +92,8 @@ namespace pure
         Texture m_defaultTexture;
         Mat4 m_projection;
         Rectf m_viewport;
+
+		const Window* m_targetWindow;
 
 		// NOTE: Do we even need this? guess its cool if we want to check 
 		// if and what we have as active draw target.

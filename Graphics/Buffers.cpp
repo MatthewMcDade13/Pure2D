@@ -228,24 +228,6 @@ FrameBuffer pure::FrameBuffer::make()
 	return buff;
 }
 
-static inline void clear_(const Vec4f & color)
-{
-	glClearColor(color.r, color.g, color.b, color.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void pure::FrameBuffer::clear(FrameBuffer fb, const Vec4f & color)
-{
-	bind(fb);
-	clear_(color);
-}
-
-void pure::FrameBuffer::clear(const Vec4f & color)
-{
-	unbind();
-	clear_(color);
-}
-
 void pure::FrameBuffer::bind(FrameBuffer fb)
 {
 	if (gl::isStateBound(gl::BindState::FRAME_BUFFER, fb.id)) return;
@@ -254,6 +236,7 @@ void pure::FrameBuffer::bind(FrameBuffer fb)
 
 void pure::FrameBuffer::unbind()
 {
+	if (gl::isStateBound(gl::BindState::FRAME_BUFFER, 0)) return;
 	gl::unbindFrameBuffer();
 }
 

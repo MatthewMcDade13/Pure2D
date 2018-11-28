@@ -34,8 +34,21 @@ static struct
 
 static const Quad defaultQuad = Quad::make();
 
-void pure::Renderer::make()
+void pure::Renderer::create(const Window& win)
 {
+
+	glViewport(0, 0, win.width(), win.height());
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	m_targetWindow = &win;
+
+	setViewport({ 0.f, 0.f, 
+		static_cast<float>(win.width()), 
+		static_cast<float>(win.height()) 
+	});
+
 	constexpr int NUM_MAT4 = 2;
 	{
 		cam.position.z = 0.f;
@@ -73,12 +86,6 @@ void pure::Renderer::make()
 
 }
 
-void pure::Renderer::make(const Rectf & viewport)
-{
-	make();
-	setViewport(viewport);
-}
-
 void pure::Renderer::beginDrawTexture(const RenderTexture & rt)
 {
 	FrameBuffer::bind(rt.frameBuffer);
@@ -100,6 +107,17 @@ Mat4 Renderer::MVMatrix() const { return m_projection * cam.view(); }
 
 float Renderer::clipNear() { return CLIP_NEAR; }
 float Renderer::clipFar() { return CLIP_FAR; }
+
+void pure::Renderer::clear(const Vec4f & color) const
+{
+	glClearColor(color.r, color.g, color.b, color.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void pure::Renderer::present() const
+{
+	m_targetWindow->swapBuffers();
+}
 
 void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Texture *texture)
 {

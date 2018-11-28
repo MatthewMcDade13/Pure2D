@@ -48,6 +48,11 @@ static struct FontShader
 	}
 
 private:
+	// TODO/NOTE: Should continue to force text to be drawn in view space?
+	// or should we allow it to be drawn in world coordinates?
+	// if so, we can either allow passing a custom shader for the text (need to handle deleting old shader)
+	// or we can always multiply by view matrix to draw in world space and just make user handle positioning.
+	// OR both, because why tf not lmao
 	static constexpr const char* defaultVert = "\n"
 		"uniform mat4 u_projMatrix;\n"
 		"vec4 position(mat4 mvpMat, vec3 pos)\n"
@@ -61,10 +66,7 @@ private:
 
 		"vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec3 fragPos)\n"
 		"{\n"
-		"	//if (texture(tex, texCoord).r == 0.0) discard;\n"
-		"   //return vec4(texture(tex, texCoord).r, texture(tex, texCoord).r, texture(tex, texCoord).r, texture(tex, texCoord).r);\n"
 		"    return vec4(1.0, 1.0, 1.0, texture(tex, texCoord).r) * u_color;\n"
-		"   //return vec4(1.0, 1.0, 1.0, 0.5);\n"
 		"}\n";
 
 	static const size_t defaultVertShaderlen;
@@ -182,7 +184,7 @@ void pure::Text::setString(const char * text)
 
 		const Glyph* g = &fm->glyphs[*c];
 
-		// Need some representation of line-spacing 
+		// TODO: Need some representation of line-spacing 
 		if (*c == '\n')
 		{
 			pos.y += fm->height;

@@ -42,7 +42,6 @@ namespace pure
 
 		bool pollEvents(WindowEvent& e);
 
-		void clear(const Vec4<float>& clearColor = Vec4<float>::single(0.f)) const;
 		void swapBuffers() const;
 
 		void toggleFullscreenWindowed();

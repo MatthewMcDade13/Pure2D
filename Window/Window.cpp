@@ -67,11 +67,6 @@ bool pure::Window::make(uint32_t width, uint32_t height, const char* title)
 	m_isFullscreen = false;
 	isActive = true;
 	
-	glViewport(0, 0, m_width, m_height);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
 	return true;
 }
 
@@ -136,12 +131,6 @@ bool pure::Window::pollEvents(WindowEvent& e)
 	}
 
 	return isPendingEvents;
-}
-
-void pure::Window::clear(const Vec4<float>& clearColor) const
-{
-	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void pure::Window::swapBuffers() const

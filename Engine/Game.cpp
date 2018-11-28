@@ -14,7 +14,7 @@ pure::Game::Game()
 {
 	pure::init();
 	m_window.make(DEFAULT_SCREEN_X, DEFAULT_SCREEN_Y, "");
-	m_renderer.make();
+	m_renderer.create(m_window);
 }
 
 pure::Game::~Game()
@@ -44,11 +44,11 @@ void pure::Game::run()
 
 		update(dt);
 
-		m_window.clear();
+		m_renderer.clear();
 
 		draw();
 
-		m_window.swapBuffers();
+		m_renderer.present();
 	}
 }
 
