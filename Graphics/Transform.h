@@ -19,14 +19,27 @@ namespace pure
         PURE2D_API const Vec3f& position() const;
         PURE2D_API Vec2f size() const;
         PURE2D_API float rotation() const;
+
+        PURE2D_API void setPosition(float x, float y);
+        PURE2D_API void setPosition(float x, float y, float z);
 		PURE2D_API void setPosition(Vec2f pos);
         PURE2D_API void setPosition(const Vec3f& pos);
+
+        PURE2D_API void setSize(float w, float h);
         PURE2D_API void setSize(Vec2f size);
+
         PURE2D_API void setRotation(float angle);
+
         PURE2D_API const Mat4& modelMatrix();
 
+        PURE2D_API void move(float x, float y);
+        PURE2D_API void move(float x, float y, float z);
         PURE2D_API void move(const Vec3f& offset);
+        PURE2D_API void move(Vec2f offset);
+
+        PURE2D_API void scale(float x, float y);
         PURE2D_API void scale(Vec2f offset);
+        
         PURE2D_API void rotate(float angle);
 
     private:
