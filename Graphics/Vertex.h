@@ -17,13 +17,34 @@ namespace pure
     {
         static constexpr uint32_t COUNT = 9;
 
+        struct Position 
+        { 
+            float x, y, z;
+            static constexpr Position fromVec3(const Vec3f& pos) { return { pos.x, pos.y, pos.z }; }
+            inline Vec3f toVec3() { return Vec3f(x, y, z); }
+        };
+
+        struct TextureCoordinate 
+        { 
+            float u, v;
+            static constexpr TextureCoordinate fromVec2(Vec2f texel) { return { texel.x, texel.y }; }
+            inline Vec2f toVec2() { return Vec2f(u, v); }
+        };
+
+        struct Color 
+        { 
+            float r, g, b, a;
+            static constexpr Color fromVec4(const Vec4& color) { return { color.r, color.g, color.b, color.a }; }
+            inline Vec4f toVec4() { return Vec4f(r, g, b, a); }
+        };
+
         union
         {
             struct
             {
-                struct { float x, y, z; } position;
-                struct { float u, v; } texCoord;
-                struct { float r, g, b, a; } color;
+                Position position;
+                TextureCoordinate texCoord;
+                Color color;
             };
 
             float buffer[COUNT];

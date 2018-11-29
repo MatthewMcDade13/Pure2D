@@ -12,7 +12,7 @@ using namespace pure;
 void pure::setColor(Vertex2D* verts, size_t vertCount, const Vec4f& color)
 {
     for (size_t i = 0; i < vertCount; i++)
-        verts[i].color = { color.r, color.g, color.b, color.a };
+        verts[i].color = Vertex2D::Color::fromVec4(color);
 }
 
 void pure::translateVerts(Vertex2D *verts, size_t vertCount, const Mat4 &transform)
