@@ -30,6 +30,8 @@ namespace pure
         };
     };
 
+    void setColor(Vertex2D* verts, size_t vertCount, const Vec4f& color);
+
     void translateVerts(Vertex2D* verts, size_t vertCount, const Mat4& transform);
     // TODO: Probably don't need vertCount, might be safe to assume this is Quad::VERT_COUNT (since we are uing a textureRect
     // to find coordinates)

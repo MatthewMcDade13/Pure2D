@@ -14,16 +14,16 @@ Vec2f pure::Transform::size() const { return m_size; }
 
 float pure::Transform::rotation() const { return m_rotation; }
 
-void setPosition(float x, float y) { setPosition(Vec2f(x, y)); }
-void setPosition(float x, float y, float z) { setPosition(Vec3f(x, y, z)); }
-void  pure::Transform::setPosition(Vec2f pos) { setPosition(Vec3f(pos.x, pos.y, m_position.z)); }
+void Transform::setPosition(float x, float y) { setPosition(Vec2f(x, y)); }
+void Transform::setPosition(float x, float y, float z) { setPosition(Vec3f(x, y, z)); }
+void pure::Transform::setPosition(Vec2f pos) { setPosition(Vec3f(pos.x, pos.y, m_position.z)); }
 void pure::Transform::setPosition(const pure::Vec3f& pos)
 {
     m_position = pos;
     m_needsUpdate = true;
 }
 
-void setSize(float w, float h) { setSize(Vec2f(w, h)); }
+void Transform::setSize(float w, float h) { setSize(Vec2f(w, h)); }
 void pure::Transform::setSize(pure::Vec2f size)
 {
     m_size = size;
@@ -51,16 +51,16 @@ const pure::Mat4 &pure::Transform::modelMatrix()
     return m_model;
 }
 
-void move(float x, float y) { move(Vec2f(x, y)); }
-void move(float x, float y, float z) { move(Vec3f(x, y, z)); }
-void move(Vec2f offset) { move({ offset.x, offset.y, 0.f }); }
+void Transform::move(float x, float y) { move(Vec2f(x, y)); }
+void Transform::move(float x, float y, float z) { move(Vec3f(x, y, z)); }
+void Transform::move(Vec2f offset) { move({ offset.x, offset.y, 0.f }); }
 void Transform::move(const Vec3f& offset)
 {
     m_position += offset;
     m_needsUpdate = true;
 }
 
-void scale(float x, float y) { scale(Vec2f(x, y)); }
+void Transform::scale(float x, float y) { scale(Vec2f(x, y)); }
 void Transform::scale(Vec2f offset)
 {
     m_size += offset;
