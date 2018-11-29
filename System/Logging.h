@@ -17,14 +17,15 @@ namespace pure
 
 		// prints given arg to stdout
 		template <typename T>
-		typename std::enable_if<std::is_integral<T>::value>::type print(const T& s) 
+		typename std::enable_if<std::is_integral<T>::value>::type print(T s) 
 		{ dbout() << s; }
 
 		template <typename T>
-		typename std::enable_if<std::is_floating_point<T>::value>::type print(const T& s) 
+		typename std::enable_if<std::is_floating_point<T>::value>::type print(T s) 
 		{ dbout() << s; }
 
-		inline void print(const Printable& obj) { dbout() << (obj.toString()); }
+		template <typename Printable>
+		void print(const Printable& obj) { dbout() << (obj.toString()); }
 
 		inline void print(const char* s) { dbout() << s; }
 
