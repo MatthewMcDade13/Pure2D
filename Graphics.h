@@ -3,6 +3,7 @@
 
 #include <Pure2D/Graphics/Buffers.h>
 #include <Pure2D/Graphics/Camera.h>
+#include <Pure2D/Graphics/Color.h>
 #include <Pure2D/Graphics/Font.h>
 #include <Pure2D/Graphics/Mesh.h>
 #include <Pure2D/Graphics/Quad.h>

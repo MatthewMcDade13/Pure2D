@@ -22,6 +22,7 @@ add_library(Pure2D SHARED
 
         Graphics/Buffers.cpp Graphics/Buffers.h
         Graphics/Camera.cpp Graphics/Camera.h
+        Graphics/Color.h
         Graphics/Font.h Graphics/Font.cpp
         Graphics/Mesh.h Graphics/Mesh.cpp
         Graphics/Quad.cpp Graphics/Quad.h
@@ -121,6 +122,7 @@ install(
         FILES
         Graphics/Buffers.h
         Graphics/Camera.h
+        Graphics/Color.h
         Graphics/Font.h
         Graphics/Mesh.h
         Graphics/Quad.cpp Graphics/Quad.h
