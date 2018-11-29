@@ -31,12 +31,19 @@ namespace pure
         const Shader& shader() const;
         void setFragShader(const char* shaderSrc);
 
+        // clears and resizes spritebatch
         void reset(size_t maxNumSprites);
+
 		// submits quad to SpriteBatch. Returns id index to quad in batch
         size_t submit(const Quad& quad, const Mat4& transform);
-		Quad& get(size_t index);
 
+        // Sends all sprites to GPU
 		void flush();
+
+        // clears all sprites from batch
+        void clear();
+
+		Quad& get(size_t index);
 
         void draw(Renderer& renderer) final;
 

@@ -79,10 +79,19 @@ Quad & pure::SpriteBatch::get(size_t index)
 	return m_quads[index];
 }
 
-void pure::SpriteBatch::flush()
+void pure::SpriteBatch::clear()
 {
     m_quads.clear();
     m_sprites.vbo.vertCount = 0;
+}
+
+void pure::SpriteBatch::flush()
+{
+    const auto* verts = reinterpret_cast<Vertex2D*>(&m_quads[0]);
+    const size_t numVerts = m_quads.size() * Quad::VERT_COUNT;
+
+    m_sprites.vbo.writeBuffer(verts, numVerts, 0);
+    m_sprites.vbo.vertCount = numVerts;
 }
 
 void pure::SpriteBatch::reset(size_t maxNumSprites)
@@ -96,18 +105,12 @@ void pure::SpriteBatch::reset(size_t maxNumSprites)
 	sprites.vbo = VertexBuffer::createZeroed(sizeof(Vertex2D), maxNumSprites * Quad::VERT_COUNT, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
 	sprites.ebo = ElementBuffer::quad(maxNumSprites * 6);
 
-	flush();
+	clear();
 	m_quads.reserve(maxNumSprites);
 }
 
 void SpriteBatch::draw(Renderer& renderer)
 {
-    const auto* verts = reinterpret_cast<Vertex2D*>(&m_quads[0]);
-    const size_t numVerts = m_quads.size() * Quad::VERT_COUNT;
-
-    m_sprites.vbo.writeBuffer(verts, numVerts, 0);
-    m_sprites.vbo.vertCount = numVerts;
-
     m_sprites.shader.setUniform(m_uniformLocations[PROJ_MAT], renderer.projection());
     m_sprites.shader.setUniform(m_uniformLocations[VIEW_MAT], renderer.cam.view());
 
