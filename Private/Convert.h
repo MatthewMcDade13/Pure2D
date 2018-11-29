@@ -67,88 +67,14 @@ constexpr pure::Vec2f toVec2(const glm::vec2& vec)
 	};
 }
 
-constexpr GLenum toGlUsage(pure::DrawUsage usage)
-{
-	using namespace pure;
+GLenum toGlUsage(pure::DrawUsage usage);
 
-	switch (usage)
-	{
-		case DrawUsage::STATIC_DRAW: return GL_STATIC_DRAW;
-		case DrawUsage::DYNAMIC_DRAW: return GL_DYNAMIC_DRAW;
-		case DrawUsage::STREAM_DRAW: return GL_STREAM_DRAW;
-	}
+GLenum toGlPrim(pure::DrawPrimitive prim);
+GLenum toGlBuffAccess(pure::BufferAccess access);
 
-	return 0;
-}
+GLenum toGlDataType(pure::DataType dt);
 
-constexpr GLenum toGlPrim(pure::DrawPrimitive prim)
-{
-	using namespace pure;
-
-	switch (prim)
-	{
-		case DrawPrimitive::POINTS: return GL_POINTS;
-		case DrawPrimitive::LINES: return GL_LINES;
-		case DrawPrimitive::LINE_LOOP: return GL_LINE_LOOP;
-		case DrawPrimitive::LINE_STRIP: return GL_LINE_STRIP;
-		case DrawPrimitive::TRIANGLES: return GL_TRIANGLES;
-		case DrawPrimitive::TRIANGLE_STRIP: return GL_TRIANGLE_STRIP;
-		case DrawPrimitive::TRIANGLE_FAN: return GL_TRIANGLE_FAN;
-		case DrawPrimitive::QUADS: return GL_QUADS;
-		case DrawPrimitive::QUAD_STRIP: return GL_QUAD_STRIP;
-		case DrawPrimitive::POLYGON: return GL_POLYGON;
-	}
-
-	return 0;
-}
-
-constexpr GLenum toGlBuffAccess(pure::BufferAccess access)
-{
-	using namespace pure;
-
-	switch (access)
-	{
-		case BufferAccess::READ_ONLY: return GL_READ_ONLY;
-		case BufferAccess::WRITE_ONLY: return GL_WRITE_ONLY;
-		case BufferAccess::READ_WRITE: return GL_READ_WRITE;
-	}
-	return 0;
-}
-
-constexpr GLenum toGlDataType(pure::DataType dt)
-{
-	using namespace pure;
-
-	switch (dt)
-	{
-		case DataType::BYTE: return GL_BYTE;
-		case DataType::UBYTE: return GL_UNSIGNED_BYTE;
-		case DataType::SHORT: return GL_SHORT;
-		case DataType::USHORT: return GL_UNSIGNED_SHORT;
-		case DataType::INT: return GL_INT;
-		case DataType::UINT: return GL_UNSIGNED_INT;
-		case DataType::FLOAT: return GL_FLOAT;
-	}
-	return 0;
-}
-
-constexpr GLenum toGlTexFormat(pure::Texture::Format fmt)
-{
-	using namespace pure;
-
-	switch (fmt)
-	{
-		case Texture::Format::RED: return GL_RED;
-		case Texture::Format::GREEN: return GL_GREEN;
-		case Texture::Format::BLUE: return GL_BLUE;
-		case Texture::Format::ALPHA: return GL_ALPHA;
-		case Texture::Format::RGB: return GL_RGB;
-		case Texture::Format::RGBA: return GL_RGBA;
-		case Texture::Format::R8: return GL_R8;
-	}
-
-	return 0;
-}
+GLenum toGlTexFormat(pure::Texture::Format fmt);
 
 SDL_Scancode toSDLScancode(pure::Key key);
 pure::Key toPureKey(SDL_Scancode code);

@@ -502,3 +502,53 @@ pure::Key toPureKey(SDL_Scancode code)
 
 }
 
+static constexpr GLenum glDataType[] = {
+	GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT,
+	GL_INT, GL_UNSIGNED_INT, GL_FLOAT
+};
+
+static constexpr GLenum glUsage[] = {
+	GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW
+};
+
+static constexpr GLenum glPrim[] = {
+	GL_POINTS, GL_LINES, GL_LINE_LOOP, GL_LINE_STRIP, GL_TRIANGLES, 
+	GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_QUADS, GL_QUAD_STRIP, 
+	GL_POLYGON
+};
+
+static constexpr GLenum glBuffAccess[] = {
+	GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE
+};
+
+static constexpr GLenum glTexFormat[] = {
+	GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_RGB,
+	GL_RGBA, GL_R8
+};
+
+GLenum toGlTexFormat(pure::Texture::Format fmt)
+{
+	return glTexFormat[static_cast<int>(fmt)];
+}
+
+GLenum toGlBuffAccess(pure::BufferAccess access)
+{
+	return glBuffAccess[static_cast<int>(access)];
+}
+
+
+GLenum toGlPrim(pure::DrawPrimitive prim)
+{
+	return glPrim[static_cast<int>(prim)];
+}
+
+GLenum toGlUsage(pure::DrawUsage usage)
+{
+	return glUsage[static_cast<int>(usage)];
+}
+
+GLenum toGlDataType(pure::DataType dt)
+{
+	return glDataType[static_cast<int>(dt)];
+}
+

@@ -18,7 +18,8 @@ namespace pure
 	{
 		STATIC_DRAW,
 		DYNAMIC_DRAW,
-		STREAM_DRAW
+		STREAM_DRAW,
+		NUM_USAGE
 	};
 
 	enum class DrawPrimitive
@@ -32,14 +33,16 @@ namespace pure
 		TRIANGLE_FAN,
 		QUADS,
 		QUAD_STRIP,
-		POLYGON
+		POLYGON,
+		NUM_PRIM
 	};
 
 	enum class BufferAccess
 	{
 		READ_ONLY,
 		WRITE_ONLY,
-		READ_WRITE
+		READ_WRITE,
+		NUM_ACCESS
 	};
 
 	struct PURE2D_API RenderBuffer
