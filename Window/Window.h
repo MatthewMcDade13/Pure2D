@@ -40,11 +40,13 @@ namespace pure
 		void captureMouse() const;
 		void releaseMouse() const;
 
-		bool pollEvents(WindowEvent& e);
+		bool pollEvents(WindowEvent& e) const;
 
 		void swapBuffers() const;
 
 		void toggleFullscreenWindowed();
+
+		void setVsync(bool isEnabled) const;
 
 	private:
 		int m_width;
