@@ -34,7 +34,7 @@ namespace pure
         struct Color 
         { 
             float r, g, b, a;
-            static constexpr Color fromVec4(const Vec4& color) { return { color.r, color.g, color.b, color.a }; }
+            static constexpr Color fromVec4(const Vec4f& color) { return { color.r, color.g, color.b, color.a }; }
             inline Vec4f toVec4() { return Vec4f(r, g, b, a); }
         };
 

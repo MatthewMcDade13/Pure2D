@@ -15,17 +15,25 @@ namespace pure
 			return stream;
 		}
 
-		// prints given arg to stdout
-		template <typename T>
-		typename std::enable_if<std::is_integral<T>::value>::type print(T s) 
-		{ dbout() << s; }
+		template<typename T>
+		using EnableIfIntegral = typename std::enable_if_t<std::is_integral_v<T>>;
+
+		template<typename T>
+		using EnableIfFloating = typename std::enable_if_t<std::is_floating_point_v<T>>;
+
+		template<typename T>
+		using EnableIfClass = typename std::enable_if_t<std::is_class_v<T>>;
+
 
 		template <typename T>
-		typename std::enable_if<std::is_floating_point<T>::value>::type print(T s) 
-		{ dbout() << s; }
+		EnableIfIntegral<T> print(T s) { dbout() << s; }
+
+		template <typename T>
+		EnableIfFloating<T> print(T s) { dbout() << s; }
 
 		template <typename Printable>
-		void print(const Printable& obj) { dbout() << (obj.toString()); }
+		EnableIfClass<Printable> print(const Printable& obj)
+		{ dbout() << (obj.toString()); }
 
 		inline void print(const char* s) { dbout() << s; }
 

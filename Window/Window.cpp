@@ -84,7 +84,7 @@ void pure::Window::setVsync(bool isEnabled) const { SDL_GL_SetSwapInterval(isEna
 void pure::Window::captureMouse() const { SDL_CaptureMouse(SDL_TRUE); }
 void pure::Window::releaseMouse() const { SDL_CaptureMouse(SDL_FALSE); }
 
-bool pure::Window::pollEvents(WindowEvent& e) const
+bool pure::Window::pollEvents(WindowEvent& e)
 {
 	SDL_Event sdlEvent;
 	const bool isPendingEvents = SDL_PollEvent(&sdlEvent);

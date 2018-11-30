@@ -40,7 +40,7 @@ namespace pure
 		void captureMouse() const;
 		void releaseMouse() const;
 
-		bool pollEvents(WindowEvent& e) const;
+		bool pollEvents(WindowEvent& e);
 
 		void swapBuffers() const;
 
