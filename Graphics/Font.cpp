@@ -69,21 +69,18 @@ private:
 		"    return vec4(1.0, 1.0, 1.0, texture(tex, texCoord).r) * u_color;\n"
 		"}\n";
 
-	static const size_t defaultVertShaderlen;
-	static const size_t defaultFragShaderlen;
-
 	FontShader()
 	{
 		std::string v{};
 		std::string f{};
 
-		v.resize(FontShader::defaultVertShaderlen * 2);
-		f.resize(FontShader::defaultFragShaderlen * 2);
+		//v.resize(FontShader::defaultVertShaderlen * 2);
+		//f.resize(FontShader::defaultFragShaderlen * 2);
 
-		Shader::createVertShader(&v[0], FontShader::defaultVert, false);
-		Shader::createFragShader(&f[0], FontShader::defaultFrag);
+		//Shader::createVertShader(&v[0], FontShader::defaultVert, false);
+		//Shader::createFragShader(&f[0], FontShader::defaultFrag);
 
-		base = Shader::createSrc(v.c_str(), f.c_str());
+		base = Shader::fromTemplate(FontShader::defaultVert, FontShader::defaultFrag);
 		base.locations.resize(base.locations.size() + 2);
 		base.locations[COLOR] = base.getLocation("u_color");
 		base.locations[PROJ_MAT] = base.getLocation("u_projMatrix");
@@ -99,9 +96,6 @@ private:
 		base.setUniformIndx(PROJ_MAT, projMat);
 	}
 };
-
-const size_t FontShader::defaultVertShaderlen = Shader::getVertShaderSize(strlen(FontShader::defaultVert));
-const size_t FontShader::defaultFragShaderlen = Shader::getFragShaderSize(strlen(FontShader::defaultFrag));
 
 const char * pure::Text::string() const
 {

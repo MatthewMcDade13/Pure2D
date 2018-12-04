@@ -36,24 +36,22 @@ static constexpr const char* batchFragShader = "\n"
         "   return texture(tex, texCoord) * color;\n"
         "}\n";
 
-static const size_t vertShaderlen = Shader::getVertShaderSize(strlen(batchVertShader));
-static const size_t fragShaderlen = Shader::getFragShaderSize(strlen(batchFragShader));
-
 pure::SpriteBatch::SpriteBatch(const pure::Texture &texture, size_t maxNumSprites):
     texture(&texture)
 {
 	reset(maxNumSprites);
 
-    std::string vert{};
-    std::string frag{};
+    //std::string vert{};
+    //std::string frag{};
 
-    vert.resize(vertShaderlen);
-    frag.resize(fragShaderlen);
+    //vert.resize(vertShaderlen);
+    //frag.resize(fragShaderlen);
 
-    Shader::createVertShader(&vert[0], batchVertShader, false);
-    Shader::createFragShader(&frag[0], batchFragShader);
+    //Shader::createVertShader(&vert[0], batchVertShader, false);
+    //Shader::createFragShader(&frag[0], batchFragShader);
 
-    m_sprites.shader = Shader::createSrc(vert.c_str(), frag.c_str());
+    //m_sprites.shader = Shader::makeSrc(vert.c_str(), frag.c_str());
+	m_sprites.shader = Shader::fromTemplate(batchVertShader, batchFragShader);
     m_uniformLocations[PROJ_MAT] = m_sprites.shader.getLocation("u_projMatrix");
     m_uniformLocations[VIEW_MAT] = m_sprites.shader.getLocation("u_viewMatrix");
 }
@@ -118,15 +116,25 @@ void SpriteBatch::draw(Renderer& renderer)
 
 }
 
+void pure::SpriteBatch::free()
+{
+	m_quads.clear();
+	m_sprites.ebo.free();
+	m_sprites.vbo.free();
+	m_sprites.shader.free();
+}
+
 void SpriteBatch::setFragShader(const char *shaderSrc)
 {
     m_sprites.shader.free();
 
-    std::string vert{};
-    vert.resize(vertShaderlen);
-    Shader::createVertShader(&vert[0], batchVertShader, false);
+	m_sprites.shader = Shader::fromTemplate(batchVertShader, shaderSrc);
 
-    m_sprites.shader = Shader::createSrc(vert.c_str(), shaderSrc);
+    //std::string vert{};
+    //vert.resize(vertShaderlen);
+    //Shader::createVertShader(&vert[0], batchVertShader, false);
+
+    //m_sprites.shader = Shader::makeSrc(vert.c_str(), shaderSrc);
 }
 
 const Shader &SpriteBatch::shader() const

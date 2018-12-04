@@ -20,7 +20,6 @@ namespace pure
     struct Quad;
     struct Mat4;
 
-    // TODO: Implement free() function like rest of api?
     struct PURE2D_API SpriteBatch : public Renderable
     {
         const Texture* texture;
@@ -47,6 +46,7 @@ namespace pure
 
         void draw(Renderer& renderer) final;
 
+		void free();
 
     private:
 		std::vector<Quad> m_quads;

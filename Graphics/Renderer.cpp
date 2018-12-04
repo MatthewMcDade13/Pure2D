@@ -66,8 +66,8 @@ void pure::Renderer::create(const Window& win)
 	}
 
 	{
-		m_shader = Shader::createSrc(shader::vert, shader::frag);
-		m_instancedShader = Shader::createSrc(shader::instancedVert, shader::frag);
+		m_shader = Shader::fromSrc(shader::vert, shader::frag);
+		m_instancedShader = Shader::fromSrc(shader::instancedVert, shader::frag);
 		m_defaultTexture = Texture::createBlank();
 	}
 
@@ -124,7 +124,7 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Texture *
     drawQuad(quad, transform, m_shader, texture);
 }
 
-void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, Shader shader, const Texture *texture)
+void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Shader& shader, const Texture *texture)
 {
     shader.bind();
     if (texture) texture->bind();
@@ -241,7 +241,7 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
     drawBuffer(start, count, buffer, texture, m_shader, ebo, primtype);
 }
 
-void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, Shader shader, const ElementBuffer* ebo, DrawPrimitive primtype)
+void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, const Texture *texture, const Shader& shader, const ElementBuffer* ebo, DrawPrimitive primtype)
 {
     shader.bind();
     if (texture) texture->bind();

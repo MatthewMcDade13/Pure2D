@@ -16,6 +16,8 @@
 using namespace pure;
 
 static uint32_t createShaderFromFile(const char* filePath, GLenum shaderType);
+static std::string createVertShader(const char *positionSrc, bool isInstanced);
+static std::string createFragShader(const char *effectSrc);
 static uint32_t compileShader(const char* src, GLenum shaderType);
 static uint32_t createShaderProg(uint32_t vert, uint32_t frag);
 static bool checkShaderError(uint32_t shader, GLenum shaderQuery);
@@ -29,7 +31,12 @@ pure::Shader::Shader(uint32_t id) :
 	locations.resize(DEFAULT_LOC_COUNT);
 }
 
-Shader pure::Shader::make(const char * vertShaderPath, const char * fragShaderPath)
+Shader pure::Shader::make(bool isInstanced)
+{
+	return Shader::fromSrc(isInstanced ? shader::instancedVert : shader::vert, shader::frag);
+}
+
+Shader pure::Shader::fromFile(const char * vertShaderPath, const char * fragShaderPath)
 {
 	uint32_t vShader = createShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);
 	uint32_t fShader = createShaderFromFile(fragShaderPath, GL_FRAGMENT_SHADER);
@@ -42,7 +49,7 @@ Shader pure::Shader::make(const char * vertShaderPath, const char * fragShaderPa
 	return s;
 }
 
-Shader pure::Shader::createSrc(const char * vertSrc, const char * fragSrc)
+Shader pure::Shader::fromSrc(const char * vertSrc, const char * fragSrc)
 {
 	uint32_t vShader = compileShader(vertSrc, GL_VERTEX_SHADER);
 	uint32_t fShader = compileShader(fragSrc, GL_FRAGMENT_SHADER);
@@ -53,6 +60,19 @@ Shader pure::Shader::createSrc(const char * vertSrc, const char * fragSrc)
 	fillCommonUniforms(s);
 
 	return s;
+}
+
+Shader pure::Shader::fromTemplate(const char * positionSrc, const char * effectSrc, bool isInstanced)
+{
+	std::string vert = "";
+	if (positionSrc == nullptr)
+		vert = isInstanced ? shader::instancedVert : shader::vert;
+	else
+		vert = createVertShader(positionSrc, isInstanced);
+
+	std::string frag = effectSrc == nullptr ? shader::frag : createFragShader(effectSrc);
+
+	return fromSrc(vert.c_str(), frag.c_str());
 }
 
 void pure::Shader::bind() const
@@ -84,6 +104,11 @@ void pure::Shader::setUniformIndx(int index, const Vec3<float>& vec) const
 	setUniformIndx_<const Vec3<float>&>(*this, index, vec);
 }
 
+void pure::Shader::setUniformIndx(int index, Vec2f vec) const
+{
+	setUniformIndx_<const Vec2f>(*this, index, vec);
+}
+
 void pure::Shader::setUniformIndx(int index, const Mat4 & matrix, bool transpose) const
 {
 	vec_bounds_assert(locations, index);
@@ -111,6 +136,12 @@ void pure::Shader::setUniform(int location, const Vec3<float> &vec) const
 {
 	bind();
 	glUniform3f(location, vec.x, vec.y, vec.z);
+}
+
+void pure::Shader::setUniform(int location, Vec2f vec) const
+{
+	bind();
+	glUniform2f(location, vec.x, vec.y);
 }
 
 void pure::Shader::setUniform(int location, const Mat4 &matrix, bool transpose) const
@@ -142,6 +173,11 @@ void pure::Shader::setUniform(const char * uniform, const Vec3<float>& vec) cons
 	setUniform(getLocation(uniform), vec);
 }
 
+void pure::Shader::setUniform(const char* uniform, Vec2f vec) const
+{
+	setUniform(getLocation(uniform), vec);
+}
+
 void pure::Shader::setUniform(const char * uniform, const Mat4 & matrix, bool transpose) const
 {
 	setUniform(getLocation(uniform), matrix, transpose);
@@ -159,6 +195,7 @@ void pure::Shader::setUniform(const char * uniform, int val) const
 
 void pure::Shader::free()
 {
+	locations.clear();
 	glDeleteProgram(m_id);
 	m_id = 0;
 }
@@ -217,65 +254,6 @@ static constexpr const char* VERT_TEMPLATE_MAIN = "\n"
 		"	gl_Position = position(matrixMVP, l_pos);\n"
 		"}";
 
-
-static const size_t defaultFragLen = strlen(shader::frag);
-static const size_t defaultInstancedVertLen = strlen(shader::instancedVert);
-static const size_t defaultVertLen = strlen(shader::vert);
-
-// TODO: Consider having this be the main way we create shaders?
-// Having this as main way of creating shaders should suffice this engine is only doing 2D
-void Shader::createFragShader(char* outBuffer, const char *effectSrc)
-{
-    std::string frag = FRAG_TEMPLATE_VARS;
-    frag += effectSrc;
-    frag += FRAG_TEMPLATE_MAIN;
-
-    strcpy(outBuffer, frag.c_str());
-}
-
-
-void Shader::createVertShader(char *outBuffer, const char *positionSrc, bool isInstanced)
-{
-	std::string vert = isInstanced ? VERT_TEMPLATE_DECLS_INSTANCED : VERT_TEMPLATE_DECLS;
-	vert += positionSrc;
-	vert += VERT_TEMPLATE_MAIN;
-
-	strcpy(outBuffer, vert.c_str());
-}
-
-Shader Shader::createDefault(bool isInstanced)
-{
-    return Shader::createSrc(isInstanced ? shader::instancedVert : shader::vert, shader::frag);
-}
-
-size_t Shader::getFragShaderSize(size_t inBufferCount)
-{
-	static const size_t fragTemplateLen = strlen(FRAG_TEMPLATE_VARS) + strlen(FRAG_TEMPLATE_MAIN);
-	return fragTemplateLen + inBufferCount;
-}
-
-size_t Shader::getVertShaderSize(size_t inBufferCount)
-{
-	// assume longer template just to keep things safe and concise
-	static const size_t vertTemplateLen = strlen(VERT_TEMPLATE_DECLS_INSTANCED) + strlen(VERT_TEMPLATE_MAIN);
-	return vertTemplateLen + inBufferCount;
-}
-
-size_t Shader::getDefaultFragShaderSize() { return defaultFragLen; }
-size_t Shader::getDefaultVertShaderSize(bool isInstanced) { return isInstanced ? defaultInstancedVertLen : defaultVertLen; }
-
-void Shader::createDefaultFragShader(char *outBuffer)
-{
-	strcpy(outBuffer, shader::frag);
-}
-
-void Shader::createDefaultVertShader(char *outBuffer, bool isInstanced)
-{
-	strcpy(outBuffer, isInstanced ? shader::instancedVert : shader::vert);
-}
-
-
-
 // HELPER FUNCS
 uint32_t createShaderFromFile(const char * filePath, GLenum shaderType)
 {
@@ -298,6 +276,24 @@ uint32_t compileShader(const char * src, GLenum shaderType)
 	}
 
 	return shader;
+}
+
+std::string createFragShader(const char *effectSrc)
+{
+	std::string frag = FRAG_TEMPLATE_VARS;
+	frag += effectSrc;
+	frag += FRAG_TEMPLATE_MAIN;
+
+	return frag;
+}
+
+std::string createVertShader(const char *positionSrc, bool isInstanced)
+{
+	std::string vert = isInstanced ? VERT_TEMPLATE_DECLS_INSTANCED : VERT_TEMPLATE_DECLS;
+	vert += positionSrc;
+	vert += VERT_TEMPLATE_MAIN;
+
+	return vert;
 }
 
 uint32_t createShaderProg(uint32_t vert, uint32_t frag)
