@@ -140,7 +140,7 @@ void Renderer::drawQuad(const Quad &quad, const Mat4 *transform, const Shader& s
     }
     else
     {
-        const Mat4 mat = Mat4::make();
+        const Mat4 mat = Mat4::identity();
         shader.setUniformIndx(Shader::MODEL_MAT_LOC, mat);
         shader.setUniformIndx(Shader::MVP_MAT_LOC, mat);
     }
@@ -250,8 +250,8 @@ void Renderer::drawBuffer(uint32_t start, uint32_t count, VertexBuffer buffer, c
 	//buffer.bind();
 
     // TODO: Maybe we can use a different simple shader to avoid sending useless data to gpu?
-    shader.setUniformIndx(Shader::MODEL_MAT_LOC, Mat4::make());
-    shader.setUniformIndx(Shader::MVP_MAT_LOC, Mat4::make());
+    shader.setUniformIndx(Shader::MODEL_MAT_LOC, Mat4::identity());
+    shader.setUniformIndx(Shader::MVP_MAT_LOC, Mat4::identity());
 
     setVertexLayout(buffer, attribs.vertex2dAttribs, ARRAY_COUNT(attribs.vertex2dAttribs));
 

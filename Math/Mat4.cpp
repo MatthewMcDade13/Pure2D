@@ -10,11 +10,23 @@
 
 using namespace pure;
 
-Mat4 pure::Mat4::make()
+Mat4 pure::Mat4::identity()
 {
+	glm::vec4 v;
 	Mat4 m = {};
 	new (&m.val_) glm::mat4(1);
 	return m;
+}
+
+Mat4 pure::Mat4::make(float m4x4[16])
+{
+	Mat4 m = {};
+	new (&m.val_) glm::mat4(
+		m4x4[0], m4x4[4], m4x4[8],  m4x4[12],
+		m4x4[1], m4x4[5], m4x4[8],  m4x4[13],
+		m4x4[2], m4x4[6], m4x4[10], m4x4[14],
+		m4x4[3], m4x4[7], m4x4[11], m4x4[15]
+	);
 }
 
 Mat4 pure::operator-(const Mat4 & operand)

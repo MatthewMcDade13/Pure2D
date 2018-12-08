@@ -40,7 +40,7 @@ const pure::Mat4 &pure::Transform::modelMatrix()
 {
     if (m_needsUpdate)
     {
-        m_model = translate(Mat4::make(), m_position);
+        m_model = translate(Mat4::identity(), m_position);
         m_model = translate(m_model, Vec3f(m_size.x * .5f, m_size.y * .5f, 0.f));
         m_model = pure::rotate(m_model, radians(m_rotation), Vec3f(0.f, 0.f, 1.f));
         m_model = translate(m_model, Vec3f(m_size.x * -.5f, m_size.y * -.5f, 0.f));
