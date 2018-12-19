@@ -3,6 +3,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/ext.hpp>
 #include <glm/mat4x4.hpp>
 #include <Pure2D/Math/Vec2.h>
 #include <Pure2D/Math/Vec3.h>
@@ -154,6 +155,6 @@ SDL_Scancode toSDLScancode(pure::Key key);
 pure::Key toPureKey(SDL_Scancode code);
 
 
-inline pure::Mat4 toMat4(const glm::mat4& mat) { return { *TO_ALIGNED_STORAGE(mat) }; }
+inline pure::Mat4 toMat4(const glm::mat4& mat) { return pure::Mat4::make(glm::value_ptr(mat)); }
 
 #endif // PURE2D_PRIVATE_CONVERT_H

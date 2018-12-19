@@ -147,8 +147,7 @@ void pure::Shader::setUniform(int location, Vec2f vec) const
 void pure::Shader::setUniform(int location, const Mat4 &matrix, bool transpose) const
 {
 	bind();
-	const glm::mat4* mat = TO_GLM_MAT4_CONST(matrix.val_);
-	glUniformMatrix4fv(location, 1, transpose, glm::value_ptr(*mat));
+	glUniformMatrix4fv(location, 1, transpose, matrix.val.buf);
 }
 
 void pure::Shader::setUniform(int location, float val) const
