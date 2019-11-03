@@ -63,15 +63,7 @@ struct QuadExample final : public pure::Game
 			(static_cast<float>(m_window.width()) * .5f) - (qxform.size().x * .5f),
 			(static_cast<float>(m_window.height()) * .5f) - (qxform.size().y * .5f),
 			0.5f
-			});
-
-		pure::Vertex2D squareVerts[5] = {
-			{ 0.f, 0.f, 0.f,   0.f, 0.f,   1.f, 1.f, 1.f, 1.f },
-			{ 1.f, 0.f, 0.f,   0.f, 0.f,   1.f, 1.f, 1.f, 1.f },
-			{ 1.f, 1.f, 0.f,   0.f, 0.f,   1.f, 1.f, 1.f, 1.f },
-			{ 0.f, 1.f, 0.f,   0.f, 0.f,   1.f, 1.f, 1.f, 1.f },
-			{ 0.f, 0.f, 0.f,   0.f, 0.f,   1.f, 1.f, 1.f, 1.f },
-		};
+		});
 
 		hoverSpot.shader = pure::Shader::fromTemplate(nullptr, SPOT_EFFECT);
 		hoverSpot.shader.locations.push_back(hoverSpot.shader.getLocation("mousePos"));
