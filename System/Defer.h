@@ -37,9 +37,9 @@ namespace pure
 	{
 		using Deleter = std::function<void(Resource&)>;
 		
-		static const Deleter defaultDeleter;
+		static const Deleter glResourceDeleter;
 
-		static inline Scoped<Resource> make(const Resource& r, Deleter deleter = defaultDeleter)
+		static inline Scoped<Resource> make(const Resource& r, Deleter deleter = glResourceDeleter)
 		{
 			return { r, deleter };
 		}
@@ -62,10 +62,10 @@ namespace pure
 	};
 
 	template<typename T>
-	const typename Scoped<T>::Deleter Scoped<T>::defaultDeleter = [](T& r) { r.free(); };
+	const typename Scoped<T>::Deleter Scoped<T>::glResourceDeleter = [](T& r) { r.free(); };
 
 	template<typename T>
-	Scoped<T> makeScoped(const T& item, typename Scoped<T>::Deleter deleter = Scoped<T>::defaultDeleter)
+	Scoped<T> makeScoped(const T& item, typename Scoped<T>::Deleter deleter = Scoped<T>::glResourceDeleter)
 	{
 		return Scoped<T>::make(item, deleter);
 	}
