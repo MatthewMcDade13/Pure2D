@@ -13,13 +13,17 @@ namespace pure
 	struct Mat4;
 	template<typename T> struct Rect;
 
-	// TODO: Let this have an optional ElementBuffer
+	// Wrapper type for Mesh data. Can assign optional Shader or Texture, owns its owns
+	// internal vbo and ebo.
 	struct PURE2D_API Mesh
 	{
 
 		VertexBuffer vbo;
 		ElementBuffer ebo = { 0 };
 		const Texture* texture;
+
+		// TODO: Make this a pointer. Mesh ideally has optional Texture and/or Shader, but owns its internal
+		// vbo and ebo (unless otherwise noted) doing this we can have Mesh comform to the free() api
 		Shader shader;
 		DrawPrimitive primtype;
 
