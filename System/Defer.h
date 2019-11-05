@@ -32,35 +32,44 @@ namespace pure
 		} defer_helper;
 	}
 
-	template<typename T> struct Scoped;
-
-	template<typename T>
-	Scoped<T> makeScoped(const T& item)
-	{
-		return Scoped<T>::make(item);
-	}
-
 	template<typename Resource>
 	struct Scoped : private NonCopyable
 	{
-		static inline Scoped<Resource> make(const Resource& r)
+		using Deleter = std::function<void(Resource&)>;
+		
+		static const Deleter defaultDeleter;
+
+		static inline Scoped<Resource> make(const Resource& r, Deleter deleter = defaultDeleter)
 		{
-			return { r };
+			return { r, deleter };
 		}
 
 		Resource& borrow() { return resource; }
+
 		Resource* operator->() { return &resource; }
-
-		~Scoped() 
+		
+		~Scoped()
 		{
-			resource.free();
+			deleter(resource);
 		}
-
 	private:
-		Scoped(const Resource& resource): resource(r) { }
+		constexpr Scoped(const Resource& r, Deleter deleter): resource(r), deleter(deleter) { }
+		Scoped(const Scoped<Resource>&&);
+		Scoped<Resource>& operator=(const Scoped<Resource>&&);
 
 		Resource resource;
+		Deleter deleter;
 	};
+
+	template<typename T>
+	const typename Scoped<T>::Deleter Scoped<T>::defaultDeleter = [](T& r) { r.free(); };
+
+	template<typename T>
+	Scoped<T> makeScoped(const T& item, typename Scoped<T>::Deleter deleter = Scoped<T>::defaultDeleter)
+	{
+		return Scoped<T>::make(item, deleter);
+	}
+
 }
 
 
