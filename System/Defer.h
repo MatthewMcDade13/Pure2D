@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <utility>
+#include <Pure2D/NonCopyable>;
 
 namespace pure
 {
@@ -30,6 +31,36 @@ namespace pure
 			}
 		} defer_helper;
 	}
+
+	template<typename T> struct Scoped;
+
+	template<typename T>
+	Scoped<T> makeScoped(const T& item)
+	{
+		return Scoped<T>::make(item);
+	}
+
+	template<typename Resource>
+	struct Scoped : private NonCopyable
+	{
+		static inline Scoped<Resource> make(const Resource& r)
+		{
+			return { r };
+		}
+
+		Resource& borrow() { return resource; }
+		Resource* operator->() { return &resource; }
+
+		~Scoped() 
+		{
+			resource.free();
+		}
+
+	private:
+		Scoped(const Resource& resource): resource(r) { }
+
+		Resource resource;
+	};
 }
 
 
