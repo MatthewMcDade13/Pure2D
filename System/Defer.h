@@ -50,7 +50,7 @@ namespace pure
 	struct Scoped : private NonCopyable
 	{
 		using Deleter = std::function<void(Resource&)>;
-
+		
 		static const Deleter glResourceDeleter;
 
 		static inline Scoped<Resource> make(const Resource& r, Deleter deleter = glResourceDeleter)
@@ -61,13 +61,12 @@ namespace pure
 		Resource& borrow() { return resource; }
 
 		Resource* operator->() { return &resource; }
-
 		~Scoped()
 		{
 			deleter(resource);
 		}
 	private:
-		constexpr Scoped(const Resource& r, Deleter deleter) : resource(r), deleter(deleter) { }
+		constexpr Scoped(const Resource& r, Deleter deleter): resource(r), deleter(deleter) { }
 		Scoped(const Scoped<Resource>&&);
 		Scoped<Resource>& operator=(const Scoped<Resource>&&);
 
