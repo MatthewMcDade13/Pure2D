@@ -30,7 +30,7 @@ static void resizeBufferDbl(Mesh& mesh, const std::vector<Quad>& quads);
 static void writeQuadsToBuffer(Mesh& mesh, std::vector<Quad>& quads);
 static inline void updateFontShaderColor(const Shader& shader, const Vec4f& color);
 
-static struct FontShader
+struct FontShader
 {
 
 	Shader base;

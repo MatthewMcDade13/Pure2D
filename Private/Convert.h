@@ -150,10 +150,6 @@ constexpr GLenum toGlTexFormat(pure::Texture::Format fmt)
 	return 0;
 }
 
-SDL_Scancode toSDLScancode(pure::Key key);
-pure::Key toPureKey(SDL_Scancode code);
-
-
 inline pure::Mat4 toMat4(const glm::mat4& mat) { return { *TO_ALIGNED_STORAGE(mat) }; }
 
 #endif // PURE2D_PRIVATE_CONVERT_H

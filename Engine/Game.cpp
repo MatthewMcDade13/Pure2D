@@ -13,7 +13,7 @@ constexpr uint32_t DEFAULT_SCREEN_Y = 768;
 pure::Game::Game()
 {
 	pure::init();
-	m_window.make(DEFAULT_SCREEN_X, DEFAULT_SCREEN_Y, "");
+	m_window.make(DEFAULT_SCREEN_X, DEFAULT_SCREEN_Y, "Pure2D");
 	m_renderer.create(m_window);
 }
 
@@ -33,7 +33,7 @@ void pure::Game::run()
 	load();
 
 	c.init();
-	while (m_window.isActive)
+	while (m_window.isOpen())
 	{
 		while (m_window.pollEvents(event))
 		{

@@ -115,8 +115,8 @@ struct QuadExample final : public pure::Game
 		{
 			switch (event.key)
 			{
-			case pure::Key::ESCAPE:
-				m_window.isActive = false;
+			case pure::Key::Escape:
+				m_window.close();
 				break;
 			case pure::Key::B:
 				qxform.setSize(float(m_window.width()), float(m_window.height()));

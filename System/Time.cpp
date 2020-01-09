@@ -1,17 +1,17 @@
 #include "Time.h"
-#include <SDL2/SDL.h>
+#include <GLFW/glfw3.h>
 
 using namespace pure;
 using namespace pure::time;
 
 float pure::time::getTime()
 {
-	return static_cast<float>(SDL_GetTicks());
+	return static_cast<float>(glfwGetTime());
 }
 
 void pure::time::Clock::init()
 {
-	start = getTime();
+	start = static_cast<float>(glfwGetTime());
 }
 
 float pure::time::Clock::reset()
@@ -23,7 +23,7 @@ float pure::time::Clock::reset()
 
 float pure::time::Clock::elapsedTime() const
 {
-	return static_cast<float>(getTime() - start) * .001f;
+	return static_cast<float>(getTime() - start);
 }
 
 bool pure::time::Timer::tick(float delta)

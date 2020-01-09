@@ -6,25 +6,43 @@
 #include "Math/Vec2.h"
 #include "WindowEvent.h"
 #include "Private/Convert.h"
-#include <SDL2/SDL.h>
+#include <queue>
+#include <GLFW/glfw3.h>
+
 
 #include <iostream>
 
-#define sdlwin(handle) (static_cast<SDL_Window*>(handle))
+#define glfwHandle(handle) (static_cast<GLFWwindow*>(handle))
 
 using namespace pure;
 static constexpr Vec2i DEFAULT_WIN_SIZE = { 1024, 768 };
 
+namespace pure
+{
+	struct WinEventHandler
+	{
+		static void onResize(GLFWwindow* win, int width, int height);
+		static void onMouseMove(GLFWwindow* window, double xpos, double ypos);
+		static void onMouseScroll(GLFWwindow* window, double xoffset, double yoffset);
+		static void onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods);
+	};
+}
+
+static GLFWmonitor* getPrimaryMonitor();
+static inline Vec2i getGLFWWindowSize(GLFWwindow* win);
+
+
 void pure::Window::setSize(uint32_t width, uint32_t height)
 {
-	SDL_SetWindowSize(sdlwin(m_handle), width, height);
-	m_width  = width;
+	m_width = width;
 	m_height = height;
+	glfwSetWindowSize(glfwHandle(m_handle), width, height);
+	glViewport(0, 0, m_width, m_height);
 }
 
 void pure::Window::setTitle(const char* title) const
 {
-	SDL_SetWindowTitle(sdlwin(m_handle), title);
+	glfwSetWindowTitle(glfwHandle(m_handle), title);
 }
 
 bool pure::Window::make(const char* title)
@@ -34,116 +52,127 @@ bool pure::Window::make(const char* title)
 
 bool pure::Window::make(uint32_t width, uint32_t height, const char* title)
 {
-	m_handle = SDL_CreateWindow(title,
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
-	);
+	GLFWwindow *const handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
 
-	if (!m_handle)
+	if (!handle)
 	{
-		std::cerr << "SDL :: Failed to create window" << std::endl;
+		std::cerr << "Failed to create GLFW Window" << std::endl;
+		glfwTerminate();
 		return false;
 	}
 
-	m_ctx = SDL_GL_CreateContext(sdlwin(m_handle));
+	glfwMakeContextCurrent(handle);
+	glfwSetFramebufferSizeCallback(handle, WinEventHandler::onResize);
+	glfwSetCursorPosCallback(handle, WinEventHandler::onMouseMove);
+	glfwSetKeyCallback(handle, WinEventHandler::onKeyInput);
+	glfwSetScrollCallback(handle, WinEventHandler::onMouseScroll);
 
-	if (!m_ctx)
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cerr << "SDL :: Failed to create OpenGL context" << std::endl;
-		SDL_DestroyWindow(sdlwin(m_handle));
+		std::cerr << "Failed to initialize GLAD" << std::endl;
+		glfwTerminate();
 		return false;
 	}
 
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-	{
-		std::cerr << "GLAD :: Failed to initialize" << std::endl;
-		SDL_DestroyWindow(sdlwin(m_handle));
-		SDL_GL_DeleteContext(m_ctx);
-		return false;
-	}
 
+	m_handle = handle;
 	m_width = width;
 	m_height = height;
 	m_isFullscreen = false;
-	isActive = true;
 	
+	glfwSetWindowUserPointer(handle, this);
+
+	glViewport(0, 0, m_width, m_height);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	return true;
+}
+
+void pure::Window::close() const
+{
+	glfwSetWindowShouldClose(glfwHandle(m_handle), true);
 }
 
 void pure::Window::destroy()
 {
-	SDL_DestroyWindow(sdlwin(m_handle));
+	glfwDestroyWindow(glfwHandle(m_handle));
+	m_width = 0;
+	m_height = 0;
+	m_isFullscreen = false;
 	m_handle = nullptr;
+	m_mousePos = {};
+	m_events = {};
+}
 
-	SDL_GL_DeleteContext(m_ctx);
-	m_ctx = nullptr;
+bool pure::Window::isOpen() const
+{
+	return !glfwWindowShouldClose(glfwHandle(m_handle));
 }
 
 void pure::Window::setVsync(bool isEnabled) const { SDL_GL_SetSwapInterval(isEnabled); }
 
-void pure::Window::captureMouse() const { SDL_CaptureMouse(SDL_TRUE); }
-void pure::Window::releaseMouse() const { SDL_CaptureMouse(SDL_FALSE); }
+void pure::Window::captureMouse() const
+{
+	glfwSetInputMode(glfwHandle(m_handle), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+void pure::Window::releaseMouse() const 
+{ 
+	glfwSetInputMode(glfwHandle(m_handle), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
 
 bool pure::Window::pollEvents(WindowEvent& e)
 {
-	SDL_Event sdlEvent;
-	const bool isPendingEvents = SDL_PollEvent(&sdlEvent);
+	glfwPollEvents();
+	if (m_events.empty()) return false;
 
-	switch (sdlEvent.type)
-	{
-	case SDL_KEYDOWN: {
-		e.type = WindowEvent::Type::KeyPress;
-		e.key = toPureKey(sdlEvent.key.keysym.scancode);
-	} break;
-	case SDL_KEYUP: {
-		e.type = WindowEvent::Type::KeyRelease;
-		e.key = toPureKey(sdlEvent.key.keysym.scancode);
-	} break;
-	case SDL_MOUSEMOTION: {
-		e.type = WindowEvent::Type::MouseMove;
-		m_mousePos = {
-			static_cast<float>(sdlEvent.motion.x),
-			static_cast<float>(sdlEvent.motion.y)
-		};
-		e.mousePos = { m_mousePos.x, m_mousePos.y };
-	} break;
-	case SDL_MOUSEWHEEL: {
-		e.type = WindowEvent::Type::MouseScroll;
-		e.scrollOffset = {
-			static_cast<float>(sdlEvent.wheel.x),
-			static_cast<float>(sdlEvent.wheel.y)
-		};
-	} break;
-	case SDL_WINDOWEVENT: {
-			if (sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED)
-			{
-				m_width = sdlEvent.window.data1;
-				m_height = sdlEvent.window.data2;
-
-				e.type = WindowEvent::Type::Resize;
-				e.winSize = { m_width, m_height };
-				glViewport(0, 0, m_width, m_height);
-
-			}
-		} break;
-	case SDL_QUIT: {
-		isActive = false;
-	} break;
-
-	}
-
-	return isPendingEvents;
+	e = m_events.front();
+	m_events.pop();
+	return true;
 }
 
 void pure::Window::swapBuffers() const
 {
-	SDL_GL_SwapWindow(sdlwin(m_handle));
+	glfwSwapBuffers(glfwHandle(m_handle));
 }
+
+bool pure::Window::isKeyPressed(Key key) const
+{
+	int keyState = glfwGetKey(glfwHandle(m_handle), static_cast<int>(key));
+	return keyState == GLFW_PRESS;
+};
+
 
 void pure::Window::toggleFullscreenWindowed()
 {
-	m_isFullscreen = !m_isFullscreen;
-	SDL_SetWindowFullscreen(sdlwin(m_handle), m_isFullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	GLFWmonitor* monitor = getPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	Vec2i winSize = {};
+
+	// FIXME: When going from fullscreen to windowed, the coordinates get all messed up... still not 100% sure
+	// if this is something that can be done here or its something the calling code will have to handle with
+	// OpenGL
+	if (m_isFullscreen)
+	{
+		// TODO: Maybe have Default Size be configurable?
+		const Vec2i windowPos = {
+				DEFAULT_WIN_SIZE.x / 2,
+				DEFAULT_WIN_SIZE.y / 2
+		};
+
+		glfwSetWindowMonitor(glfwHandle(m_handle), nullptr,
+			windowPos.x, windowPos.y, DEFAULT_WIN_SIZE.x,
+			DEFAULT_WIN_SIZE.y, mode->refreshRate);
+		m_isFullscreen = false;
+	}
+	else
+	{
+		glfwSetWindowMonitor(glfwHandle(m_handle), monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+		m_isFullscreen = true;
+	}
+
 }
 
 int pure::Window::width() const { return m_width; }
@@ -155,3 +184,82 @@ Vec2i pure::Window::size() const
 }
 
 Vec2f pure::Window::mousePos() const { return m_mousePos; }
+
+
+void WinEventHandler::onResize(GLFWwindow* win, int width, int height)
+{
+	Window* window = static_cast<Window*>(glfwGetWindowUserPointer(win));
+	window->m_width = width;
+	window->m_height = height;
+
+	WindowEvent e;
+	e.type = WindowEvent::Type::Resize;
+	e.winSize = { window->m_width, window->m_height };
+	window->m_events.push(e);
+
+	glViewport(0, 0, window->m_width, window->m_height);
+}
+
+
+void WinEventHandler::onMouseMove(GLFWwindow* window, double xpos, double ypos)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	win->m_mousePos = {
+			static_cast<float>(xpos),
+			static_cast<float>(ypos)
+	};
+
+	WindowEvent e;
+	e.type = WindowEvent::Type::MouseMove;
+	e.mousePos = { win->m_mousePos.x, win->m_mousePos.y };
+	win->m_events.push(e);
+}
+
+void WinEventHandler::onKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	// Ignoring repeat events for now...
+	if (action == GLFW_REPEAT) return;
+
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	WindowEvent e;
+
+	if (action == GLFW_PRESS)
+		e.type = WindowEvent::Type::KeyPress;
+	else if (action == GLFW_RELEASE)
+		e.type = WindowEvent::Type::KeyRelease;
+
+	e.key = static_cast<Key>(key);
+
+	win->m_events.push(e);
+}
+
+void WinEventHandler::onMouseScroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+	Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	WindowEvent e;
+	e.type = WindowEvent::Type::MouseScroll;
+	e.scrollOffset = {
+			static_cast<float>(xoffset),
+			static_cast<float>(yoffset)
+	};
+
+	win->m_events.push(e);
+}
+
+GLFWmonitor* getPrimaryMonitor()
+{
+	int count;
+	GLFWmonitor** monitors = glfwGetMonitors(&count);
+	if (count == 0) return nullptr;
+	return monitors[0];
+}
+
+inline Vec2i getGLFWWindowSize(GLFWwindow* win)
+{
+	int width, height;
+	glfwGetWindowSize(win, &width, &height);
+	return { width, height };
+}
