@@ -1,6 +1,7 @@
 #include <Pure2D/Engine/Game.h>
 #include <Pure2D/Graphics.h>
-
+#include <Pure2D/System/Logging.h>
+#include <iostream>
 
 static constexpr const char* SPOT_EFFECT = "\n"
 "uniform vec2 mousePos;\n"
@@ -72,6 +73,7 @@ struct QuadExample final : public pure::Game
 
 	void draw() final
 	{
+		std::cout << "BRUH" << std::endl;
 		// Start drawing to framebuffer
 		m_renderer.beginDrawTexture(rt);
 		{
@@ -129,6 +131,10 @@ struct QuadExample final : public pure::Game
 					});
 				break;
 			}
+		}
+		if (event.type == pure::WindowEvent::Type::MouseScroll)
+		{
+			m_renderer.zoom(-event.scrollOffset.y * 50.f);
 		}
 	}
 };
