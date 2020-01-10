@@ -31,6 +31,13 @@ pure::Shader::Shader(uint32_t id) :
 	locations.resize(DEFAULT_LOC_COUNT);
 }
 
+int pure::Shader::storeLocation(const char* locationName)
+{
+	int loc = getLocation(locationName);
+	locations.push_back(loc);
+	return loc;
+}
+
 Shader pure::Shader::make(bool isInstanced)
 {
 	return Shader::fromSrc(isInstanced ? shader::instancedVert : shader::vert, shader::frag);

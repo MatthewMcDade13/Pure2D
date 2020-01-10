@@ -33,6 +33,7 @@ namespace pure
 
 		void bind() const;
 
+		int storeLocation(const char* locationName);
 		int getLocation(const char *uniform) const;
 
 		void setUniformIndx(int index, const Vec4<float> &vec) const;
