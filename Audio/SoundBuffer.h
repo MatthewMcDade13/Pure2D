@@ -2,6 +2,7 @@
 #define PURE2D_AUDIO_SOUNDBUFFER_H
 
 #include <cinttypes>
+#include <cstddef>
 
 namespace pure
 {

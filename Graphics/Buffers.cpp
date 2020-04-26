@@ -1,5 +1,5 @@
 #include "Buffers.h"
-#include "glad.h"
+#include "External/glad.h"
 #include "Vertex.h"
 #include <vector>
 #include <iostream>
@@ -7,6 +7,7 @@
 #include "Private/GlContext.h"
 #include <Pure2D/Graphics/Texture.h>
 #include <cassert>
+#include "External/imgui/imgui.h"
 
 using namespace pure;
 

@@ -401,3 +401,5 @@ ASALocalRun/
 *.sln
 *.vcxproj.filters
 .vscode/
+build/
+builddir/

@@ -33,12 +33,16 @@ namespace pure
 
     struct Renderer : private NonCopyable
     {
+		static const Vec4f DEFAULT_CLEAR_COLOR;
         Camera cam;
+		Vec4f clearColor = DEFAULT_CLEAR_COLOR;
 
 		PURE2D_API static float clipNear();
 		PURE2D_API static float clipFar();
 
-		PURE2D_API void clear(const Vec4f& color = { 0.f, 0.f, 0.f, 1.f }) const;
+		PURE2D_API void newImGuiFrame() const;
+		PURE2D_API void clear(const Vec4f& color) const;
+		PURE2D_API void clear() const;
 		PURE2D_API void present() const;
 
 		PURE2D_API void create(const Window& win);

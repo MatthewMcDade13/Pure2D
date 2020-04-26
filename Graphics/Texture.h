@@ -1,7 +1,7 @@
 #ifndef PURE2D_TEXTURE_H
 #define PURE2D_TEXTURE_H
 
-#include <cinttypes>
+#include <cstddef>
 #include <Pure2D/Define.h>
 #include <Pure2D/Math/Vec2.h>
 #include <Pure2D/System/DataType.h>

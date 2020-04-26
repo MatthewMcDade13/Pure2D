@@ -2,7 +2,7 @@
 // Created by matt on 9/3/18.
 //
 #include "Window.h"
-#include "glad.h"
+#include "External/glad.h"
 #include "Math/Vec2.h"
 #include "WindowEvent.h"
 #include "Private/Convert.h"

@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "External/imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <Pure2D/Init.h>
 #include <Pure2D/Pure2D.h>
@@ -38,6 +39,14 @@ void pure::Game::run()
 		while (m_window.pollEvents(event))
 		{
 			windowEvent(event);
+		}
+		m_renderer.newImGuiFrame();
+
+		if (showFPS)
+		{
+			ImGui::Begin("Average FPS", &showFPS);
+			ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
 		}
 
 		const float dt = c.reset();

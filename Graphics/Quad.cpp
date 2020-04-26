@@ -1,7 +1,6 @@
 //
 // Created by matt on 10/3/18.
 //
-
 #include "Graphics/Quad.h"
 #include "Graphics/Transform.h"
 #include "Graphics/Mesh.h"

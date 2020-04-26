@@ -3,7 +3,7 @@
 //
 
 #include "Init.h"
-#include "glad.h"
+#include "External/glad.h"
 #include <GLFW/glfw3.h>	
 #include <iostream>
 

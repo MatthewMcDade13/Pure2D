@@ -1,6 +1,6 @@
 #include "Shader.h"
 //#include <gl/GL.h>
-#include "glad.h"
+#include "External/glad.h"
 #include "Private/FileIO.h"
 #include "Private/GlContext.h"
 #include "Private/Shaders.h"
