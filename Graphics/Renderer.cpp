@@ -15,7 +15,7 @@
 #include "Private/Util.h"
 #include <string>
 #include <vector>
-#include "glad.h"
+#include "External/glad.h"
 #include "Quad.h"
 #include <iostream>
 

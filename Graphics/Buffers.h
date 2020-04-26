@@ -74,7 +74,7 @@ namespace pure
         uint8_t bufferIndex;
         uint8_t elemCount;
         bool isInstanced;
-        DataType type : 16;
+        DataType type;
         size_t offset;
         size_t stride;
 

@@ -1,5 +1,5 @@
 #include "Buffers.h"
-#include "glad.h"
+#include "External/glad.h"
 #include "Vertex.h"
 #include <vector>
 #include <iostream>

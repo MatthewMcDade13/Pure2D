@@ -1,10 +1,10 @@
 #include "Texture.h"
 #include <iostream>
 #include <cassert>
-#include "glad.h"
+#include "External/glad.h"
 #include "Private/Convert.h"
 #include "Private/GlContext.h"
-#include "stb_image.h"
+#include "External/stb_image.h"
 
 using namespace pure;
 

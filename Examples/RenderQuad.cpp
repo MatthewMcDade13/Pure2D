@@ -73,7 +73,6 @@ struct QuadExample final : public pure::Game
 
 	void draw() final
 	{
-		std::cout << "BRUH" << std::endl;
 		// Start drawing to framebuffer
 		m_renderer.beginDrawTexture(rt);
 		{

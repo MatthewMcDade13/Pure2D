@@ -8,6 +8,7 @@
 
 #include <cinttypes>
 #include <type_traits>
+#include <Math/Vec2.h>
 #include <Pure2D/Math/Vec2.h>
 #include <Pure2D/Math/MatrixTransform.h>
 
