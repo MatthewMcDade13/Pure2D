@@ -1,6 +1,7 @@
 #include <Pure2D/Engine/Game.h>
 #include <Pure2D/Graphics.h>
 #include <Pure2D/System/Logging.h>
+#include "External/imgui/imgui.h"
 #include <iostream>
 
 static constexpr const char* SPOT_EFFECT = "\n"
@@ -51,6 +52,7 @@ struct QuadExample final : public pure::Game
 
 	void load() final
 	{
+		showFPS = true;
 		m_window.setTitle("Quad Example");
 
 		q.verts[0].color = { 1.f, 0.f, 0.f, 1.f };

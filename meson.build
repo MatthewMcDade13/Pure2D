@@ -87,7 +87,20 @@ install_headers([
 ], subdir: 'Pure2D/Window')
 
 dir_rel = include_directories('../')
+dir_imgui = include_directories('External/imgui')
+
+IMGUI_DIR = 'External/imgui/'
+
+src_imgui = [
+    IMGUI_DIR + 'imgui_draw.cpp',
+    IMGUI_DIR + 'imgui_widgets.cpp',
+    IMGUI_DIR + 'imgui.cpp',
+    'External/imgui_renderer_impl.cpp',
+    'External/imgui_window_impl.cpp'
+]
+src += src_imgui
+
 pure2dlib = library('pure2d', src, install: true, dependencies: dep_all, include_directories: [dir_rel])
 
-executable('sample_quad', 'Examples/RenderQuad.cpp', link_with: pure2dlib, include_directories: [dir_rel])
-
+executable('sample_quad', 'Examples/RenderQuad.cpp', dependencies: [dep_glfw], link_with: [pure2dlib], include_directories: [dir_rel])
+executable('sample_imgui', 'Examples/ImguiSample.cpp', link_with: pure2dlib, include_directories: [dir_rel])

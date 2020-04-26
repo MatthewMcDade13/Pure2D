@@ -16,6 +16,9 @@
 #include <string>
 #include <vector>
 #include "External/glad.h"
+#include "External/imgui/imgui.h"
+#include "External/imgui_window_impl.h"
+#include "External/imgui_renderer_impl.h"
 #include "Quad.h"
 #include <iostream>
 
@@ -33,6 +36,8 @@ static struct
 } attribs = {};
 
 static const Quad defaultQuad = Quad::make();
+
+const Vec4f pure::Renderer::DEFAULT_CLEAR_COLOR = { 0.f, 0.f, 0.f, 1.f };
 
 void pure::Renderer::create(const Window& win)
 {
@@ -84,6 +89,15 @@ void pure::Renderer::create(const Window& win)
 		m_instancedMatBuffer = VertexBuffer::createZeroed(sizeof(Mat4) * NUM_MAT4, 20, DrawUsage::DYNAMIC_DRAW, DataType::FLOAT);
 	}
 
+
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(m_targetWindow->rawHandle()), true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void pure::Renderer::beginDrawTexture(const RenderTexture & rt)
@@ -108,6 +122,17 @@ Mat4 Renderer::MVMatrix() const { return m_projection * cam.view(); }
 float Renderer::clipNear() { return CLIP_NEAR; }
 float Renderer::clipFar() { return CLIP_FAR; }
 
+void pure::Renderer::newImGuiFrame() const
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+void pure::Renderer::clear() const
+{
+    clear(clearColor);
+}
+
 void pure::Renderer::clear(const Vec4f & color) const
 {
 	glClearColor(color.r, color.g, color.b, color.a);
@@ -116,6 +141,8 @@ void pure::Renderer::clear(const Vec4f & color) const
 
 void pure::Renderer::present() const
 {
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	m_targetWindow->swapBuffers();
 }
 
@@ -284,6 +311,10 @@ void Renderer::destroy()
     m_defaultTexture.free();
 
     m_drawVAO.free();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void pure::Renderer::activate()

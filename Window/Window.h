@@ -53,6 +53,8 @@ namespace pure
 
 		void setVsync(bool isEnabled) const;
 
+		inline void* rawHandle() const { return m_handle; }
+
 	private:
 		int m_width;
 		int m_height;

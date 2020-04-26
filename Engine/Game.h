@@ -5,6 +5,7 @@
 #include <Pure2D/Window/Window.h>
 #include <Pure2D/Graphics/Renderer.h>
 #include <Pure2D/Math/Vec3.h>
+#include <Pure2D/Math/Vec4.h>
 
 namespace pure
 {
@@ -12,6 +13,8 @@ namespace pure
 
 	struct PURE2D_API Game
 	{
+		bool showFPS = false;
+		
 		Game();
 		virtual ~Game();
 

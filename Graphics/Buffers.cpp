@@ -7,6 +7,7 @@
 #include "Private/GlContext.h"
 #include <Pure2D/Graphics/Texture.h>
 #include <cassert>
+#include "External/imgui/imgui.h"
 
 using namespace pure;
 
