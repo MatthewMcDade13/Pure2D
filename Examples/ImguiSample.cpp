@@ -22,6 +22,9 @@ struct ImGuiExample final : public pure::Game
         static float f = 0.0f;
         static int counter = 0;
 
+        // ImGui calls from imgui documentation examples. We can just use
+        // ImGui anywhere in our Game class and it should "just werk"
+
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
